@@ -1,4 +1,4 @@
-const f = require('util').format;
+// const f = require('util').format;
 // const ExtractJwt = require('passport-jwt').ExtractJwt;
 
 const cookiesOptions = {
@@ -23,8 +23,9 @@ jwtOptions.jwtFromRequest = function (req) {
 
 
 
-const dbUrl = f('mongodb://%s:%s@%s/%s',
-  process.env.MONGO_USER, process.env.MONGO_PWD, process.env.MONGO_URI, process.env.MONGO_DB);
+// const dbUrl = f('mongodb://%s:%s@%s/%s',
+//   process.env.MONGO_USER, process.env.MONGO_PWD, process.env.MONGO_URI, process.env.MONGO_DB);
+const dbUrl = process.env.DATABASE_URL;
 
 const vars = {
   title: process.env.TITLE || 'TeamWord',
