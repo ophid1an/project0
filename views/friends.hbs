@@ -1,0 +1,77 @@
+<div class="container">
+
+    <div class="row">
+        <div class="one-half column">
+            <a class="button" href="/">{{__ 'back'}}</a>
+        </div>
+    </div>
+
+    <div class="row align-center">
+        <div class="twelve columns">
+            <h3>{{__ 'friendsHeader'}}</h3>
+        </div>
+    </div>
+
+    <div class="row overflow-auto">
+        <div class="twelve columns">
+            <table class="">
+                <thead>
+                    <tr>
+                        <th class="align-center">{{__ 'friendsName'}}</th>
+                        <th class="align-center">{{__ 'friendsUsername'}}</th>
+                        <th class="align-center">{{__ 'friendsCompletedGames'}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each friends}}
+                        <tr>
+                            <td class="align-center">{{name}}</td>
+                            <td class="align-center">{{username}}</td>
+                            <td class="align-center">{{completedGames}}</td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="twelves columns">
+            <h4 class="align-center">{{__ 'incFriendReqs'}} </h4>
+        </div>
+    </div>
+
+    <div class="row overflow-auto">
+        <div class="twelve columns">
+            <table class="">
+                <thead>
+                    <tr>
+                        <th class="align-center">{{__ 'dateSent'}}</th>
+                        <th class="align-center">{{__ 'sender'}}</th>
+                        <th class="align-center">{{__ 'text'}}</th>
+                        <th class="align-center" colspan="2"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each inqFriendReqs}}
+                        <tr>
+                            <td class="align-center">{{date}}</td>
+                            <td class="align-center">{{username}}</td>
+                            <td>{{text}}</td>
+                            <td class="align-center"><button>Αποδοχή</button></td>
+                            <td class="align-center"><button>Απόρριψη</button></td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <hr>
+
+    <a class="button-primary button" href="/sendFriendReq">{{__ 'sendFriendReq'}}</a>
+
+
+
+</div>

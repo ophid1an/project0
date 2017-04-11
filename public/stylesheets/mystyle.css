@@ -1,0 +1,109 @@
+/* Variables
+-------------------------------------------------- */
+/* Rules
+------------------------------------------------- */
+body {
+  margin-top: 1.5vh;
+  background-color: #efefef;
+  font-family: "Roboto", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+
+h1,
+h2,
+h3,
+h4 {
+  border-top: 1px solid black;
+  border-bottom: 1px solid black; }
+
+@media (max-width: 550px) {
+  .column-special {
+    width: 50%; } }
+
+.overflow-auto {
+  overflow: auto; }
+
+.hidden {
+  display: none; }
+
+.spacing-special {
+  margin-bottom: 0.5rem; }
+
+.border-btm {
+  border-bottom: 1px solid black; }
+
+.align-baseline {
+  vertical-align: baseline; }
+
+.button-bold {
+  background-color: rgba(200, 200, 200, 0.9) !important; }
+
+.align-center {
+  text-align: center; }
+
+.align-right {
+  text-align: right; }
+
+.bg {
+  background-image: url("/images/crossword-arxiki.jpg");
+  background-position: center;
+  background-repeat: repeat-x;
+  padding: 1rem 1rem 0;
+  background-color: #666; }
+
+.border-dotted {
+  border: 1px dotted black; }
+
+.pos-abs-btm-left {
+  position: absolute;
+  left: 0;
+  bottom: 0; }
+
+.pos-rel-btm-left {
+  position: relative;
+  left: 0;
+  bottom: 0; }
+
+.box {
+  display: flex;
+  flex-flow: column;
+  height: 98.5vh; }
+  .box .row {
+    overflow: hidden; }
+  .box .row.row-header {
+    flex: 0 0 auto; }
+  .box .row.row-canvas {
+    flex: 0 1 47%; }
+  .box .row.row-clues {
+    flex: 0 1 25%;
+    overflow: auto; }
+  .box .row.row-keyboard {
+    flex: 0 0 auto; }
+
+.ui-keyboard {
+  border-radius: 0;
+  left: 50%;
+  margin-left: -50%;
+  top: auto;
+  bottom: 0;
+  position: fixed;
+  width: 100%; }
+
+.text-muted {
+  color: #636c72; }
+
+.text-primary {
+  color: #0275d8; }
+
+.text-success {
+  color: #5cb85c; }
+
+.text-info {
+  color: #5bc0de; }
+
+.text-warning {
+  color: #f0ad4e; }
+
+.text-danger {
+  color: #d9534f; }
+
+.text-white {
+  color: #fff; }

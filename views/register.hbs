@@ -1,0 +1,55 @@
+<div class="container">
+
+    <div class="row">
+        <div class="one-half column">
+            <a class="button" href="/">{{__ 'back'}}</a>
+        </div>
+    </div>
+
+    <div class="row align-center">
+        <div class="twelve columns">
+            <h3>{{__ 'registerHeader'}}</h3>
+        </div>
+    </div>
+
+    {{#if errors}}
+        <div class="row">
+            <div class="twelve columns">
+                <ul class="text-danger">
+                    {{#each errors}}
+                        <li>{{msg}}</li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+    {{/if}}
+
+    <form action="/register" method="post">
+
+        <div class="row">
+            <div class="one-half column">
+                <label for="username">{{__ 'username'}}</label>
+                <input type="text" id="username" name="username" {{#if user}} value= {{user.username}} {{/if}} required/>
+            </div>
+            <div class="one-half column">
+                <label for="email">{{__ 'email'}}</label>
+                <input type="email" id="email" name="email" {{#if user}} value= {{user.email}} {{/if}} required/>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="one-half column">
+                <label for="pwd">{{__ 'password'}}</label>
+                <input type="password" id="pwd" name="pwd" required/>
+            </div>
+            <div class="one-half column">
+                <label for="pwd-confirm">{{__ 'passwordConfirm'}}</label>
+                <input type="password" id="pwd-confirm" name="pwd-confirm" required/>
+            </div>
+        </div>
+
+        <input class="button-primary" type="submit" value="{{__ 'submitButton'}}">
+
+    </form>
+
+</div>

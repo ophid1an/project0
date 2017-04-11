@@ -1,0 +1,28 @@
+<div class="container">
+
+    <div class="row">
+        <div class="one-half column">
+            <a class="button" href="/main/">{{__ 'back'}}</a>
+        </div>
+    </div>
+
+    <div class="row align-center">
+        <div class="twelve columns">
+            <h3>{{__ 'uploadCrosswordHeader'}}</h3>
+        </div>
+    </div>
+
+    <form action="/main/upload-crossword" method="post" enctype="multipart/form-data">
+
+        <div class="row">
+            <div class="twelve columns">
+                <label for="file-to-upload">{{__ 'fileToUpload'}}</label>
+                <input type="file" name="file-to-upload" id="file-to-upload" required>
+            </div>
+        </div>
+
+        <input class="button-primary" type="submit" value="{{__ 'submitButton'}}">
+
+    </form>
+
+</div>

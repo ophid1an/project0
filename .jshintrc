@@ -1,0 +1,8 @@
+{
+  "strict": "implied",
+  "node": true,
+  "unused": true,
+  "jquery": true,
+  "browser": true,
+  "esversion": 6
+}
