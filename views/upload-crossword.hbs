@@ -12,6 +12,30 @@
         </div>
     </div>
 
+    {{#if errors}}
+        <div class="row text-danger">
+            <div class="twelve columns">
+                <ul>
+                    {{#each errors}}
+                        <li>{{msg}}</li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+    {{/if}}
+
+    {{#if success}}
+        <div class="row text-success">
+            <div class="twelve columns">
+                <ul>
+                    {{#each success}}
+                        <li>{{msg}}</li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+    {{/if}}
+
     <form action="/main/upload-crossword" method="post" enctype="multipart/form-data">
 
         <div class="row">

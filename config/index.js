@@ -2,7 +2,7 @@
 
 const cookiesOptions = {
   name: 'jwt',
-  age: 7 * 23 * 60 * 60 * 1000
+  age: 6 * 24 * 60 * 60 * 1000
 };
 
 const jwtOptions = {

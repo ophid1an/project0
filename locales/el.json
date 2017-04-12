@@ -70,7 +70,10 @@
     "warnInvalidEmail": "Μη έγκυρη διεύθυνση e-mail.",
     "warnInvalidPwd": "Ο κωδικός χρήστη πρέπει να αποτελείται από 8 τουλάχιστον χαρακτήρες.",
     "warnPasswordsDoNotMatch": "Οι κωδικοί δεν είναι ίδιοι.",
-    "warnUsernameExists": "Το όνομα χρήστη ήδη υπάρχει.",
-    "warnEmailExists": "Η διεύθυνση e-mail ήδη υπάρχει.",
-    "user": "Χρήστης"
+    "warnUsernameExists": "Το όνομα χρήστη υπάρχει ήδη.",
+    "warnEmailExists": "Η διεύθυνση e-mail υπάρχει ήδη.",
+    "user": "Χρήστης",
+    "crosswordUploadSuccess" : "Το σταυρόλεξο μεταφορτώθηκε επιτυχώς.",
+    "crosswordParsingFailure" : "Υπήρξε πρόβλημα στην συντακτική ανάλυση του σταυρολέξου.",
+    "userSettingsHeader": "Ρυθμίσεις χρήστη"
 }

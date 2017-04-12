@@ -1,4 +1,7 @@
+const Session = require('../models/session');
 const User = require('../models/user');
+const Crossword = require('../models/crossword');
+
 const limits = require('../config').limits;
 // const async = require('async');
 const jwt = require('jsonwebtoken');
@@ -6,9 +9,113 @@ const jwtOptions = require('../config').jwtOptions;
 const cookiesOptions = require('../config').cookiesOptions;
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
-const util = require('util');
-const mongoose = require('mongoose');
 
+function sessionNewGameGet(req, res) {
+  res.render('new-game');
+}
+
+function sessionNewGamePost(req, res, next) {
+  res.render('new-game');
+
+  // router.post('/new-game', function (req, res, next) {
+  //
+  //
+  //   var crosswordTemplate = {
+  //     _id: "<ObjectId>",
+  //     difficulty: "<Number>",
+  //     totalLetters: "<Number>",
+  //     dimensions: ["<Number>", "<Number>"],
+  //     blackPositions: [
+  //       ["<Number>", "<Number>"], "..."
+  //     ],
+  //     clues: [{
+  //       position: ["<Number>", "<Number>"],
+  //       isAcross: "<Boolean>",
+  //       text: "<String>",
+  //       answer: "<String>"
+  //     }, "..."]
+  //   };
+  //
+  //
+  //   var myCrossword1 = {
+  //     dimensions: [6, 6],
+  //     blackPositions: [
+  //       [2, 4],
+  //       [3, 2],
+  //       [4, 5],
+  //       [5, 3]
+  //     ],
+  //     clues: {
+  //       across: [{
+  //           position: 1,
+  //           text: 'Δοχείο για νερό ή κρασί.',
+  //         }, {
+  //           position: 2,
+  //           text: 'Η μυθική χώρα του Αιήτη — Εισάγει υποθετικές προτάσεις.'
+  //         },
+  //         {
+  //           position: 3,
+  //           text: 'Κεφάλι από ιερό λείψανο.'
+  //         },
+  //         {
+  //           position: 4,
+  //           text: 'Εκπροσωπείται κι αυτή στο προεδρείο της Γ.Σ.Ε.Ε. (αρχικά).'
+  //         },
+  //         {
+  //           position: 5,
+  //           text: 'Λατρευόταν στην αρχαία Αίγυπτο — Άδης… προγόνων μας.'
+  //         },
+  //         {
+  //           position: 6,
+  //           text: 'Μαζί, ομού.'
+  //         }
+  //       ],
+  //       down: [{
+  //           position: 1,
+  //           text: 'Μηχανή λήψης εικόνας.',
+  //         },
+  //         {
+  //           position: 2,
+  //           text: 'Πληθυντικός άρθρου της Αρχαίας — Χρησιμοποιείται σε παρομοιώσεις.',
+  //         },
+  //         {
+  //           position: 3,
+  //           text: 'Φορητή κούνια βρέφους.',
+  //         },
+  //         {
+  //           position: 4,
+  //           text: 'Είναι τα υφάσματα από αμίαντο.',
+  //         },
+  //         {
+  //           position: 5,
+  //           text: 'Έρημος της Ινδίας — Μεσαία στον… κιμά.',
+  //         },
+  //         {
+  //           position: 6,
+  //           text: '"Βασίλισσα" αρχαίων.',
+  //         }
+  //       ]
+  //     }
+  //   };
+  //
+  //
+  //   initObj.clues = myCrossword1.clues;
+  //   // console.log(initObj.clues);
+  //
+  //   res.render('game-session', initObj);
+  //   //console.log(initObj);
+  // });
+
+
+}
+
+function resumeGameGet(req,res) {
+  res.render('resume-game');
+}
+
+function gameSessionGet(req,res) {
+  res.render('game-session');
+}
 
 function userLoginGet(req, res) {
   if (req.cookies[cookiesOptions.name]) {
@@ -224,45 +331,15 @@ function userRegisterPost(req, res, next) {
             return next(err);
           }
 
-          res.redirect('/login');
+          res.redirect('/');
         });
       });
     });
 }
 
-function userHistoryGet(req, res) {
-  res.render('history');
-}
-
-function userFriendsGet(req, res, next) {
-
-  User
-    .findOne({
-      _id: req.user._id
-    })
-    .populate('friends.friend')
-    .exec((err, user) => {
-      if (err) {
-        return next(err);
-      }
-      res.render('friends', {
-        friends: user.friends
-      });
-    });
-}
-
-function userSettingsGet (req,res) {
-  res.render('user-settings');
-}
-
-
 module.exports = {
-    userLoginGet: userLoginGet,
-  userLoginPost: userLoginPost,
-  userRegisterGet: userRegisterGet,
-  userRegisterPost: userRegisterPost,
-  userFriendsGet: userFriendsGet,
-  userHistoryGet: userHistoryGet,
-  userSettingsGet: userSettingsGet
-
+  sessionNewGameGet: sessionNewGameGet,
+  sessionNewGamePost: sessionNewGamePost,
+  resumeGameGet: resumeGameGet,
+  gameSessionGet: gameSessionGet
 };

@@ -12,61 +12,63 @@
         </div>
     </div>
 
-    <div class="row overflow-auto">
-        <div class="twelve columns">
-            <table class="">
-                <thead>
-                    <tr>
-                        <th class="align-center">{{__ 'friendsName'}}</th>
-                        <th class="align-center">{{__ 'friendsUsername'}}</th>
-                        <th class="align-center">{{__ 'friendsCompletedGames'}}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each friends}}
+    {{#if friends}}
+        <div class="row overflow-auto">
+            <div class="twelve columns">
+                <table class="">
+                    <thead>
                         <tr>
-                            <td class="align-center">{{name}}</td>
-                            <td class="align-center">{{username}}</td>
-                            <td class="align-center">{{completedGames}}</td>
+                            <th class="align-center">{{__ 'friendsUsername'}}</th>
+                            <th class="align-center">{{__ 'friendsCompletedGames'}}</th>
                         </tr>
-                    {{/each}}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {{#each friends}}
+                            <tr>
+                                <td class="align-center">{{friend.username}}</td>
+                                <td class="align-center">{{completedGames}}</td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    {{/if}}
 
-
-    <div class="row">
-        <div class="twelves columns">
-            <h4 class="align-center">{{__ 'incFriendReqs'}} </h4>
+    {{#if inqFriendReqs}}
+        <div class="row">
+            <div class="twelves columns">
+                <h4 class="align-center">{{__ 'incFriendReqs'}} </h4>
+            </div>
         </div>
-    </div>
 
-    <div class="row overflow-auto">
-        <div class="twelve columns">
-            <table class="">
-                <thead>
-                    <tr>
-                        <th class="align-center">{{__ 'dateSent'}}</th>
-                        <th class="align-center">{{__ 'sender'}}</th>
-                        <th class="align-center">{{__ 'text'}}</th>
-                        <th class="align-center" colspan="2"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each inqFriendReqs}}
+
+        <div class="row overflow-auto">
+            <div class="twelve columns">
+                <table class="">
+                    <thead>
                         <tr>
-                            <td class="align-center">{{date}}</td>
-                            <td class="align-center">{{username}}</td>
-                            <td>{{text}}</td>
-                            <td class="align-center"><button>Αποδοχή</button></td>
-                            <td class="align-center"><button>Απόρριψη</button></td>
+                            <th class="align-center">{{__ 'dateSent'}}</th>
+                            <th class="align-center">{{__ 'sender'}}</th>
+                            <th class="align-center">{{__ 'text'}}</th>
+                            <th class="align-center" colspan="2"></th>
                         </tr>
-                    {{/each}}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {{#each inqFriendReqs}}
+                            <tr>
+                                <td class="align-center">{{date}}</td>
+                                <td class="align-center">{{username}}</td>
+                                <td>{{text}}</td>
+                                <td class="align-center"><button>Αποδοχή</button></td>
+                                <td class="align-center"><button>Απόρριψη</button></td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    {{/if}}
 
     <hr>
 

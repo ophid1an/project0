@@ -6,11 +6,13 @@ const CrosswordSchema = Schema({
     type: String
   },
   difficulty: {
-    type: Number,
+    type: String,
+    enum: ['easy', 'medium', 'hard'],
     required: true
   },
-  totalLetters: {
+  totalWhite: {
     type: Number,
+    min: 1,
     required: true
   },
   dimensions: {
@@ -18,15 +20,29 @@ const CrosswordSchema = Schema({
     required: true
   },
   blackPositions: {
-    type: [Schema.Types.Mixed],
-    required: true
+    type: [
+      [Number]
+    ]
   },
-  cluesAcross: {
-    type: [Schema.Types.Mixed],
-    required: true
-  },
-  cluesDown: {
-    type: [Schema.Types.Mixed],
+  clues: {
+    type: [{
+      isAcross: {
+        type: Boolean,
+        required:true
+      },
+      position: {
+        type: [Number],
+        required: true
+      },
+      text: {
+        type: String,
+        required: true
+      },
+      answer: {
+        type: String,
+        required: true
+      }
+    }],
     required: true
   }
 });

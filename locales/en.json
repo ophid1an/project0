@@ -72,5 +72,8 @@
   "warnPasswordsDoNotMatch": "Passwords do not match.",
   "warnUsernameExists": "Username already exists.",
   "warnEmailExists": "E-mail address already exists.",
-  "user": "User"
+  "user": "User",
+  "crosswordUploadSuccess" : "Crossword uploaded successfully.",
+  "crosswordParsingFailure" : "There was a problem during crossword's parsing.",
+  "userSettingsHeader": "User settings"
 }

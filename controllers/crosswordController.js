@@ -9,17 +9,6 @@ const upload = multer({
 }).single('file-to-upload');
 
 
-// const vars = require('../config').vars;
-// const limits = require('../config').limits;
-// // const async = require('async');
-// const jwt = require('jsonwebtoken');
-// const jwtOptions = require('../config').jwtOptions;
-// const cookiesOptions = require('../config').cookiesOptions;
-// const bcrypt = require('bcrypt');
-// const saltRounds = 10;
-
-
-
 function crosswordUploadGet(req, res) {
   if (req.user.isAdmin) {
     res.render('upload-crossword');
@@ -31,18 +20,30 @@ function crosswordUploadGet(req, res) {
 function crosswordUploadPost(req, res, next) {
 
   function checkCrossword(crosswordToTest) {
-    // if (crosswordToTest.) {
-    //   const crossword = new Crossword({
-    //     language: crosswordToTest.language,
-    //     difficulty: crosswordToTest.difficulty,
-    //     totalLetters: crosswordToTest.dimensions[0] * crosswordToTest.dimensions[1] - crosswordToTest.blackPositions.length,
-    //     dimensions: crosswordToTest.dimensions,
-    //     blackPositions: crosswordToTest.blackPositions,
-    //     clues: crosswordToTest.clues
-    //   });
-    //   return crossword;
-    // }
-    return false;
+
+    const diff = crosswordToTest.difficulty;
+    const dim = crosswordToTest.dimensions;
+    const clues = crosswordToTest.clues;
+    const bpos = crosswordToTest.blackPositions;
+
+    if (!diff || !dim || !dim.length || dim.length !== 2 || !clues || !clues.length || clues.length < 1) {
+      return false;
+    }
+
+    const total = bpos && bpos.length ? dim[0] * dim[1] - bpos.length : dim[0] * dim[1];
+
+    if (total<1) {
+      return false;
+    }
+
+    return new Crossword({
+      language: crosswordToTest.language,
+      difficulty: diff,
+      totalWhite: total,
+      dimensions: dim,
+      blackPositions: bpos,
+      clues: clues
+    });
 
   }
 
@@ -58,8 +59,6 @@ function crosswordUploadPost(req, res, next) {
 
         if (crossword) {
 
-
-
           crossword.save(err => {
 
             if (err) {
@@ -67,18 +66,26 @@ function crosswordUploadPost(req, res, next) {
             }
 
             res.render('upload-crossword', {
-              success: true
+              success: [{
+                msg: res.__('crosswordUploadSuccess')
+              }]
             });
           });
 
         } else {
           res.render('upload-crossword', {
-            errors: true
+            errors: [{
+              msg: res.__('crosswordParsingFailure')
+            }]
           });
         }
 
       } catch (err) {
-        return next(err);
+        return res.render('upload-crossword', {
+          errors: [{
+            msg: err
+          }]
+        });
       }
 
     });
