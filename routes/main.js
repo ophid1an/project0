@@ -38,7 +38,7 @@ router.get('/upload-crossword', crosswordController.crosswordUploadGet);
 
 router.post('/upload-crossword', crosswordController.crosswordUploadPost);
 
-router.get('/add-friend', testController.userAddFriendGet);
+router.get('/add-friend/:user', testController.userAddFriendGet);
 
 
 module.exports = router;

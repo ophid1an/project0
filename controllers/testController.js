@@ -12,29 +12,32 @@ const mongoose = require('mongoose');
 function userAddFriendGet(req, res, next) {
 
   User.findOne({
-        'username': 'nick'
+        'username': req.params.user
     })
     .exec((err, user) => {
 
       if (err) {
         return next(err);
       }
-
-      User.update({
-        _id: req.user._id
-      }, {
-        $push: {
-          friends: {
-            friend: user
+      if (user) {
+        User.update({
+          _id: req.user._id
+        }, {
+          $push: {
+            friends: {
+              friend: user
+            }
           }
-        }
-      }, err => {
-        if (err) {
-          return next(err);
-        }
+        }, err => {
+          if (err) {
+            return next(err);
+          }
+          res.redirect('/main/friends');
+        });
+      }
+      else {
         res.redirect('/main/friends');
-      });
-
+      }
 
     });
 }
