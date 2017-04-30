@@ -3,50 +3,50 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const gameSchema = Schema({
-  crossword: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Crossword',
-    required: true
-  },
-  player1: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  player2: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  letters: [{
-    position: [Number],
-    isPlayer1: {
-      type: Boolean,
-      required: true
+    crossword: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Crossword',
+        required: true
     },
-    isCertain: {
-      type: Boolean,
-      required: true
+    player1: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
-    char: {
-      type: String,
-      required: true
-    }
-  }],
-  messages: [{
-    date: {
-      type: Date,
-      required: true
+    player2: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
-    from: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    text: {
-      type: String,
-      required: true
-    }
-  }]
+    letters: [{
+        pos: {
+            type: [Number],
+            required: true
+        },
+        isPlayer1: {
+            type: Boolean,
+        },
+        isCertain: {
+            type: Boolean,
+        },
+        letter: {
+            type: String,
+        }
+    }],
+    messages: [{
+        date: {
+            type: Date,
+            required: true
+        },
+        from: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        text: {
+            type: String,
+            required: true
+        }
+    }]
 });
 
 module.exports = mongoose.model('Game', gameSchema);

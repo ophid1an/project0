@@ -1,137 +1,326 @@
+const moment = require('moment');
 const Game = require('../models/game');
-const User = require('../models/user');
 const Crossword = require('../models/crossword');
 
-function gameNewGet(req, res, next) {
-  User
-    .findOne({
-      _id: req.user._id
-    })
-    .populate('friends.friend')
-    .exec((err, user) => {
-      if (err) {
-        return next(err);
-      }
-      res.render('game-settings', {
-        friends: user.friends
-      });
+
+const util = require('util');
+
+
+const getFriends = require('../lib/util').getFriends;
+const indexOfArray = require('../lib/util').indexOfArray;
+
+
+
+
+exports.gameNewGet = function (req, res, next) {
+
+    getFriends(req.user._id, (err, friends) => {
+        if (err) {
+            return next(err);
+        }
+        res.render('game-settings', {
+            friends: friends
+        });
     });
-}
-
-function gameNewPost(req, res, next) {
-  res.send('gameNewPost');
-  // res.render('new-game');
-
-  // router.post('/new-game', function (req, res, next) {
-  //
-  //
-  //   var crosswordTemplate = {
-  //     _id: "<ObjectId>",
-  //     difficulty: "<Number>",
-  //     totalLetters: "<Number>",
-  //     dimensions: ["<Number>", "<Number>"],
-  //     blackPositions: [
-  //       ["<Number>", "<Number>"], "..."
-  //     ],
-  //     clues: [{
-  //       position: ["<Number>", "<Number>"],
-  //       isAcross: "<Boolean>",
-  //       text: "<String>",
-  //       answer: "<String>"
-  //     }, "..."]
-  //   };
-  //
-  //
-  //   var myCrossword1 = {
-  //     dimensions: [6, 6],
-  //     blackPositions: [
-  //       [2, 4],
-  //       [3, 2],
-  //       [4, 5],
-  //       [5, 3]
-  //     ],
-  //     clues: {
-  //       across: [{
-  //           position: 1,
-  //           text: 'Δοχείο για νερό ή κρασί.',
-  //         }, {
-  //           position: 2,
-  //           text: 'Η μυθική χώρα του Αιήτη — Εισάγει υποθετικές προτάσεις.'
-  //         },
-  //         {
-  //           position: 3,
-  //           text: 'Κεφάλι από ιερό λείψανο.'
-  //         },
-  //         {
-  //           position: 4,
-  //           text: 'Εκπροσωπείται κι αυτή στο προεδρείο της Γ.Σ.Ε.Ε. (αρχικά).'
-  //         },
-  //         {
-  //           position: 5,
-  //           text: 'Λατρευόταν στην αρχαία Αίγυπτο — Άδης… προγόνων μας.'
-  //         },
-  //         {
-  //           position: 6,
-  //           text: 'Μαζί, ομού.'
-  //         }
-  //       ],
-  //       down: [{
-  //           position: 1,
-  //           text: 'Μηχανή λήψης εικόνας.',
-  //         },
-  //         {
-  //           position: 2,
-  //           text: 'Πληθυντικός άρθρου της Αρχαίας — Χρησιμοποιείται σε παρομοιώσεις.',
-  //         },
-  //         {
-  //           position: 3,
-  //           text: 'Φορητή κούνια βρέφους.',
-  //         },
-  //         {
-  //           position: 4,
-  //           text: 'Είναι τα υφάσματα από αμίαντο.',
-  //         },
-  //         {
-  //           position: 5,
-  //           text: 'Έρημος της Ινδίας — Μεσαία στον… κιμά.',
-  //         },
-  //         {
-  //           position: 6,
-  //           text: '"Βασίλισσα" αρχαίων.',
-  //         }
-  //       ]
-  //     }
-  //   };
-  //
-  //
-  //   initObj.clues = myCrossword1.clues;
-  //   // console.log(initObj.clues);
-  //
-  //   res.render('game-session', initObj);
-  //   //console.log(initObj);
-  // });
+};
 
 
-}
 
-function gameResumeGet(req, res) {
-  res.render('game-settings', {
-    resume: true
-  });
-}
+exports.gameNewPost = function (req, res, next) {
 
-function gameResumePost(req, res) {
-  res.send('gameResumePost');
-}
+    const game = new Game({
+        player1: req.user._id
+    });
 
-function gameSessionGet(req, res) {
-  res.render('game-session');
-}
 
-module.exports = {
-  gameNewGet: gameNewGet,
-  gameNewPost: gameNewPost,
-  gameResumeGet: gameResumeGet,
-  gameResumePost: gameResumePost,
-  gameSessionGet: gameSessionGet
+    function renderGameSettingsWithError(error) {
+
+        getFriends(req.user._id, (err, friends) => {
+            if (err) {
+                return next(err);
+            }
+            res.render('game-settings', {
+                friends: friends,
+                errors: [{
+                    msg: error
+                }]
+            });
+        });
+    }
+
+
+    function proceed() {
+
+        Crossword
+            .count({
+                diff: req.body.difficulty
+            }, (err, count) => {
+                if (err) {
+                    return next(err);
+                }
+
+                if (!count) {
+                    return renderGameSettingsWithError(res.__('errorCrosswordNotFound'));
+                }
+
+                const randomCw = Math.floor(Math.random() * count);
+
+                Crossword
+                    .find({
+                        diff: req.body.difficulty
+                    })
+                    .select('dim blacksPos')
+                    .limit(-1)
+                    .skip(randomCw)
+                    .exec((err, cw) => {
+                        if (err) {
+                            return next(err);
+                        }
+
+                        if (!cw.length) {
+                            return renderGameSettingsWithError(res.__('errorCrosswordNotFound'));
+                        }
+
+                        game.crossword = cw[0]._id;
+
+                        var rows = cw[0].dim[0];
+                        var cols = cw[0].dim[1];
+                        var bpos = cw[0].blacksPos;
+                        var letters = [];
+
+                        for (let i = 0; i < rows; i += 1) {
+                            for (let j = 0; j < cols; j += 1) {
+                                if (indexOfArray([i, j], bpos) === -1) {
+                                    letters.push({
+                                        pos: [i, j]
+                                    });
+                                }
+                            }
+                        }
+
+                        game.letters = letters;
+
+                        game.save((err, game) => {
+
+                            if (err) {
+                                return next(err);
+                            }
+
+                            // res.cookie(cookiesOptions.name.game, game._id.toString(), {
+                            //   expires: new Date(Date.now() + cookiesOptions.age),
+                            //   httpOnly: true
+                            // });
+
+                            res.redirect('/main/game-session/' + game._id.toString());
+
+                        });
+                    });
+            });
+
+
+    }
+
+    const difficulties = ['easy', 'medium', 'hard'];
+
+    req.sanitize('difficulty').trim();
+    req.sanitize('partner').trim();
+    req.sanitize('difficulty').escape();
+    req.sanitize('partner').escape();
+
+    if (difficulties.indexOf(req.body.difficulty) === -1) {
+        return renderGameSettingsWithError(res.__('errorInvalidDifficulty'));
+    }
+
+    if (req.body.partner) {
+
+        getFriends(req.user._id, (err, friends) => {
+
+            if (err) {
+                return next(err);
+            }
+
+            let pos = friends.map(e => e.username).indexOf(req.body.partner);
+
+            if (pos === -1) {
+                return renderGameSettingsWithError(res.__('errorInvalidPartner'));
+            }
+
+            game.player2 = friends[pos]._id;
+            proceed();
+
+        });
+
+    } else {
+        proceed();
+    }
+
+};
+
+
+
+
+exports.gameResumeGet = function (req, res, next) {
+
+    Game
+        .find({
+            $or: [{
+                player1: req.user._id
+            }, {
+                player2: req.user._id
+            }]
+        })
+        .populate('player1', 'username')
+        .populate('player2', 'username')
+        .sort({
+            _id: -1
+        })
+        .exec((err, games) => {
+
+            if (err) {
+                return next(err);
+            }
+
+
+            var gamesMod = [];
+
+            games.forEach(e => {
+                var entry = {};
+                entry.url = '/main/game-session/' + e._id;
+                entry.dateCreated = moment(e._id.getTimestamp()).format('MMM DD YYYY, HH:mm');
+                entry.isAdmin = req.user._id.equals(e.player1._id);
+                entry.partner = e.player2 ? (req.user._id.equals(e.player1._id) ? e.player2.username : e.player1.username) : '';
+                gamesMod.push(entry);
+            });
+
+            res.render('game-settings', {
+                resume: true,
+                games: gamesMod
+            });
+
+        });
+
+};
+
+
+exports.gameSessionGet = function (req, res, next) {
+
+    req.checkParams('gameId', 'Invalid urlparam').isHexadecimal().isLength({
+        min: 24,
+        max: 24
+    });
+
+    const errors = req.validationErrors();
+
+    if (errors) {
+        return res.redirect('/main');
+    }
+
+    Game
+        .findOne({
+            _id: req.params.gameId,
+            $or: [{
+                player1: req.user._id
+            }, {
+                player2: req.user._id
+            }]
+        })
+        .populate('crossword')
+        .exec((err, game) => {
+
+            if (err) {
+                return next(err);
+            }
+
+            if (!game) {
+                return res.redirect('/main');
+            }
+
+            var crossword = {};
+            crossword.lang = game.crossword.lang;
+            crossword.dim = game.crossword.dim;
+            crossword.bpos = game.crossword.blacksPos;
+            crossword.cluesDownInd = game.crossword.cluesDownInd;
+            crossword.cluesAcrossInd = game.crossword.cluesAcrossInd;
+            crossword.clues = [];
+            game.crossword.clues.forEach(e => {
+                crossword.clues.push({
+                    len: e.answer.length,
+                    isAcross: e.isAcross,
+                    def: e.def,
+                    pos: e.pos
+                });
+            });
+
+            res.render('game-session', {
+                data: JSON.stringify({
+                    crossword: crossword,
+                    letters: game.letters || [],
+                    isPlayer1: game.player1.equals(req.user._id)
+                })
+            });
+
+        });
+};
+
+
+exports.gameSessionPost = function (req, res) {
+    var data = req.body;
+
+    var query = {
+        _id: data.gameId
+    };
+
+    if (data.isPlayer1) {
+        query.player1 = req.user._id;
+    } else {
+        query.player2 = req.user._id;
+    }
+
+    var updateLetter = (letter, callback) => {
+        query['letters.pos'] = letter.pos;
+
+        Game
+            .update(query, {
+                $set: {
+                    'letters.$.isCertain': letter.isCertain,
+                    'letters.$.letter': letter.letter,
+                    'letters.$.isPlayer1': data.isPlayer1,
+                }
+            })
+            .exec((err) => {
+                if (err) {
+                    return callback(err);
+                }
+                callback();
+            });
+    };
+
+    if (!data.letters || !data.letters.length) {
+        return res.json({
+            error: 'Invalid JSON file!'
+        });
+    }
+
+    var len = data.letters.length;
+
+    (function uploadLetters(ind) {
+        if (ind < len) {
+            updateLetter(data.letters[ind], err => {
+                if (err) {
+                    console.log(util.inspect(err));
+                    return res.json({
+                        error: err
+                    });
+                } else {
+                    uploadLetters(ind + 1);
+                }
+            });
+        }
+
+    })(0);
+
+    return res.json({
+        msg: 'OK'
+    });
+
 };

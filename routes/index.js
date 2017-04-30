@@ -8,18 +8,19 @@ const userController = require('../controllers/userController');
 
 /* GET home page. */
 router.get('/', function (req, res) {
-  if (req.cookies[cookiesOptions.name]) {
-    res.redirect('/main');
-  } else {
-    res.render('index', {
-      author: vars.author
-    });
-  }
+    if (req.cookies[cookiesOptions.name.jwt]) {
+        res.redirect('/main');
+    } else {
+        res.render('index', {
+            author: vars.author
+        });
+    }
 });
 
 router.get('/logout', function (req, res) {
-  res.clearCookie(cookiesOptions.name);
-  res.redirect('/');
+    res.clearCookie(cookiesOptions.name.jwt);
+    res.clearCookie(cookiesOptions.name.game);
+    res.redirect('/');
 });
 
 router.get('/login', userController.userLoginGet);

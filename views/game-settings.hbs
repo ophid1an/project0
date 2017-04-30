@@ -2,9 +2,11 @@
 
     <div class="row">
         <div class="one-half column">
-            <a class="button" href="/">{{__ 'back'}}</a>
+            <a class="button" href="/main">{{__ 'back'}}</a>
         </div>
     </div>
+
+
 
     {{#if resume}}
 
@@ -14,9 +16,49 @@
             </div>
         </div>
 
-        <div class="row">
+        {{#if errors}}
+            <div class="row text-danger">
+                <div class="twelve columns">
+                    <ul>
+                        {{#each errors}}
+                            <li>{{msg}}</li>
+                        {{/each}}
+                    </ul>
+                </div>
+            </div>
+        {{/if}}
 
-        </div>
+
+        {{#if games}}
+            <div class="row overflow-auto">
+                <div class="twelve columns">
+                    <table class="">
+                        <thead>
+                            <tr>
+                                <th class="align-center"></th>
+                                <th class="align-center">{{__ 'dateCreated'}}</th>
+                                <th class="align-center">{{__ 'partner'}}</th>
+                                <th class="align-center">{{__ 'moderator'}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each games}}
+                                <tr>
+                                    <td class="align-center"><a class="button button-primary" href= {{url}}>{{../__ 'select'}}</a></td>
+                                    <td class="align-center">{{dateCreated}}</td>
+                                    <td class="align-center">
+                                        {{#if partner}}{{partner}}{{else}}-{{/if}}
+                                    </td>
+                                    <td class="align-center">
+                                        {{#if isAdmin}}{{../__ 'yes'}}{{else}}{{../__ 'no'}}{{/if}}
+                                    </td>
+                                </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {{/if}}
 
     {{else}}
 
@@ -26,25 +68,38 @@
             </div>
         </div>
 
+        {{#if errors}}
+            <div class="row text-danger">
+                <div class="twelve columns">
+                    <ul>
+                        {{#each errors}}
+                            <li>{{msg}}</li>
+                        {{/each}}
+                    </ul>
+                </div>
+            </div>
+        {{/if}}
+
+
         <form action="/main/new-game" method="post">
             <fieldset>
-                <legend>{{__ 'difficulty'}}</legend>
+                <legend>{{__ 'difficultyLevel'}}:</legend>
                 <div class="row">
                     <div class="one-third column">
-                        <label for="radio-difficulty-easy">
-                    <input type="radio" name="radio-difficulty" id="radio-difficulty-easy" value="easy" checked>
+                        <label for="difficulty-easy">
+                    <input type="radio" name="difficulty" id="difficulty-easy" value="easy" checked>
                     <span class="label-body">{{__ 'easy'}}</span>
                     </label>
                     </div>
                     <div class="one-third column">
-                        <label for="radio-difficulty-medium">
-                  <input type="radio" name="radio-difficulty" id="radio-difficulty-medium" value="medium">
+                        <label for="difficulty-medium">
+                  <input type="radio" name="difficulty" id="difficulty-medium" value="medium">
                   <span class="label-body">{{__ 'medium'}}</span>
                   </label>
                     </div>
                     <div class="one-third column">
-                        <label for="radio-difficulty-hard">
-                  <input type="radio" name="radio-difficulty" id="radio-difficulty-hard" value="hard">
+                        <label for="difficulty-hard">
+                  <input type="radio" name="difficulty" id="difficulty-hard" value="hard">
                   <span class="label-body">{{__ 'hard'}}</span>
                   </label>
                     </div>
@@ -53,11 +108,11 @@
 
             <div class="row">
                 <div class="twelve columns">
-                    <label for="select-choice-1" class="select">{{__ 'partner'}}</label>
-                    <select name="select-choice-1" id="select-choice-1" data-mini="true" data-inline="true">
-                    <option value="none">&lt; {{__ 'noone'}} &gt;</option>
+                    <label for="partner" class="select">{{__ 'partner'}}:</label>
+                    <select name="partner" id="partner" data-mini="true" data-inline="true">
+                    <option value="">&lt; {{__ 'noone'}} &gt;</option>
                   {{#each friends}}
-    <option value="standard">{{friend.username}}</option>
+    <option>{{username}}</option>
                   {{/each}}
                   </select>
                 </div>

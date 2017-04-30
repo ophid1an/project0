@@ -1,2 +1,2 @@
 #!/bin/bash
-webpack --optimize-minimize public/javascripts/login.js public/dist/bundle.js
+webpack --optimize-minimize public/javascripts/game-session.js dist/js/bundle.js

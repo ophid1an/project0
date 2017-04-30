@@ -1,47 +1,37 @@
-<div class="container box">
+<div class="container">
 
-    <div class="row center row-header">
-        <div class="one-half column column-special">
-            <a class="button" href="/">{{__ 'back'}}</a>
-        </div>
-        <div class="one-half column column-special align-right">
-            <a class="button" href="/">{{__ 'complete'}}</a>
+    <div class="row">
+        <div class="twelve columns">
+            <a class="button" href="/main">{{__ 'back'}}</a>
+            <a class="button u-pull-right" href="/">{{__ 'complete'}}</a>
         </div>
     </div>
 
-    <div class="row row-canvas border-dotted">
-        <canvas id="canvas" style="width: 100%; height: 100%;">
-            Canvas element is not supported!
-          </canvas>
-          <input id="keyboard" type="text" class="pos-abs-btm-left" onfocus="blur();">
+    <input type="text" class="pos-abs-hidden" id="input" name="input" autocomplete="off" value="">
+
+    <div class="row">
+        <div class="twelve columns overflow-auto" id="info"> - </div>
     </div>
 
-    <div class="row row-clues border-dotted">
-        <h5 class="border-btm align-center spacing-special"><b>{{__ 'across'}}</b></h5>
-        <div id="across">
-            {{#each clues.across}}
-                <p class="spacing-special"><b>{{position}}.</b> {{text}}</p>
-            {{/each}}
-        </div>
-        <h5 class="border-btm align-center spacing-special"><b>{{__ 'down'}}</b></h5>
-        <div id="down">
-            {{#each clues.down}}
-                <p class="spacing-special"><b>{{position}}.</b> {{text}}</p>
-            {{/each}}
-        </div>
+    <div class="row border-dotted spacing-special">
+        <canvas id="canvas">
+          Canvas element is not supported!
+        </canvas>
     </div>
 
-    <!-- <div class="row row-keyboard border-dotted" id="">
+    <div id="defs" class="row border-dotted overflow-auto">
+        <h5 class="border-btm align-center">
+          <b>{{__ 'across'}}</b>
+        </h5>
+        <div id="defs-across"> </div>
+        <h5 class="border-btm align-center">
+          <b>{{__ 'down'}}</b>
+        </h5>
+        <div id="defs-down"> </div>
+    </div>
 
-    </div> -->
 
-
-    <script src="/javascripts/crossword-setup.js"></script>
+    <div id="data" class="hidden">{{data}}</div>
+    <script src="/javascripts/game-session.js"></script>
 
 </div>
-
-
-
-
-<!-- <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-    in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p> -->

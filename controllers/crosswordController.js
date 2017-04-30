@@ -1,102 +1,107 @@
-// const Busboy = require('busboy');
-// const util = require('util');
-
-const Crossword = require('../models/crossword');
 const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({
-  storage: storage
+    storage: storage
 }).single('file-to-upload');
 
+const parseCrossword = require('../lib/util').parseCrossword;
+// const Busboy = require('busboy');
+const util = require('util');
 
-function crosswordUploadGet(req, res) {
-  if (req.user.isAdmin) {
-    res.render('upload-crossword');
-  } else {
+
+
+exports.crosswordUploadGet = function (req, res) {
+
+    if (req.user.isAdmin) {
+        return res.render('upload-crossword');
+    }
+
     res.redirect('/main');
-  }
-}
+};
 
-function crosswordUploadPost(req, res, next) {
 
-  function checkCrossword(crosswordToTest) {
 
-    const diff = crosswordToTest.difficulty;
-    const dim = crosswordToTest.dimensions;
-    const clues = crosswordToTest.clues;
-    const bpos = crosswordToTest.blackPositions;
 
-    if (!diff || !dim || !dim.length || dim.length !== 2 || !clues || !clues.length || clues.length < 1) {
-      return false;
-    }
+exports.crosswordUploadPost = function (req, res, next) {
 
-    const total = bpos && bpos.length ? dim[0] * dim[1] - bpos.length : dim[0] * dim[1];
-
-    if (total<1) {
-      return false;
-    }
-
-    return new Crossword({
-      language: crosswordToTest.language,
-      difficulty: diff,
-      totalWhite: total,
-      dimensions: dim,
-      blackPositions: bpos,
-      clues: clues
-    });
-
-  }
-
-  if (req.user.isAdmin) {
-    upload(req, res, (err) => {
-      if (err) {
-        return next(err);
-      }
-      try {
-        const crosswordToTest = JSON.parse(req.file.buffer.toString());
-
-        const crossword = checkCrossword(crosswordToTest);
-
-        if (crossword) {
-
-          crossword.save(err => {
-
+    if (req.user.isAdmin) {
+        upload(req, res, (err) => {
             if (err) {
-              return next(err);
+                return next(err);
             }
 
-            res.render('upload-crossword', {
-              success: [{
-                msg: res.__('crosswordUploadSuccess')
-              }]
-            });
-          });
+            var crosswordToParse;
+            try {
+                crosswordToParse = JSON.parse(req.file.buffer.toString());
+            } catch (err) {
+                return res.render('upload-crossword', {
+                    errors: [{
+                        msg: err
+                    }]
+                });
+            }
 
-        } else {
-          res.render('upload-crossword', {
-            errors: [{
-              msg: res.__('crosswordParsingFailure')
-            }]
-          });
-        }
+            const cwData = parseCrossword(crosswordToParse);
 
-      } catch (err) {
-        return res.render('upload-crossword', {
-          errors: [{
-            msg: err
-          }]
+            if (cwData && cwData.cw && cwData.matrix) {
+
+                cwData.cw.save(err => {
+                    if (err) {
+                        return next(err);
+                    }
+
+                    cwData.matrix = cwData.matrix.split('\n');
+
+                    // Construct definitions
+
+                    var defs = {};
+                    defs.across = [];
+                    defs.down = [];
+
+                    cwData.cw.cluesAcrossInd.forEach((eleOuter) => {
+                        var str = '';
+                        var lenOuter = eleOuter.length;
+                        eleOuter.forEach((eleInner, indInner) => {
+                            str += cwData.cw.clues[eleInner].def;
+                            str += indInner === lenOuter - 1 ? '' : ' - ';
+                        });
+                        defs.across.push(str);
+                    });
+
+                    cwData.cw.cluesDownInd.forEach((eleOuter) => {
+                        var str = '';
+                        var lenOuter = eleOuter.length;
+                        eleOuter.forEach((eleInner, indInner) => {
+                            str += cwData.cw.clues[eleInner].def;
+                            str += indInner === lenOuter - 1 ? '' : ' - ';
+                        });
+                        defs.down.push(str);
+                    });
+
+                    // Render
+
+                    return res.render('upload-crossword', {
+                        success: [{
+                            msg: res.__('crosswordUploadSuccess')
+                        }],
+                        matrix: cwData.matrix,
+                        defs: defs
+                    });
+                });
+
+            } else {
+                return res.render('upload-crossword', {
+                    errors: [{
+                        msg: res.__('crosswordParsingFailure')
+                    }]
+                });
+            }
+
+
+
         });
-      }
 
-    });
-
-
-  } else {
-    res.redirect('/main');
-  }
-}
-
-module.exports = {
-  crosswordUploadGet: crosswordUploadGet,
-  crosswordUploadPost: crosswordUploadPost
+    } else {
+        res.redirect('/main');
+    }
 };

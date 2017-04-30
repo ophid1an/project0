@@ -49,4 +49,32 @@
 
     </form>
 
+    {{#if success}}
+        <div class="row">
+            {{#each matrix}}
+                <div class="twelve columns">
+                    <code>{{this}}</code>
+                </div>
+            {{/each}}
+        </div>
+
+        <div class="row">
+            <div class="twelve columns">
+                <h5 class="border-btm align-center"><b>{{__ 'across'}}</b></h5>
+                <ol>
+                    {{#each defs.across}}
+                        <li>{{this}}</li>
+                    {{/each}}
+                </ol>
+                <h5 class="border-btm align-center"><b>{{__ 'down'}}</b></h5>
+                <ol>
+                    {{#each defs.down}}
+                        <li>{{this}}</li>
+                    {{/each}}
+                </ol>
+            </div>
+        </div>
+
+    {{/if}}
+
 </div>
