@@ -77,7 +77,7 @@ hbs.registerHelper('__', function () {
 passport.use(new JwtStrategy(jwtOptions, function (jwt_payload, done) {
     User.findOne({
         _id: jwt_payload.uid
-    },'username', function (err, user) {
+    }, 'username', function (err, user) {
         if (err) {
             return done(err, false);
         }
@@ -100,6 +100,9 @@ app.use(require('node-sass-middleware')({
 }));
 
 app.use(express.static(path.join(__dirname, 'public')));
+if (process.env.NODE_ENV === 'production') {
+    app.use('/javascripts', express.static(__dirname + 'dist/javascripts'));
+}
 
 app.use('/', index);
 app.use('/main', passport.authenticate('jwt', {

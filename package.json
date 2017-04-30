@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "devstart": "nodemon ./bin/www"
+    "devstart": "nodemon ./bin/www",
+    "build": "webpack -p"
   },
   "engines": {
     "node": "6.10.2",
@@ -33,5 +34,21 @@
     "serve-favicon": "2.4.2",
     "socket.io": "1.7.3",
     "validator": "7.0.0"
-  }
+  },
+  "devDependencies": {
+    "webpack": "2.4.1"
+  },
+  "description": "",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ophid1an/project0.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ophid1an/project0/issues"
+  },
+  "homepage": "https://github.com/ophid1an/project0#readme"
 }
