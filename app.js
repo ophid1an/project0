@@ -91,8 +91,9 @@ passport.use(new JwtStrategy(jwtOptions, function (jwt_payload, done) {
 
 
 app.use(require('node-sass-middleware')({
-    src: path.join(__dirname, 'public'),
+    src: path.join(__dirname, 'src/stylesheets/scss'),
     dest: path.join(__dirname, 'public'),
+    prefix: '/stylesheets',
     outputStyle: 'compressed',
     indentedSyntax: false,
     sourceMap: false,
@@ -101,7 +102,9 @@ app.use(require('node-sass-middleware')({
 
 app.use(express.static(path.join(__dirname, 'public')));
 if (process.env.NODE_ENV === 'production') {
-    app.use('/javascripts', express.static(__dirname + 'dist/javascripts'));
+    app.use('/javascripts', express.static(path.join(__dirname, 'dist/javascripts')));
+} else {
+    app.use('/javascripts', express.static(path.join(__dirname, 'src/javascripts')));
 }
 
 app.use('/', index);
