@@ -20,14 +20,27 @@ exports.userAddFriendGet = function (req, res, next) {
                 }, {
                     $push: {
                         friends: {
-                            friend: user
+                            friend: user._id
                         }
                     }
                 }, err => {
                     if (err) {
                         return next(err);
                     }
-                    res.redirect('/main/friends');
+                    User.update({
+                        _id: user._id
+                    }, {
+                        $push: {
+                            friends: {
+                                friend: req.user._id
+                            }
+                        }
+                    }, err => {
+                        if (err) {
+                            return next(err);
+                        }
+                        res.redirect('/main/friends');
+                    });
                 });
             } else {
                 res.redirect('/main/friends');

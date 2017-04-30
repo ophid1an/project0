@@ -74,11 +74,10 @@ hbs.registerHelper('__', function () {
 //   return i18n.__n.apply(this, arguments);
 // });
 
-
 passport.use(new JwtStrategy(jwtOptions, function (jwt_payload, done) {
     User.findOne({
         _id: jwt_payload.uid
-    }, function (err, user) {
+    },'username', function (err, user) {
         if (err) {
             return done(err, false);
         }
