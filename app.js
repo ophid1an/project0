@@ -38,6 +38,10 @@ i18n.configure({
 
 const app = express();
 
+if (!process.env.DONTUSECOMPRESSION) {
+    app.use(require('compression')());
+}
+
 app.use(helmet());
 
 //Set up mongoose connection
@@ -93,7 +97,6 @@ passport.use(new JwtStrategy(jwtOptions, function (jwt_payload, done) {
 app.use(require('node-sass-middleware')({
     src: path.join(__dirname, 'src/stylesheets/scss'),
     dest: path.join(__dirname, 'public/stylesheets'),
-    prefix: '/stylesheets',
     outputStyle: 'compressed',
     indentedSyntax: false,
     sourceMap: false,
