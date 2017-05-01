@@ -398,25 +398,25 @@ function start() {
     function moveCursor(direction) {
         var isAcross = gameConf.crossword.clues[cursor.clueInd].isAcross,
             len = gameConf.crossword.clues[cursor.clueInd].len,
-            cursorPosToClueIndex = cursorPosToClueIndex();
+            cPosToClIndex = cursorPosToClueIndex();
 
         if (direction === 'backwards') {
             if (isAcross) {
-                if (cursorPosToClueIndex) {
+                if (cPosToClIndex) {
                     cursor.pos = [cursor.pos[0], cursor.pos[1] - 1];
                 }
             } else {
-                if (cursorPosToClueIndex) {
+                if (cPosToClIndex) {
                     cursor.pos = [cursor.pos[0] - 1, cursor.pos[1]];
                 }
             }
         } else {
             if (isAcross) {
-                if (cursorPosToClueIndex !== len - 1) {
+                if (cPosToClIndex !== len - 1) {
                     cursor.pos = [cursor.pos[0], cursor.pos[1] + 1];
                 }
             } else {
-                if (cursorPosToClueIndex !== len - 1) {
+                if (cPosToClIndex !== len - 1) {
                     cursor.pos = [cursor.pos[0] + 1, cursor.pos[1]];
                 }
             }
