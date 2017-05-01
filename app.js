@@ -22,6 +22,7 @@ const passport = require('passport');
 const JwtStrategy = require('passport-jwt').Strategy;
 const jwtOptions = require('./config').jwtOptions;
 const User = require('./models/user');
+const isProduction = process.env.NODE_ENV === 'production';
 
 
 i18n.configure({
@@ -58,7 +59,9 @@ app.set('view engine', 'hbs');
 // uncomment after placing your favicon in /public
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
-app.use(logger('dev'));
+if (!isProduction) {
+    app.use(logger('dev'));
+}
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: false
@@ -104,7 +107,7 @@ app.use(require('node-sass-middleware')({
 }));
 
 app.use(express.static(path.join(__dirname, 'public')));
-if (process.env.NODE_ENV === 'production') {
+if (isProduction) {
     app.use('/javascripts', express.static(path.join(__dirname, 'dist/javascripts')));
 } else {
     app.use('/javascripts', express.static(path.join(__dirname, 'src/javascripts')));
