@@ -8,8 +8,7 @@
     "build": "webpack -p"
   },
   "engines": {
-    "node": "6.10.2",
-    "npm": "4.5.0"
+    "node": "6.10.2"
   },
   "dependencies": {
     "bcrypt": "1.0.2",
