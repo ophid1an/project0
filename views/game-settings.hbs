@@ -35,7 +35,6 @@
                     <table class="">
                         <thead>
                             <tr>
-                                <th class="align-center"></th>
                                 <th class="align-center">{{__ 'dateCreated'}}</th>
                                 <th class="align-center">{{__ 'partner'}}</th>
                                 <th class="align-center">{{__ 'moderator'}}</th>
@@ -44,7 +43,6 @@
                         <tbody>
                             {{#each games}}
                                 <tr>
-                                    <td class="align-center"><a class="button button-primary" href= {{url}}>{{../__ 'select'}}</a></td>
                                     <td class="align-center">{{dateCreated}}</td>
                                     <td class="align-center">
                                         {{#if partner}}{{partner}}{{else}}-{{/if}}
@@ -52,6 +50,9 @@
                                     <td class="align-center">
                                         {{#if isAdmin}}{{../__ 'yes'}}{{else}}{{../__ 'no'}}{{/if}}
                                     </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3"><a class="button button-primary" href= {{url}}>{{../__ 'select'}}</a></td>
                                 </tr>
                             {{/each}}
                         </tbody>
