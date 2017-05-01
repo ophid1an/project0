@@ -31,7 +31,7 @@ function start() {
 
 
 
-    function getCursorPosition(canvas, event) {
+    function getMousePosition(canvas, event) {
         var rect = canvas.getBoundingClientRect(),
             x = event.clientX - rect.left,
             y = event.clientY - rect.top;
@@ -112,8 +112,8 @@ function start() {
         });
 
         canvas.addEventListener('click', function (e) {
-            var cursorPos = getCursorPosition(canvas, e),
-                sqPos = getSquarePosition(cursorPos);
+            var mousePos = getMousePosition(canvas, e),
+                sqPos = getSquarePosition(mousePos);
 
             if (sqPos) {
                 select({
@@ -570,7 +570,7 @@ function start() {
 
 
 
-    function getSquarePosition(cursorPos) {
+    function getSquarePosition(mousePos) {
         var padX = gameConf.grid.padX,
             padY = gameConf.grid.padY,
             sqLen = gameConf.grid.sqLen,
@@ -579,8 +579,8 @@ function start() {
             bpos = gameConf.crossword.bpos,
             sPos = [];
 
-        sPos.push(Math.floor((cursorPos[1] - padY) / sqLen));
-        sPos.push(Math.floor((cursorPos[0] - padX) / sqLen));
+        sPos.push(Math.floor((mousePos[1] - padY) / sqLen));
+        sPos.push(Math.floor((mousePos[0] - padX) / sqLen));
 
         if (sPos[0] >= 0 && sPos[1] >= 0 && sPos[0] < rows && sPos[1] < cols && indexOfArray(sPos, bpos) === -1) {
             return sPos;
@@ -687,7 +687,6 @@ function start() {
         lettersSupported: '',
         extraChars: ' .',
         uncertaintyChar: '*',
-        cursorChar: '_',
         isPlayer1: true
     };
 
