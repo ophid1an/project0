@@ -99,7 +99,7 @@ function start() {
         defsDiv.addEventListener('click', function (e) {
             var target = e.target;
             if (target.tagName === 'SPAN') {
-                selection = select({
+                select({
                     spanId: target.id
                 });
 
@@ -116,7 +116,7 @@ function start() {
                 sqPos = getSquarePosition(cursorPos);
 
             if (sqPos) {
-                selection = select({
+                select({
                     sqPos: sqPos
                 });
 
@@ -159,8 +159,8 @@ function start() {
 
 
     function cursorPosToClueIndex() {
-        var cluePos = gameConf.crossword.clues[selection.clueInd].pos,
-            isAcross = gameConf.crossword.clues[selection.clueInd].isAcross;
+        var cluePos = gameConf.crossword.clues[cursor.clueInd].pos,
+            isAcross = gameConf.crossword.clues[cursor.clueInd].isAcross;
 
         return isAcross ? cursor.pos[1] - cluePos[1] : cursor.pos[0] - cluePos[0];
     }
@@ -236,7 +236,7 @@ function start() {
     function sendLetters(lettersToSend) {
         var req,
             transformedLetters = [],
-            clue = gameConf.crossword.clues[selection.clueInd];
+            clue = gameConf.crossword.clues[cursor.clueInd];
 
         if (!lettersToSend.letters.length) {
             return false;
@@ -283,7 +283,7 @@ function start() {
 
 
     function clearSelection() {
-        if (selection.status) {
+        if (cursor.pos.length) {
             var clues = gameConf.crossword.clues,
                 colors = gameConf.colors,
                 infoDiv = gameConf.htmlElements.infoDiv;
@@ -291,9 +291,9 @@ function start() {
             // Reset grid squares
             manipulateSquare({
                 name: 'stroke',
-                pos: clues[selection.clueInd].pos,
-                isAcross: clues[selection.clueInd].isAcross,
-                numOfSquares: clues[selection.clueInd].len,
+                pos: clues[cursor.clueInd].pos,
+                isAcross: clues[cursor.clueInd].isAcross,
+                numOfSquares: clues[cursor.clueInd].len,
                 color: colors.default
             });
             infoDiv.innerHTML = '-';
@@ -310,9 +310,9 @@ function start() {
             colors = gameConf.colors,
             spanPrefix = gameConf.htmlElements.spanPrefix,
             infoDiv = gameConf.htmlElements.infoDiv,
-            prevSelection = selection,
+            prevCursor = cursor,
             spanOffset = spanPrefix.length, // spanId : 'defXX'
-            newSelection = {},
+            newCursor = {},
             clueInd,
             possibleCluesInd = [];
 
@@ -321,11 +321,12 @@ function start() {
 
         // Select from <span> OR grid
         if (spanId) {
-            // Construct selection
+            // Construct cursor
             clueInd = +spanId.slice(spanOffset);
-            newSelection = {
-                sqPos: false,
+            newCursor = {
+                pos: clues[clueInd].pos,
                 clueInd: clueInd,
+                isCertain: true
             };
         } else {
             // Get clues that match square position
@@ -341,17 +342,23 @@ function start() {
                 clueInd = possibleCluesInd[0];
             } else {
                 clueInd = clues[possibleCluesInd[0]].isAcross ? possibleCluesInd[0] : possibleCluesInd[1]; // select 'Across'
-                if (prevSelection.status &&
-                    prevSelection.clueInd === possibleCluesInd[0] || prevSelection.clueInd === possibleCluesInd[1]) {
-                    if (clues[prevSelection.clueInd].isAcross) {
-                        clueInd = clues[possibleCluesInd[0]].isAcross ? possibleCluesInd[1] : possibleCluesInd[0];
+                if (prevCursor.pos.length) {
+                    if (prevCursor.clueInd === possibleCluesInd[0] ||
+                        prevCursor.clueInd === possibleCluesInd[1]) {
+                        if (!clues[prevCursor.clueInd].isAcross) {
+                            clueInd = clues[possibleCluesInd[0]].isAcross ? possibleCluesInd[1] : possibleCluesInd[0]; // select 'Down'
+                        }
+                        if (prevCursor.pos[0] === sqPos[0] && prevCursor.pos[1] === sqPos[1]) {
+                            clueInd = clues[prevCursor.clueInd].isAcross ? possibleCluesInd[1] : possibleCluesInd[0];
+                        }
                     }
                 }
             }
 
-            // Construct selection
-            newSelection = {
-                sqPos: sqPos,
+            // Construct cursor
+            newCursor = {
+                pos: sqPos,
+                isCertain: true,
                 clueInd: clueInd
             };
         }
@@ -366,14 +373,10 @@ function start() {
         });
 
         // Set and draw cursor
-        cursor.pos = sqPos || clues[clueInd].pos;
+        cursor = newCursor;
         drawCursor();
         // Modify infoDiv
         infoDiv.innerHTML = clues[clueInd].def;
-        // New selection ready
-        newSelection.status = true;
-
-        return newSelection;
     }
 
 
@@ -393,36 +396,31 @@ function start() {
 
 
     function moveCursor(direction) {
-        var cluePos = gameConf.crossword.clues[selection.clueInd].pos,
-            isAcross = gameConf.crossword.clues[selection.clueInd].isAcross,
-            len = gameConf.crossword.clues[selection.clueInd].len;
+        var isAcross = gameConf.crossword.clues[cursor.clueInd].isAcross,
+            len = gameConf.crossword.clues[cursor.clueInd].len,
+            cursorPosToClueIndex = cursorPosToClueIndex();
 
         if (direction === 'backwards') {
             if (isAcross) {
-                if (cursor.pos[1] !== cluePos[1]) {
+                if (cursorPosToClueIndex) {
                     cursor.pos = [cursor.pos[0], cursor.pos[1] - 1];
-                    return true;
                 }
             } else {
-                if (cursor.pos[0] !== cluePos[0]) {
+                if (cursorPosToClueIndex) {
                     cursor.pos = [cursor.pos[0] - 1, cursor.pos[1]];
-                    return true;
                 }
             }
         } else {
             if (isAcross) {
-                if (cursor.pos[1] < cluePos[1] + len - 1) {
+                if (cursorPosToClueIndex !== len - 1) {
                     cursor.pos = [cursor.pos[0], cursor.pos[1] + 1];
-                    return true;
                 }
             } else {
-                if (cursor.pos[0] < cluePos[0] + len - 1) {
+                if (cursorPosToClueIndex !== len - 1) {
                     cursor.pos = [cursor.pos[0] + 1, cursor.pos[1]];
-                    return true;
                 }
             }
         }
-        return false;
     }
 
 
@@ -697,10 +695,10 @@ function start() {
     gameConf.grid.padY = gameConf.grid.pad + gameConf.grid.numberPadY;
 
     var data = {},
-        selection = {},
         cursor = {
-            isCertain: true,
-            pos: []
+            pos: [],
+            clueInd: 0,
+            isCertain: true
         },
         lettersToSend = {
             letters: [],
