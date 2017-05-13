@@ -8,6 +8,7 @@ const gameController = require('../controllers/gameController');
 
 const testController = require('../controllers/testController');
 
+
 /* GET main page. */
 router.get('/', function (req, res) {
     res.render('main', {
@@ -16,7 +17,6 @@ router.get('/', function (req, res) {
         isAdmin: req.user.isAdmin
     });
 });
-
 
 router.get('/new-game', gameController.gameNewGet);
 

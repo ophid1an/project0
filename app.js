@@ -114,6 +114,14 @@ if (isProduction) {
     app.use('/javascripts', express.static(path.join(__dirname, 'src/javascripts')));
 }
 
+// Heroku redirect from http to https
+app.use(function (req, res, next) {
+    if (req.headers['x-forwarded-proto'] !== 'https' && isProduction) {
+        return res.redirect(`https://${req.hostname}:${app.get('port')}${req.url}`);
+    }
+    return next();
+});
+
 app.use('/', index);
 app.use('/main', passport.authenticate('jwt', {
     session: false,
