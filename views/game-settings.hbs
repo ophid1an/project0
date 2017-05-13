@@ -35,6 +35,7 @@
                     <table class="">
                         <thead>
                             <tr>
+                                <th class="align-center"></th>
                                 <th class="align-center">{{__ 'dateCreated'}}</th>
                                 <th class="align-center">{{__ 'partner'}}</th>
                                 <th class="align-center">{{__ 'moderator'}}</th>
@@ -43,6 +44,7 @@
                         <tbody>
                             {{#each games}}
                                 <tr>
+                                    <td><input type="radio" name="game" value= {{url}}></td>
                                     <td class="align-center">{{dateCreated}}</td>
                                     <td class="align-center">
                                         {{#if partner}}{{partner}}{{else}}-{{/if}}
@@ -51,14 +53,12 @@
                                         {{#if isAdmin}}{{../__ 'yes'}}{{else}}{{../__ 'no'}}{{/if}}
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td colspan="3"><a class="button button-primary" href= {{url}}>{{../__ 'select'}}</a></td>
-                                </tr>
                             {{/each}}
                         </tbody>
                     </table>
                 </div>
             </div>
+            <a class="button button-primary" onclick="window.location.href=document.querySelector('input:checked').value;">{{__ 'select'}}</a>
         {{/if}}
 
     {{else}}

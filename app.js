@@ -100,6 +100,7 @@ passport.use(new JwtStrategy(jwtOptions, function (jwt_payload, done) {
 app.use(require('node-sass-middleware')({
     src: path.join(__dirname, 'src/stylesheets/scss'),
     dest: path.join(__dirname, 'public/stylesheets'),
+    prefix: '/stylesheets', // Where prefix is at <link rel="stylesheets" href="prefix/style.css"/>
     outputStyle: 'compressed',
     indentedSyntax: false,
     sourceMap: false,
