@@ -84,7 +84,7 @@ hbs.registerHelper('__', function () {
 passport.use(new JwtStrategy(jwtOptions, function (jwt_payload, done) {
     User.findOne({
         _id: jwt_payload.uid
-    }, 'username', function (err, user) {
+    }, 'username isAdmin', function (err, user) {
         if (err) {
             return done(err, false);
         }
