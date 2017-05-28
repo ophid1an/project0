@@ -1,10 +1,10 @@
-(function ready(fn) {
+;(function ready(fn) {
     if (document.readyState != 'loading') {
         fn();
     } else {
         document.addEventListener('DOMContentLoaded', fn);
     }
-})(start);
+}(start));
 
 
 
@@ -41,7 +41,7 @@ function start() {
 
 
 
-    function modifyCanvasDiv() {
+    function modifyCanvas() {
         var canvas = gameConf.canvas,
             rows = gameConf.crossword.dim[0],
             cols = gameConf.crossword.dim[1],
@@ -61,12 +61,12 @@ function start() {
         var defsDiv = gameConf.htmlElements.defsDiv,
             body = document.getElementsByTagName('body')[0],
             bodyComputedStyle = window.getComputedStyle(body),
-            bodyTotalHeight = Number.parseFloat(bodyComputedStyle.height, 10) +
-            Number.parseFloat(bodyComputedStyle.marginTop, 10) +
-            Number.parseFloat(bodyComputedStyle.marginBottom, 10) +
-            Number.parseFloat(bodyComputedStyle.paddingTop, 10) +
-            Number.parseFloat(bodyComputedStyle.paddingBottom, 10),
-            defsDivHeight = Number.parseFloat(window.getComputedStyle(defsDiv).height, 10),
+            bodyTotalHeight = window.parseFloat(bodyComputedStyle.height, 10) +
+            window.parseFloat(bodyComputedStyle.marginTop, 10) +
+            window.parseFloat(bodyComputedStyle.marginBottom, 10) +
+            window.parseFloat(bodyComputedStyle.paddingTop, 10) +
+            window.parseFloat(bodyComputedStyle.paddingBottom, 10),
+            defsDivHeight = window.parseFloat(window.getComputedStyle(defsDiv).height, 10),
             randomOffset = 20,
             defsDivNewHeight = (Math.abs(window.innerHeight - (bodyTotalHeight - defsDivHeight + randomOffset))) + 'px';
 
@@ -719,7 +719,7 @@ function start() {
         gameConf.isPlayer1 = data.isPlayer1;
         gameConf.lettersSupported = (gameConf.langsSupported[gameConf.crossword.lang] || '') + gameConf.extraChars;
 
-        modifyCanvasDiv();
+        modifyCanvas();
 
         modifyDefsDiv();
 
