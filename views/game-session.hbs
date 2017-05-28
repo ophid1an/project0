@@ -3,7 +3,9 @@
     <div class="row">
         <div class="twelve columns">
             <a class="button" href="/main">{{__ 'back'}}</a>
-            <a class="button u-pull-right" href="/">{{__ 'complete'}}</a>
+            {{#if isPlayer1}}
+                <a class="button u-pull-right" href="/">{{__ 'complete'}}</a>
+            {{/if}}
         </div>
     </div>
 
