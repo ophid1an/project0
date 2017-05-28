@@ -6,16 +6,13 @@ const upload = multer({
 
 const parseCrossword = require('../lib/util').parseCrossword;
 // const Busboy = require('busboy');
-const util = require('util');
 
 
 
 exports.crosswordUploadGet = function (req, res) {
-
     if (req.user.isAdmin) {
         return res.render('upload-crossword');
     }
-
     res.redirect('/main');
 };
 

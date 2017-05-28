@@ -9,7 +9,6 @@ const bodyParser = require('body-parser');
 
 const index = require('./routes/index');
 const main = require('./routes/main');
-// const users = require('./routes/users');
 
 const hbs = require('hbs');
 const helmet = require('helmet');
