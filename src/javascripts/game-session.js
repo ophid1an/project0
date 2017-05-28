@@ -1,4 +1,5 @@
-;(function ready(fn) {
+;
+(function ready(fn) {
     if (document.readyState != 'loading') {
         fn();
     } else {
@@ -730,5 +731,7 @@ function start() {
         setDefs();
 
         addEventListeners();
+
+        var socket = io();
     }
 }
