@@ -1,25 +1,26 @@
 const express = require('express');
 const router = express.Router();
 
-const vars = require('../config').vars;
+const title = require('../config').title;
+const author = require('../config').author;
 const cookiesOptions = require('../config').cookiesOptions;
 const userController = require('../controllers/userController');
 
 
 /* GET home page. */
 router.get('/', function (req, res) {
-    if (req.cookies[cookiesOptions.name.jwt]) {
-        res.redirect('/main');
-    } else {
-        res.render('index', {
-            author: vars.author
-        });
+    if (req.cookies[cookiesOptions.name]) {
+        return res.redirect('/main');
     }
+    res.render('index', {
+        title: title,
+        author: author
+    });
 });
 
 router.get('/logout', function (req, res) {
-    res.clearCookie(cookiesOptions.name.jwt);
-    res.clearCookie(cookiesOptions.name.game);
+    res.clearCookie(cookiesOptions.name);
+    // res.clearCookie(cookiesOptions.name.game);
     res.redirect('/');
 });
 

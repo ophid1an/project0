@@ -8,17 +8,14 @@ const jwtOptions = require('../config').jwtOptions;
 const cookiesOptions = require('../config').cookiesOptions;
 const getFriends = require('../lib/util').getFriends;
 
-// const async = require('async');
-// const util = require('util');
+
 
 
 
 exports.userLoginGet = function (req, res) {
-
-    if (req.cookies[cookiesOptions.name.jwt]) {
+    if (req.cookies[cookiesOptions.name]) {
         return res.redirect('/main');
     }
-
     res.render('login');
 };
 
@@ -26,7 +23,7 @@ exports.userLoginGet = function (req, res) {
 
 exports.userLoginPost = function (req, res, next) {
 
-    if (req.cookies[cookiesOptions.name.jwt]) {
+    if (req.cookies[cookiesOptions.name]) {
         return res.redirect('/main');
     }
 
@@ -81,7 +78,7 @@ exports.userLoginPost = function (req, res, next) {
                     if (err) {
                         return next(err);
                     }
-                    res.cookie(cookiesOptions.name.jwt, token, {
+                    res.cookie(cookiesOptions.name, token, {
                         expires: new Date(Date.now() + cookiesOptions.age),
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production'
@@ -101,14 +98,10 @@ exports.userLoginPost = function (req, res, next) {
 
 
 
-
-
 exports.userRegisterGet = function (req, res) {
-
-    if (req.cookies[cookiesOptions.name.jwt]) {
+    if (req.cookies[cookiesOptions.name]) {
         return res.redirect('/main');
     }
-
     res.render('register');
 };
 
@@ -117,7 +110,7 @@ exports.userRegisterGet = function (req, res) {
 
 exports.userRegisterPost = function (req, res, next) {
 
-    if (req.cookies[cookiesOptions.name.jwt]) {
+    if (req.cookies[cookiesOptions.name]) {
         return res.redirect('/main');
     }
 
@@ -263,13 +256,10 @@ exports.userHistoryGet = function (req, res) {
 
 
 exports.userFriendsGet = function (req, res, next) {
-
     getFriends(req.user._id, (err, friends) => {
-
         if (err) {
             return next(err);
         }
-
         res.render('friends', {
             friends: friends
         });

@@ -1,10 +1,7 @@
 const moment = require('moment');
 const Game = require('../models/game');
 const Crossword = require('../models/crossword');
-
-
-const util = require('util');
-
+const limits = require('../config').limits;
 
 const getFriends = require('../lib/util').getFriends;
 const indexOfArray = require('../lib/util').indexOfArray;
@@ -13,7 +10,6 @@ const indexOfArray = require('../lib/util').indexOfArray;
 
 
 exports.gameNewGet = function (req, res, next) {
-
     getFriends(req.user._id, (err, friends) => {
         if (err) {
             return next(err);
@@ -120,7 +116,7 @@ exports.gameNewPost = function (req, res, next) {
 
     }
 
-    const difficulties = ['easy', 'medium', 'hard'];
+    const difficulties = limits.CW_DIFFICULTIES;
 
     req.sanitize('difficulty').trim();
     req.sanitize('partner').trim();
@@ -250,12 +246,14 @@ exports.gameSessionGet = function (req, res, next) {
                     pos: e.pos
                 });
             });
+            var isPlayer1 = game.player1.equals(req.user._id);
 
             res.render('game-session', {
+                isPlayer1: isPlayer1,
                 data: JSON.stringify({
                     crossword: crossword,
                     letters: game.letters || [],
-                    isPlayer1: game.player1.equals(req.user._id)
+                    isPlayer1: isPlayer1
                 })
             });
 
@@ -307,7 +305,6 @@ exports.gameSessionPost = function (req, res) {
         if (ind < len) {
             updateLetter(data.letters[ind], err => {
                 if (err) {
-                    console.log(util.inspect(err));
                     return res.json({
                         error: err
                     });

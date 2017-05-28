@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const limits = require('../config');
 const Schema = mongoose.Schema;
+const limits = require('../config').limits;
 
 const UserSchema = Schema({
     username: {
@@ -21,13 +21,48 @@ const UserSchema = Schema({
     },
     friends: [{
         friend: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
         },
         completedGames: {
             type: Number,
             min: 0,
             default: 0
+        }
+    }],
+    outFriendReq: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    incFriendReq: [{
+        from: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        text: {
+            type: String,
+            minlength: limits.MESSAGE_MIN_LENGTH,
+            maxlength: limits.MESSAGE_MAX_LENGTH,
+            required: true
+        }
+    }],
+    gameInv: [{
+        from: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        game: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        diff: {
+            type: String,
+            enum: limits.CW_DIFFICULTIES,
+            required: true
         }
     }],
     isAdmin: Boolean

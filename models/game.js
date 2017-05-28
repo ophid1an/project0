@@ -1,20 +1,20 @@
 const mongoose = require('mongoose');
-// const limits = require('../config');
 const Schema = mongoose.Schema;
+const limits = require('../config').limits;
 
 const gameSchema = Schema({
     crossword: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Crossword',
         required: true
     },
     player1: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
     player2: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User'
     },
     letters: [{
@@ -24,26 +24,36 @@ const gameSchema = Schema({
         },
         isPlayer1: {
             type: Boolean,
+            default: true
         },
         isCertain: {
             type: Boolean,
+            default: true
         },
         letter: {
             type: String,
+            minlength: limits.LETTER_MIN_LENGTH,
+            maxlength: limits.LETTER_MAX_LENGTH,
+            default: ' '
+        },
+        date: {
+            type: Date,
+            default: Date.now
         }
     }],
     messages: [{
+        isPlayer1: {
+            type: Boolean,
+            required: true
+        },
         date: {
             type: Date,
             required: true
         },
-        from: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            required: true
-        },
         text: {
             type: String,
+            minlength: limits.MESSAGE_MIN_LENGTH,
+            maxlength: limits.MESSAGE_MAX_LENGTH,
             required: true
         }
     }]

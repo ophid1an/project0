@@ -1,14 +1,16 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const limits = require('../config').limits;
 
 const CrosswordSchema = Schema({
     lang: {
         type: String,
+        enum: limits.CW_LANGUAGES_SUPPORTED,
         required: true
     },
     diff: {
         type: String,
-        enum: ['easy', 'medium', 'hard'],
+        enum: limits.CW_DIFFICULTIES,
         required: true,
         index: true
     },
@@ -21,11 +23,9 @@ const CrosswordSchema = Schema({
         type: [Number],
         required: true
     },
-    blacksPos: {
-        type: [
-            [Number]
-        ]
-    },
+    blacksPos: [
+        [Number]
+    ],
     cluesAcrossInd: {
         type: [
             [Number]
@@ -50,10 +50,12 @@ const CrosswordSchema = Schema({
             },
             def: {
                 type: String,
+                minlength: 1,
                 required: true
             },
             answer: {
                 type: String,
+                minlength: 1,
                 required: true
             }
         }],

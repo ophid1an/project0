@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const vars = require('../config').vars;
+const title = require('../config').title;
+const author = require('../config').author;
 const userController = require('../controllers/userController');
 const crosswordController = require('../controllers/crosswordController');
 const gameController = require('../controllers/gameController');
@@ -12,7 +13,8 @@ const testController = require('../controllers/testController');
 /* GET main page. */
 router.get('/', function (req, res) {
     res.render('main', {
-        author: vars.author,
+        title: title,
+        author: author,
         username: req.user.username,
         isAdmin: req.user.isAdmin
     });
