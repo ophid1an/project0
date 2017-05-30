@@ -1,16 +1,16 @@
 const moment = require('moment');
+const User = require('../models/user');
 const Game = require('../models/game');
 const Crossword = require('../models/crossword');
 const limits = require('../config').limits;
 
-const getFriends = require('../lib/util').getFriends;
 const indexOfArray = require('../lib/util').indexOfArray;
 
 
 
 
 exports.gameNewGet = function (req, res, next) {
-    getFriends(req.user._id, (err, friends) => {
+    User.getFriends(req.user._id, (err, friends) => {
         if (err) {
             return next(err);
         }
@@ -31,7 +31,7 @@ exports.gameNewPost = function (req, res, next) {
 
     function renderGameSettingsWithError(error) {
 
-        getFriends(req.user._id, (err, friends) => {
+        User.getFriends(req.user._id, (err, friends) => {
             if (err) {
                 return next(err);
             }
@@ -129,7 +129,7 @@ exports.gameNewPost = function (req, res, next) {
 
     if (req.body.partner) {
 
-        getFriends(req.user._id, (err, friends) => {
+        User.getFriends(req.user._id, (err, friends) => {
 
             if (err) {
                 return next(err);

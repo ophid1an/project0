@@ -1,4 +1,3 @@
-const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -6,7 +5,7 @@ const saltRounds = 10;
 const limits = require('../config').limits;
 const jwtOptions = require('../config').jwtOptions;
 const cookiesOptions = require('../config').cookiesOptions;
-const getFriends = require('../lib/util').getFriends;
+const User = require('../models/user');
 
 
 
@@ -256,7 +255,7 @@ exports.userHistoryGet = function (req, res) {
 
 
 exports.userFriendsGet = function (req, res, next) {
-    getFriends(req.user._id, (err, friends) => {
+    User.getFriends(req.user._id, (err, friends) => {
         if (err) {
             return next(err);
         }

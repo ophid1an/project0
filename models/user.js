@@ -68,4 +68,26 @@ const UserSchema = Schema({
     isAdmin: Boolean
 });
 
+UserSchema.statics.getFriends = function (userId, callback) {
+    this
+        .findOne({
+            _id: userId
+        }, {
+            friends: 1
+        })
+        .populate('friends.friend', 'username')
+        .exec((err, user) => {
+            if (err) {
+                return callback(err);
+            }
+            return callback(null, user.friends.map(e => {
+                return {
+                    username: e.friend.username,
+                    _id: e.friend._id,
+                    completedGames: e.completedGames
+                };
+            }));
+        });
+};
+
 module.exports = mongoose.model('User', UserSchema);
