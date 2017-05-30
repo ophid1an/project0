@@ -1,4 +1,4 @@
-;
+/* globals io */ ;
 (function ready(fn) {
     if (document.readyState != 'loading') {
         fn();
@@ -74,6 +74,25 @@ function start() {
         defsDiv.style.height = defsDivNewHeight;
     }
 
+
+
+    function addSocketListeners() {
+        var infoP1Span = gameConf.htmlElements.infoP1Span;
+        var infoP2Span = gameConf.htmlElements.infoP2Span;
+        var locale = gameConf.locale;
+        socket.on('connect', function () {
+            infoP1Span.classList.replace('text-danger', 'text-success');
+            infoP1Span.innerHTML = locale.online;
+        });
+
+        socket.on('disconnect', function () {
+            infoP1Span.classList.replace('text-success', 'text-danger');
+            infoP1Span.innerHTML = locale.offline;
+        });
+
+        infoP2Span.innerHTML = 'LALA LALA LALA LALA LALA LALA';
+
+    }
 
 
 
@@ -233,8 +252,33 @@ function start() {
 
 
 
-
     function sendLetters(lettersToSend) {
+        var transformedLetters = [],
+            clue = gameConf.crossword.clues[cursor.clueInd];
+
+        if (!lettersToSend.letters.length) {
+            return false;
+        }
+
+        lettersToSend.letters.forEach(function (letter, i) {
+            transformedLetters.push({
+                l: letter[0],
+                p: clue.isAcross ? [clue.pos[0], clue.pos[1] + i] : [clue.pos[0] + i, clue.pos[1]],
+                c: letter.length === 1
+            });
+        });
+
+        socket.emit('letters msg', {
+            gid: gameConf.gameId,
+            letters: transformedLetters,
+            p1: gameConf.isPlayer1
+        });
+    }
+
+
+
+
+    function sendLettersXHR(lettersToSend) {
         var req,
             transformedLetters = [],
             clue = gameConf.crossword.clues[cursor.clueInd];
@@ -267,13 +311,13 @@ function start() {
                     try {
                         res = JSON.parse(req.responseText);
                     } catch (e) {
-                        gameConf.htmlElements.infoDiv.innerHTML = '!!! ' + e + ' !!!';
+                        gameConf.htmlElements.defSingleDiv.innerHTML = '!!! ' + e + ' !!!';
                     }
                     if (res.error) {
-                        gameConf.htmlElements.infoDiv.innerHTML = '!!! ' + res.error + ' !!!';
+                        gameConf.htmlElements.defSingleDiv.innerHTML = '!!! ' + res.error + ' !!!';
                     }
                 } else {
-                    gameConf.htmlElements.infoDiv.innerHTML = '!!! There was a problem with the request. !!!';
+                    gameConf.htmlElements.defSingleDiv.innerHTML = '!!! There was a problem with the request. !!!';
                 }
             }
         };
@@ -287,7 +331,7 @@ function start() {
         if (cursor.pos.length) {
             var clues = gameConf.crossword.clues,
                 colors = gameConf.colors,
-                infoDiv = gameConf.htmlElements.infoDiv;
+                defSingleDiv = gameConf.htmlElements.defSingleDiv;
 
             // Reset grid squares
             manipulateSquare({
@@ -297,7 +341,7 @@ function start() {
                 numOfSquares: clues[cursor.clueInd].len,
                 color: colors.default
             });
-            infoDiv.innerHTML = '-';
+            defSingleDiv.innerHTML = '&nbsp;';
         }
     }
 
@@ -310,7 +354,7 @@ function start() {
             clues = gameConf.crossword.clues,
             colors = gameConf.colors,
             spanPrefix = gameConf.htmlElements.spanPrefix,
-            infoDiv = gameConf.htmlElements.infoDiv,
+            defSingleDiv = gameConf.htmlElements.defSingleDiv,
             prevCursor = cursor,
             spanOffset = spanPrefix.length, // spanId : 'defXX'
             newCursor = {},
@@ -376,8 +420,8 @@ function start() {
         // Set and draw cursor
         cursor = newCursor;
         drawCursor();
-        // Modify infoDiv
-        infoDiv.innerHTML = clues[clueInd].def;
+        // Modify defSingleDiv
+        defSingleDiv.innerHTML = clues[clueInd].def;
     }
 
 
@@ -675,7 +719,9 @@ function start() {
         htmlElements: {
             defsDiv: document.getElementById('defs'),
             userInput: document.getElementById('input'),
-            infoDiv: document.getElementById('info'),
+            defSingleDiv: document.getElementById('def-single'),
+            infoP1Span: document.getElementById('info-p1'),
+            infoP2Span: document.getElementById('info-p2'),
             defsAcrossDiv: document.getElementById('defs-across'),
             defsDownDiv: document.getElementById('defs-down'),
             spanPrefix: 'def'
@@ -683,6 +729,10 @@ function start() {
         langsSupported: {
             el: 'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ',
             en: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        },
+        locale: {
+            online: 'Online',
+            offline: 'Offline'
         },
         utilKeys: ['Enter', 'Backspace'],
         lettersSupported: '',
@@ -720,6 +770,12 @@ function start() {
         gameConf.isPlayer1 = data.isPlayer1;
         gameConf.lettersSupported = (gameConf.langsSupported[gameConf.crossword.lang] || '') + gameConf.extraChars;
 
+        var socket = io(undefined, {
+            query: 'gid=' + gameConf.gameId
+        });
+
+        addSocketListeners();
+
         modifyCanvas();
 
         modifyDefsDiv();
@@ -732,6 +788,5 @@ function start() {
 
         addEventListeners();
 
-        var socket = io();
     }
 }

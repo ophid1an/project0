@@ -7,7 +7,7 @@
 const app = require('../app');
 const debug = require('debug')('ptyxiakh-skeleton:server');
 const http = require('http');
-const socketsConnection = require('../lib/sockets').connection;
+const sockets = require('../lib/sockets');
 
 /**
  * Get port from environment and store in Express.
@@ -28,7 +28,8 @@ const server = http.createServer(app);
 
 const io = require('socket.io')(server);
 
-io.on('connection', socketsConnection);
+io.use(sockets.authenticate);
+io.on('connection', sockets.connect);
 
 /**
  * Listen on provided port, on all network interfaces.

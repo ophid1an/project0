@@ -12,7 +12,13 @@
     <input type="text" class="pos-abs-hidden" id="input" name="input" autocomplete="off" value="">
 
     <div class="row">
-        <div class="twelve columns overflow-auto" id="info"> - </div>
+        <div class="twelve columns overflow-auto nowrap">
+            <span id="info-p1">&nbsp;</span> - <span id="info-p2">&nbsp;</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="twelve columns overflow-auto nowrap" id="def-single">&nbsp;</div>
     </div>
 
     <div class="row border-dotted spacing-special">
@@ -34,6 +40,7 @@
 
 
     <div id="data" class="hidden">{{data}}</div>
+    <script src="/javascripts/classList-polyfill.js"></script>
     <script src="/javascripts/socket.io.js"></script>
     <script src="/javascripts/game-session.js"></script>
 
