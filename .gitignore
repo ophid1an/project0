@@ -1,4 +1,5 @@
 dist
+public/stylesheets/style.css
 
 *.bak*
 
