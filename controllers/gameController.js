@@ -102,11 +102,6 @@ exports.gameNewPost = function (req, res, next) {
                                 return next(err);
                             }
 
-                            // res.cookie(cookiesOptions.name.game, game._id.toString(), {
-                            //   expires: new Date(Date.now() + cookiesOptions.age),
-                            //   httpOnly: true
-                            // });
-
                             res.redirect('/main/game-session/' + game._id.toString());
 
                         });
