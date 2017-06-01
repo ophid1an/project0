@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const saltRounds = 10;
 
 const limits = require('../config').limits;
@@ -12,7 +13,7 @@ const User = require('../models/user');
 
 
 exports.userLoginGet = function (req, res) {
-    if (req.cookies[cookiesOptions.name]) {
+    if (req.cookies.jwt) {
         return res.redirect('/main');
     }
     res.render('login');
@@ -22,7 +23,7 @@ exports.userLoginGet = function (req, res) {
 
 exports.userLoginPost = function (req, res, next) {
 
-    if (req.cookies[cookiesOptions.name]) {
+    if (req.cookies.jwt) {
         return res.redirect('/main');
     }
 
@@ -68,7 +69,8 @@ exports.userLoginPost = function (req, res, next) {
                 }
 
                 jwt.sign({
-                    uid: user._id
+                    uid: user._id,
+                    jti: user.jti
                 }, jwtOptions.secretOrKey, {
                     issuer: jwtOptions.issuer,
                     expiresIn: jwtOptions.expiresIn,
@@ -77,7 +79,7 @@ exports.userLoginPost = function (req, res, next) {
                     if (err) {
                         return next(err);
                     }
-                    res.cookie(cookiesOptions.name, token, {
+                    res.cookie('jwt', token, {
                         expires: new Date(Date.now() + cookiesOptions.age),
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production'
@@ -98,7 +100,7 @@ exports.userLoginPost = function (req, res, next) {
 
 
 exports.userRegisterGet = function (req, res) {
-    if (req.cookies[cookiesOptions.name]) {
+    if (req.cookies.jwt) {
         return res.redirect('/main');
     }
     res.render('register');
@@ -109,7 +111,7 @@ exports.userRegisterGet = function (req, res) {
 
 exports.userRegisterPost = function (req, res, next) {
 
-    if (req.cookies[cookiesOptions.name]) {
+    if (req.cookies.jwt) {
         return res.redirect('/main');
     }
 
@@ -223,21 +225,31 @@ exports.userRegisterPost = function (req, res, next) {
                 return userRegisterPostErrors(errors);
             }
 
-            bcrypt.hash(user.pwd, saltRounds, (err, hash) => {
-
+            // create (JTI_MIN_LENGTH/2) random bytes for jti property
+            crypto.randomBytes(limits.JTI_MIN_LENGTH / 2, (err, buf) => {
                 if (err) {
                     return next(err);
                 }
+                user.jti = buf.toString('hex');
 
-                user.pwd = hash;
-
-                user.save(err => {
+                // hash password
+                bcrypt.hash(user.pwd, saltRounds, (err, hash) => {
 
                     if (err) {
                         return next(err);
                     }
 
-                    res.redirect('/login');
+                    user.pwd = hash;
+
+                    // save user record
+                    user.save(err => {
+
+                        if (err) {
+                            return next(err);
+                        }
+
+                        res.redirect('/login');
+                    });
                 });
             });
         });

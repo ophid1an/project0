@@ -33,7 +33,7 @@ const gameSchema = Schema({
         letter: {
             type: String,
             minlength: limits.LETTER_MIN_LENGTH,
-            maxlength: limits.LETTER_MAX_LENGTH,
+            maxlength: limits.LETTER_MIN_LENGTH,
             default: ' '
         },
         date: {

@@ -3,13 +3,12 @@ const router = express.Router();
 
 const title = require('../config').title;
 const author = require('../config').author;
-const cookiesOptions = require('../config').cookiesOptions;
 const userController = require('../controllers/userController');
 
 
 /* GET home page. */
 router.get('/', function (req, res) {
-    if (req.cookies[cookiesOptions.name]) {
+    if (req.cookies.jwt) {
         return res.redirect('/main');
     }
     res.render('index', {
@@ -19,8 +18,7 @@ router.get('/', function (req, res) {
 });
 
 router.get('/logout', function (req, res) {
-    res.clearCookie(cookiesOptions.name);
-    // res.clearCookie(cookiesOptions.name.game);
+    res.clearCookie('jwt');
     res.redirect('/');
 });
 

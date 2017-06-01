@@ -15,6 +15,12 @@ const UserSchema = Schema({
         required: true,
         unique: true
     },
+    jti: {
+        type: String,
+        minlength: limits.JTI_MIN_LENGTH,
+        maxlength: limits.JTI_MIN_LENGTH,
+        default: Array(limits.JTI_MIN_LENGTH + 1).join('0')
+    },
     pwd: {
         type: String,
         required: true
