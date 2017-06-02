@@ -193,70 +193,12 @@ exports.gameResumeGet = function (req, res, next) {
 };
 
 
-exports.gameSessionGet = function (req, res, next) {
-
-    req.checkParams('gameId', 'Invalid urlparam').isHexadecimal().isLength({
-        min: 24,
-        max: 24
-    });
-
-    const errors = req.validationErrors();
-
-    if (errors) {
-        return res.redirect('/main');
-    }
-
-    Game
-        .findOne({
-            _id: req.params.gameId,
-            $or: [{
-                player1: req.user._id
-            }, {
-                player2: req.user._id
-            }]
-        })
-        .populate('crossword')
-        .exec((err, game) => {
-
-            if (err) {
-                return next(err);
-            }
-
-            if (!game) {
-                return res.redirect('/main');
-            }
-
-            var crossword = {};
-            crossword.lang = game.crossword.lang;
-            crossword.dim = game.crossword.dim;
-            crossword.bpos = game.crossword.blacksPos;
-            crossword.cluesDownInd = game.crossword.cluesDownInd;
-            crossword.cluesAcrossInd = game.crossword.cluesAcrossInd;
-            crossword.clues = [];
-            game.crossword.clues.forEach(e => {
-                crossword.clues.push({
-                    len: e.answer.length,
-                    isAcross: e.isAcross,
-                    def: e.def,
-                    pos: e.pos
-                });
-            });
-            var isPlayer1 = game.player1.equals(req.user._id);
-
-            res.render('game-session', {
-                isPlayer1: isPlayer1,
-                data: JSON.stringify({
-                    crossword: crossword,
-                    letters: game.letters || [],
-                    isPlayer1: isPlayer1
-                })
-            });
-
-        });
+exports.gameSessionGet = function (req, res) {
+    res.render('game-session');
 };
 
 
-exports.gameSessionPost = function (req, res) {
+var gameSessionPost = function (req, res) { // TODO Delete
     var data = req.body;
 
     var query = {

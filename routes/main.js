@@ -28,8 +28,6 @@ router.get('/resume-game', gameController.gameResumeGet);
 
 router.get('/game-session/:gameId', gameController.gameSessionGet);
 
-router.post('/game-session', gameController.gameSessionPost);
-
 router.get('/friends', userController.userFriendsGet);
 
 router.get('/history', userController.userHistoryGet);

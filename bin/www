@@ -25,11 +25,7 @@ const server = http.createServer(app);
 /**
  * Initialize socket.io instance and listen for incoming sockets
  */
-
-const io = require('socket.io')(server);
-
-io.use(sockets.authenticate);
-io.on('connection', sockets.connect);
+sockets(server);
 
 /**
  * Listen on provided port, on all network interfaces.
