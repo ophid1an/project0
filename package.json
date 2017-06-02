@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "devstart": "nodemon ./bin/www",
+    "devstart": "npm-run-all --parallel watch:server watch:build",
+    "watch:server": "nodemon --ignore src/ --ignore dist/ ./bin/www",
+    "watch:build": "webpack --watch --config ./webpack.prod.config.js --progress",
     "build": "webpack -p --config ./webpack.prod.config.js --progress",
+    "devbuild": "webpack --config ./webpack.prod.config.js --progress",
     "heroku-prebuild": "echo This runs before Heroku installs your dependencies.",
     "heroku-postbuild": "webpack -p --config ./webpack.prod.config.js --progress"
   },
@@ -34,10 +37,12 @@
     "passport": "0.3.2",
     "passport-jwt": "2.2.1",
     "serve-favicon": "2.4.3",
-    "socket.io": "2.0.2"
+    "socket.io": "2.0.2",
+    "webpack": "2.6.1"
   },
   "devDependencies": {
-    "webpack": "2.6.1"
+    "nodemon": "1.11.0",
+    "npm-run-all": "4.0.2"
   },
   "description": "",
   "main": "app.js",
