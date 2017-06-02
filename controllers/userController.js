@@ -69,11 +69,11 @@ exports.userLoginPost = function (req, res, next) {
                 }
 
                 jwt.sign({
-                    uid: user._id,
-                    jti: user.jti
+                    uid: user._id
                 }, jwtOptions.secretOrKey, {
                     issuer: jwtOptions.issuer,
                     expiresIn: jwtOptions.expiresIn,
+                    jwtid: user.jti.getTime() + '',
                     algorithm: 'HS256'
                 }, (err, token) => {
                     if (err) {
@@ -84,10 +84,7 @@ exports.userLoginPost = function (req, res, next) {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production'
                     });
-                    // res.json({
-                    //   errors: null,
-                    //   token: token
-                    // });
+
                     res.redirect('/main');
                 });
 
@@ -225,31 +222,26 @@ exports.userRegisterPost = function (req, res, next) {
                 return userRegisterPostErrors(errors);
             }
 
-            // create (JTI_MIN_LENGTH/2) random bytes for jti property
-            crypto.randomBytes(limits.JTI_MIN_LENGTH / 2, (err, buf) => {
+            // create jti property
+            user.jti = Date.now();
+
+            // hash password
+            bcrypt.hash(user.pwd, saltRounds, (err, hash) => {
+
                 if (err) {
                     return next(err);
                 }
-                user.jti = buf.toString('hex');
 
-                // hash password
-                bcrypt.hash(user.pwd, saltRounds, (err, hash) => {
+                user.pwd = hash;
+
+                // save user record
+                user.save(err => {
 
                     if (err) {
                         return next(err);
                     }
 
-                    user.pwd = hash;
-
-                    // save user record
-                    user.save(err => {
-
-                        if (err) {
-                            return next(err);
-                        }
-
-                        res.redirect('/login');
-                    });
+                    res.redirect('/login');
                 });
             });
         });
