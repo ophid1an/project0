@@ -99,7 +99,7 @@ passport.use(new JwtStrategy(jwtOptions, function (jwt_payload, done) {
 
 app.use(require('node-sass-middleware')({
     src: path.join(__dirname, 'src/stylesheets/scss'),
-    dest: path.join(__dirname, 'public/stylesheets'),
+    dest: path.join(__dirname, 'dist/stylesheets'),
     prefix: '/stylesheets', // Where prefix is at <link rel="stylesheets" href="prefix/style.css"/>
     outputStyle: 'compressed',
     indentedSyntax: false,
@@ -109,6 +109,7 @@ app.use(require('node-sass-middleware')({
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/javascripts', express.static(path.join(__dirname, 'dist/javascripts')));
+app.use('/stylesheets', express.static(path.join(__dirname, 'dist/stylesheets')));
 
 // Heroku redirect from http to https
 app.use(function (req, res, next) {
