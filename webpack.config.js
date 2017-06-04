@@ -1,9 +1,16 @@
 var path = require('path');
 
 module.exports = {
-  entry: './src/javascripts/game-session.js',
-  output: {
-    filename: 'game-session.js',
-    path: path.resolve(__dirname, 'dist/javascripts')
-  }
+    entry: './src/javascripts/game-session.js',
+    output: {
+        filename: 'game-session.js',
+        path: path.resolve(__dirname, 'dist/javascripts'),
+    },
+    module: {
+        rules: [{
+            test: /\.js$/,
+            exclude: /node_modules/,
+            loader: "babel-loader"
+        }]
+    }
 };

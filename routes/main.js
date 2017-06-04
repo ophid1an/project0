@@ -7,7 +7,7 @@ const userController = require('../controllers/userController');
 const crosswordController = require('../controllers/crosswordController');
 const gameController = require('../controllers/gameController');
 
-const testController = require('../controllers/testController');
+const testController = require('../controllers/testController'); // TODO delete
 
 
 /* GET main page. */
@@ -40,7 +40,7 @@ router.post('/upload-crossword', crosswordController.crosswordUploadPost);
 
 
 
-// if (process.env.NODE_ENV !== 'production') {
+// if (process.env.NODE_ENV !== 'production') { // TODO delete
 router.get('/add-friend/:user', testController.userAddFriendGet);
 router.get('/crosswords', testController.crosswordsGet);
 router.get('/games', testController.gamesGet);
