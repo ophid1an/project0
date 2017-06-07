@@ -4,6 +4,7 @@ const upload = multer({
     storage: storage
 }).single('file-to-upload');
 
+const Crossword = require('../models/crossword');
 const parseCrossword = require('../lib/util').parseCrossword;
 // const Busboy = require('busboy');
 
@@ -41,8 +42,9 @@ exports.crosswordUploadPost = function (req, res, next) {
             const cwData = parseCrossword(crosswordToParse);
 
             if (cwData && cwData.cw && cwData.matrix) {
-
-                cwData.cw.save(err => {
+                var cw = new Crossword(cwData.cw);
+                
+                cw.save(err => {
                     if (err) {
                         return next(err);
                     }
