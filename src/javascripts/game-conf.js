@@ -15,7 +15,7 @@ const gameConf = {
     },
     colors: {
         default: 'black',
-        thisPlayer: 'black',
+        thisPlayer: 'blue',
         otherPlayer: 'red',
         thisSelection: 'yellow',
         otherSelection: 'red',

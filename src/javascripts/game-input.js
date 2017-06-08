@@ -1,32 +1,45 @@
 const gameConf = require('./game-conf');
 const grid = require('./game-grid');
-const letters = require('./game-letters');
+const selection = require('./game-selection');
 
 const input = (function () {
     var userInput = gameConf.htmlElements.userInput,
-        transformLetter = (letter, selection) => {
+        lettersSupported = [],
+        socket = {},
+        lettersToSend = [],
+        selectionSquares = [],
+        transformLetter = letter => {
             var cursor = selection.getCursor();
             return {
-                letter,
-                pos: cursor.pos,
-                isCertain: cursor.isCertain
+                ind: cursor.ind,
+                letter: {
+                    letter,
+                    pos: selectionSquares[cursor.ind],
+                    isCertain: cursor.isCertain
+                }
             };
         },
+        add = letter => {
+            var letterWithDate = Object.assign(letter.letter, {
+                date: Date.now()
+            });
+
+            lettersToSend[letter.ind] = letterWithDate;
+            return this;
+        },
         stub = {
-            check(spec) {
-                var key = spec.key,
-                    lettersSupported = spec.lettersSupported,
-                    selection = spec.selection;
-
-
+            init(letters, s) {
+                lettersSupported = letters;
+                socket = s;
+                return this;
+            },
+            check(key, squares, which) {
                 var inputValue = userInput.value,
                     utilKeys = gameConf.utilKeys,
                     ind = -1,
                     transformedLetter = {};
 
-                if (!inputValue) {
-                    return false;
-                }
+                selectionSquares = squares;
 
                 // Check for util keys
                 ind = utilKeys.indexOf(key);
@@ -37,24 +50,10 @@ const input = (function () {
                             userInput.blur();
                             break;
                         case 'Backspace':
-                            transformedLetter = (transformLetter(' ', selection));
-                            letters.add(transformedLetter);
-                            grid.drawLetters([transformedLetter]);
+                            transformedLetter = transformLetter(' ');
+                            add(transformedLetter);
+                            grid.drawLetter(transformedLetter.letter);
                             selection.moveCursor('backwards');
-                            // //Clear lettersToSend letter
-                            // lettersToSend.letters[getClueIndexFromCursorPos()] = ' ';
-                            //
-                            // // Clear square
-                            // manipulateSquare({
-                            //     name: 'clear',
-                            //     pos: cursor.pos,
-                            // });
-                            //
-                            // // Move cursor back
-                            // moveCursor('backwards');
-                            // drawCursor();
-                            //
-                            // lettersToSend.startInd = getClueIndexFromCursorPos();
                             break;
                     }
                     return;
@@ -68,9 +67,9 @@ const input = (function () {
                     if (letter === '.') {
                         return selection.toggleCursor();
                     }
-                    transformedLetter = (transformLetter(letter, selection));
-                    letters.add(transformedLetter, selection);
-                    grid.drawLetters([transformedLetter]);
+                    transformedLetter = transformLetter(letter);
+                    add(transformedLetter);
+                    grid.drawLetter(transformedLetter.letter);
                     selection.moveCursor('forward');
                 }
 
@@ -78,6 +77,22 @@ const input = (function () {
             clear() {
                 userInput.value = '';
 
+                return this;
+            },
+            send() {
+                if (!lettersToSend) {
+                    return false;
+                }
+
+                var notEmptyLeters = lettersToSend.filter(letter => letter.letter);
+
+                socket.emit('letters to other', {
+                    letters: notEmptyLeters
+                });
+                return this;
+            },
+            clearLetters() {
+                lettersToSend = [];
                 return this;
             }
         };

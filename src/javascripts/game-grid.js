@@ -13,10 +13,15 @@ const grid = (function () {
         ctx = canvas.getContext('2d'),
         offsetFromBtm = 5,
         crossword = {},
+        isPlayer1 = true,
 
         manipulateSquare = spec => {
-            var x = 0.5 + padX + sqLen * spec.pos[1],
+            var x, y;
+
+            if (spec.pos) {
+                x = 0.5 + padX + sqLen * spec.pos[1];
                 y = 0.5 + padY + sqLen * spec.pos[0];
+            }
 
             switch (spec.name) {
                 case 'fill':
@@ -24,13 +29,15 @@ const grid = (function () {
                     ctx.fillRect(x, y, sqLen, sqLen);
                     break;
 
-                case 'stroke':
+                case 'selection':
+                    var squares = spec.squares;
                     ctx.strokeStyle = spec.color;
-                    if (spec.isAcross) {
-                        ctx.strokeRect(x, y, sqLen * spec.numOfSquares, sqLen);
-                    } else {
-                        ctx.strokeRect(x, y, sqLen, sqLen * spec.numOfSquares);
-                    }
+
+                    squares.forEach(square => {
+                        x = 0.5 + padX + sqLen * square[1];
+                        y = 0.5 + padY + sqLen * square[0];
+                        ctx.strokeRect(x + 1, y + 1, sqLen - 2, sqLen - 2);
+                    });
                     break;
 
                 case 'write':
@@ -55,13 +62,17 @@ const grid = (function () {
                     ctx.strokeRect(x + 2, y + 2, sqLen - 4, sqLen - 4);
                     ctx.restore();
                     break;
+                case 'clearCursorArea':
+                    ctx.clearRect(x + 1.5, y + 1.5, sqLen - 3, sqLen - 3);
+                    break;
             }
 
         },
 
         stub = {
-            init(c) {
+            init(c, isP1) {
                 crossword = c;
+                isPlayer1 = isP1;
                 return this;
             },
             draw() {
@@ -146,12 +157,26 @@ const grid = (function () {
                         name: 'write',
                         letter: l.letter,
                         pos: l.pos,
-                        color: l.isPlayer1 === undefined ? colors.thisPlayer :
-                            (l.isPlayer1 ? colors.thisPlayer : colors.otherPlayer),
+                        color: l.isPlayer1 === isPlayer1 ? colors.thisPlayer : colors.otherPlayer,
                         isCertain: l.isCertain
                     });
                 });
-
+                return this;
+            },
+            drawLetter(letter) {
+                // Clear area enveloped by cursor first
+                manipulateSquare({
+                    name: 'clearCursorArea',
+                    pos: letter.pos
+                });
+                // Write letter afterwards
+                manipulateSquare({
+                    name: 'write',
+                    letter: letter.letter,
+                    pos: letter.pos,
+                    color: colors.thisPlayer,
+                    isCertain: letter.isCertain
+                });
                 return this;
             },
             drawCursor(spec) {
@@ -164,10 +189,8 @@ const grid = (function () {
             },
             drawSelection(spec) {
                 manipulateSquare({
-                    name: 'stroke',
-                    pos: spec.pos,
-                    isAcross: spec.isAcross,
-                    numOfSquares: spec.numOfSquares,
+                    name: 'selection',
+                    squares: spec.squares,
                     color: spec.color
                 });
             },

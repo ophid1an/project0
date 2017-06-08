@@ -19,28 +19,25 @@ function start() {
         const io = require('socket.io-client'),
             grid = require('./game-grid'),
             defs = require('./game-defs'),
-            input = require('./game-input'),
             selection = require('./game-selection'),
+            input = require('./game-input'),
             getMousePosition = require('../../lib/util').getMousePosition,
             socket = io(undefined, {
                 query: 'gid=' + gameConf.gameId
-            });
-
-        var game = {
+            }),
+            game = {
                 isConnected: false,
-                otherLastSeen: false,
             },
-
-
+            userInput = gameConf.htmlElements.userInput,
             infoThisSpan = gameConf.htmlElements.infoThisSpan,
             infoOtherSpan = gameConf.htmlElements.infoOtherSpan,
             dividerSpan = gameConf.htmlElements.dividerSpan,
             infoDiv = gameConf.htmlElements.infoDiv, // TODO to be removed
             defSpanOffset = gameConf.htmlElements.defSpanOffset,
             locale = gameConf.localeStrings,
-
-            thisSelection = function () {},
-            otherSelection = function () {},
+            hasFocus = elem => {
+                return elem === document.activeElement && (elem.type || elem.href);
+            },
             changeOtherSpans = action => {
                 if (action === 'show') {
                     infoOtherSpan.classList.remove('hidden');
@@ -56,7 +53,7 @@ function start() {
                 dividerSpan.classList.toggle('hidden');
             };
 
-        socket.on('game-data', function (data) {
+        socket.on('game data', function (data) {
             Object.assign(game, {
                 crossword: data.crossword,
                 letters: data.letters,
@@ -65,129 +62,188 @@ function start() {
                 lettersSupported: ((gameConf.langsSupported[data.crossword.lang] || '') +
                     gameConf.extraChars).split(''),
                 thisUsername: data.thisUsername, // TODO May not be needed
-                otherUsername: data.otherUsername
+                otherUsername: data.otherUsername,
+                mostRecentLetter: (function () {
+                    var date = new Date(0),
+                        stub = {
+                            setDate(letters) {
+                                letters.forEach(letter => {
+                                    // letter.date is a STRING !!!
+                                    if (letter.isPlayer1 !== game.isPlayer1) {
+                                        var lDate = new Date(letter.date);
+                                        if (lDate > date) {
+                                            date = lDate;
+                                        }
+                                    }
+
+                                });
+                            },
+                            getDate() {
+                                return date;
+                            }
+                        };
+                    return stub;
+                })(),
+                mostRecentMessage: (function () {
+                    var date = new Date(0),
+                        stub = {
+                            setDate(messages) {
+                                messages.forEach(message => {
+                                    // message.date is a STRING !!!
+                                    if (message.isPlayer1 !== game.isPlayer1) {
+                                        var mDate = new Date(message.date);
+                                        if (mDate > date) {
+                                            date = mDate;
+                                        }
+                                    }
+                                });
+                            },
+                            getDate() {
+                                return date;
+                            }
+                        };
+                    return stub;
+                })(),
             });
 
-            thisSelection = selection(game.crossword, socket);
-            otherSelection = selection(game.crossword, undefined, true);
+            if (game.otherUsername) {
+                // Get most recent other player letter
+                game.mostRecentLetter.setDate(game.letters);
+                // Get most recent other player message
+                game.mostRecentMessage.setDate(game.messages);
+            }
 
-            grid
-                .init(game.crossword)
+            grid.init(game.crossword, game.isPlayer1)
                 .resize()
                 .draw()
                 .drawLetters(game.letters);
 
-            defs
-                .init(game.crossword)
+            defs.init(game.crossword)
                 .resize()
                 .setup();
+
+            selection.init(game.crossword, socket);
+
+            input.init(game.lettersSupported, socket);
 
             /***
                   HTML event listeners
             ***/
 
             var canvas = gameConf.canvas,
-                userInput = gameConf.htmlElements.userInput,
                 defsDiv = gameConf.htmlElements.defsDiv;
 
-            userInput.addEventListener('keyup', function (e) {
+            userInput.addEventListener('keyup', e => {
                 // ignore alt, shift, ctrl, caps lock
                 if ([16, 17, 18, 20].indexOf(e.which) === -1) {
-                    input.check({
-                        key: e.key,
-                        lettersSupported: game.lettersSupported,
-                        selection: thisSelection
-                    });
+                    input.check(e.key, selection.getSquares());
                 }
             });
 
-            userInput.addEventListener('blur', function () {
-                // sendLetters(lettersToSend); // TODO
+            userInput.addEventListener('blur', () => {
+                input.send();
                 input.clear();
-                thisSelection.clear().emit(-1);
+                selection.clear();
+                if (game.otherUsername) {
+                    selection.emit();
+                }
             });
 
-            defsDiv.addEventListener('click', function (e) {
+            defsDiv.addEventListener('click', e => {
                 var target = e.target;
                 if (target.tagName === 'SPAN') {
-                    thisSelection
-                        // .clear() // TODO REMOVE?
-                        .set(+target.id.slice(defSpanOffset))
-                        .emit();
-
-                    // Clear and set lettersToSend
-                    // lettersToSend.letters = []; // TODO
-                    // lettersToSend.startInd = getClueIndexFromCursorPos();
-
-                    userInput.focus();
+                    if (selection.set(+target.id.slice(defSpanOffset))) {
+                        if (game.otherUsername) {
+                            selection.emit();
+                        }
+                        userInput.focus();
+                    }
                 }
             });
 
-            canvas.addEventListener('click', function (e) {
+            canvas.addEventListener('click', e => {
                 var mousePos = getMousePosition(canvas, e),
                     sqPos = grid.getSquarePosition(game.crossword, mousePos);
 
                 if (sqPos) {
-                    thisSelection
-                        // .clear() // TODO REMOVE?
-                        .setBySqPos(sqPos)
-                        .emit();
-
-                    // Clear and set lettersToSend
-                    // lettersToSend.letters = []; // TODO
-                    // lettersToSend.startInd = getClueIndexFromCursorPos();
-                    //
-                    userInput.focus();
+                    if (selection.setBySqPos(sqPos)) {
+                        if (game.otherUsername) {
+                            selection.emit();
+                        }
+                        userInput.focus();
+                    }
                 }
             });
 
-            window.onresize = function () {
+            window.onresize = () => {
                 defs.resize();
             };
 
         });
 
-        socket.on('connect', function () {
+        socket.on('connect', () => {
             game.isConnected = true;
 
             infoThisSpan.classList.replace('text-danger', 'text-success');
             infoThisSpan.innerHTML = locale.online;
+
+            if (!game.crossword) {
+                socket.emit('game data to me');
+            } else {
+                if (game.otherUsername) {
+                    socket.emit('messages to me', game.mostRecentMessage.getDate());
+                    socket.emit('letters to me', game.mostRecentLetter.getDate());
+                }
+            }
         });
 
-        socket.on('disconnect', function () {
+        socket.on('disconnect', () => {
             game.isConnected = false;
-            otherSelection.clear();
+            selection.clearOther();
 
             infoThisSpan.classList.replace('text-success', 'text-danger');
             infoThisSpan.innerHTML = locale.offline;
             changeOtherSpans('hide'); // TODO
         });
 
-        socket.on('error', function (err) {
+        socket.on('error', err => {
             console.log('Error: ' + err);
             infoDiv.innerHTML = 'Error: ' + err;
         });
 
-        socket.on('selection', function (data) {
+        socket.on('selection', data => {
             // clear previous other selection and set new one
-            otherSelection.clear().set(data);
+            selection.clearOther()
+                .setOther(data.ind, data.squares);
         });
 
-        socket.on('letters', function (data) {
-            otherSelection.clear();
+        socket.on('letters', data => {
+            infoDiv.innerHTML = data.length;
+            game.mostRecentLetter.setDate(data);
             grid.drawLetters(data);
         });
 
-        socket.on('joined', function () {
-            thisSelection.emit();
+        socket.on('letters received', () => {
+            if (!hasFocus(userInput)) {
+                input.clearLetters();
+            }
+        });
+
+        socket.on('messages', data => {
+            game.mostRecentMessage.setDate(data);
+            console.log(data);
+        });
+
+        socket.on('joined', () => {
+            setTimeout(() => selection.emit(), 500); // Wait a bit (solves timing issue)
 
             infoOtherSpan.classList.replace('text-danger', 'text-success');
             infoOtherSpan.innerHTML = game.otherUsername + ' is online.';
             changeOtherSpans('show');
         });
 
-        socket.on('left', function () {
-            otherSelection.clear();
+        socket.on('left', () => {
+            selection.clearOther();
 
             infoOtherSpan.classList.replace('text-success', 'text-danger');
             infoOtherSpan.innerHTML = game.otherUsername + ' is offline.';
