@@ -14,128 +14,67 @@ function start() {
 
     if (gameConf.canvas.getContext) {
 
-        require('./classList-polyfill');
-
         const io = require('socket.io-client'),
             grid = require('./game-grid'),
             defs = require('./game-defs'),
             selection = require('./game-selection'),
             input = require('./game-input'),
+            messages = require('./game-messages'),
+            info = require('./game-info'),
             getMousePosition = require('../../lib/util').getMousePosition,
             socket = io(undefined, {
                 query: 'gid=' + gameConf.gameId
             }),
-            game = {
-                isConnected: false,
-            },
             userInput = gameConf.htmlElements.userInput,
-            infoThisSpan = gameConf.htmlElements.infoThisSpan,
-            infoOtherSpan = gameConf.htmlElements.infoOtherSpan,
-            dividerSpan = gameConf.htmlElements.dividerSpan,
-            infoDiv = gameConf.htmlElements.infoDiv, // TODO to be removed
             defSpanOffset = gameConf.htmlElements.defSpanOffset,
-            locale = gameConf.localeStrings,
-            infoLog = msg => { //TODO Remove
-                infoDiv.innerHTML = msg
-                setTimeout(() => infoDiv.innerHTML = '&nbsp;', 2000)
-            },
             hasFocus = elem => {
                 return elem === document.activeElement && (elem.type || elem.href);
             },
-            changeOtherSpans = action => {
-                if (action === 'show') {
-                    infoOtherSpan.classList.remove('hidden');
-                    dividerSpan.classList.remove('hidden');
-                }
-                if (action === 'hide') {
-                    infoOtherSpan.classList.add('hidden');
-                    dividerSpan.classList.add('hidden');
-                }
-            },
-            toggleOtherSpans = () => {
-                infoOtherSpan.classList.toggle('hidden');
-                dividerSpan.classList.toggle('hidden');
-            };
+            canvas = gameConf.canvas,
+            defsDiv = gameConf.htmlElements.defsDiv;
+
+        var firstConnection = true;
 
         socket.on('game data', function (data) {
-            Object.assign(game, {
-                crossword: data.crossword,
-                letters: data.letters,
-                messages: data.messages,
-                isPlayer1: data.isPlayer1,
-                lettersSupported: ((gameConf.langsSupported[data.crossword.lang] || '') +
-                    gameConf.extraChars).split(''),
-                thisUsername: data.thisUsername, // TODO May not be needed
-                otherUsername: data.otherUsername,
-                mostRecentLetter: (function () {
-                    var date = new Date(0),
-                        stub = {
-                            setDate(letters) {
-                                letters.forEach(letter => {
-                                    // letter.date is a STRING !!!
-                                    if (letter.isPlayer1 !== game.isPlayer1) {
-                                        var lDate = new Date(letter.date);
-                                        if (lDate > date) {
-                                            date = lDate;
-                                        }
-                                    }
+            /*****
+              // data = {
+              //     crossword: 'Array',
+              //     letters: 'Array',
+              //     messages: 'Array',
+              //     isPlayer1: 'Boolean',
+              //     otherUsername: 'String'
+              // };
+              *****/
 
-                                });
-                            },
-                            getDate() {
-                                return date;
-                            }
-                        };
-                    return stub;
-                })(),
-                mostRecentMessage: (function () {
-                    var date = new Date(0),
-                        stub = {
-                            setDate(messages) {
-                                messages.forEach(message => {
-                                    // message.date is a STRING !!!
-                                    if (message.isPlayer1 !== game.isPlayer1) {
-                                        var mDate = new Date(message.date);
-                                        if (mDate > date) {
-                                            date = mDate;
-                                        }
-                                    }
-                                });
-                            },
-                            getDate() {
-                                return date;
-                            }
-                        };
-                    return stub;
-                })(),
-            });
+            firstConnection = false;
 
-            if (game.otherUsername) {
-                // Get most recent other player letter
-                game.mostRecentLetter.setDate(game.letters);
-                // Get most recent other player message
-                game.mostRecentMessage.setDate(game.messages);
-            }
+            var lettersSupported = ((gameConf.langsSupported[data.crossword.lang] || '') +
+                gameConf.extraChars).split('');
 
-            grid.init(game.crossword, game.isPlayer1)
+            // Setup game objects
+            info.init(data.otherUsername)
+                .thisOnline();
+
+            grid.init(data.crossword, data.isPlayer1)
                 .resize()
                 .draw()
-                .drawLetters(game.letters);
+                .drawLetters(data.letters);
 
-            defs.init(game.crossword)
+            defs.init(data.crossword)
                 .resize()
                 .setup();
 
-            selection.init(game.crossword, socket);
+            selection.init(data.crossword, socket, data.otherUsername);
 
-            input.init(game.letters, game.lettersSupported, socket);
+            input.init(data.letters, lettersSupported, socket,
+                data.isPlayer1, data.otherUsername);
+
+            messages.init(data.messages, socket,
+                data.isPlayer1, data.otherUsername);
 
             /***
                   HTML event listeners
             ***/
-
-            var canvas = gameConf.canvas,
-                defsDiv = gameConf.htmlElements.defsDiv;
 
             userInput.addEventListener('keyup', e => {
                 // ignore alt, shift, ctrl, caps lock
@@ -148,18 +87,14 @@ function start() {
                 input.send();
                 input.clear();
                 selection.clear();
-                if (game.otherUsername) {
-                    selection.emit();
-                }
+                selection.send();
             });
 
             defsDiv.addEventListener('click', e => {
                 var target = e.target;
                 if (target.tagName === 'SPAN') {
                     if (selection.set(+target.id.slice(defSpanOffset))) {
-                        if (game.otherUsername) {
-                            selection.emit();
-                        }
+                        selection.send();
                         userInput.focus();
                     }
                 }
@@ -167,13 +102,11 @@ function start() {
 
             canvas.addEventListener('click', e => {
                 var mousePos = getMousePosition(canvas, e),
-                    sqPos = grid.getSquarePosition(game.crossword, mousePos);
+                    sqPos = grid.getSquarePosition(data.crossword, mousePos);
 
                 if (sqPos) {
                     if (selection.setBySqPos(sqPos)) {
-                        if (game.otherUsername) {
-                            selection.emit();
-                        }
+                        selection.send();
                         userInput.focus();
                     }
                 }
@@ -186,49 +119,34 @@ function start() {
         });
 
         socket.on('connect', () => {
-            game.isConnected = true;
-
-            infoThisSpan.classList.replace('text-danger', 'text-success');
-            infoThisSpan.innerHTML = locale.online;
-
-            if (!game.crossword) { // If connecting freshly
+            if (firstConnection) { // If connecting freshly
                 socket.emit('game data to me');
             } else {
-                if (game.otherUsername) { // If reconnecting to a partnered game
-                    // Send own saved letters
-                    input.send();
-                    // Wait a bit to signal to receive other player's letters
-                    setTimeout(() => {
-                        socket.emit('letters to me', game.mostRecentLetter.getDate());
-                    }, 500);
-                    // Signal to receive other player's messages
-                    socket.emit('messages to me', game.mostRecentMessage.getDate());
-                }
+                info.thisOnline();
+                // If reconnecting to a partnered game
+                // Send own saved letters
+                input.send();
+                // Wait a bit to signal to receive other player's letters
+                setTimeout(() => {
+                    input.receive();
+                }, 500);
+                // Signal to receive other player's messages
+                messages.receive();
             }
         });
 
         socket.on('disconnect', () => {
-            game.isConnected = false;
             selection.clearOther();
-
-            infoThisSpan.classList.replace('text-success', 'text-danger');
-            infoThisSpan.innerHTML = locale.offline;
-            changeOtherSpans('hide'); // TODO
-        });
-
-        socket.on('error', err => {
-            console.log('Error: ' + err);
-            infoDiv.innerHTML = 'Error: ' + err;
+            info.thisOnline(false);
         });
 
         socket.on('selection', data => {
-            // clear previous other selection and set new one
-            selection.clearOther()
+            selection.clearOther() // clear previous other selection and set new one
                 .setOther(data.ind, data.squares);
+            info.otherOnline();
         });
 
         socket.on('letters', data => {
-            game.mostRecentLetter.setDate(data);
             input.updateLetters(data);
             grid.drawLetters(data);
         });
@@ -240,24 +158,22 @@ function start() {
         });
 
         socket.on('messages', data => {
-            game.mostRecentMessage.setDate(data);
+            messages.update(data);
         });
 
-        socket.on('joined', () => {
-            setTimeout(() => selection.emit(), 500); // Wait a bit (solves timing issue)
-
-            infoOtherSpan.classList.replace('text-danger', 'text-success');
-            infoOtherSpan.innerHTML = game.otherUsername + ' is online.';
-            changeOtherSpans('show');
+        socket.on('other online', () => {
+            setTimeout(() => selection.send(), 500); // Wait a bit (solves timing issue)
+            info.otherOnline();
         });
 
-        socket.on('left', () => {
+        socket.on('other offline', () => {
             selection.clearOther();
-
-            infoOtherSpan.classList.replace('text-success', 'text-danger');
-            infoOtherSpan.innerHTML = game.otherUsername + ' is offline.';
-            changeOtherSpans('show');
+            info.otherOnline(false);
         });
 
+        socket.on('error', err => {
+            console.log('Error: ' + err);
+            info.error(err);
+        });
     }
 }

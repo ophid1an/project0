@@ -4,13 +4,24 @@ const selection = require('./game-selection');
 
 const input = (function () {
     var userInput = gameConf.htmlElements.userInput,
+        colorBackground = gameConf.colors.background,
         lettersSupported = [],
         socket = {},
         lettersToSend = [],
         selectionSquares = [],
         lettersHash = {},
         cursor = {},
-        colorBackground = gameConf.colors.background,
+        isPlayer1 = true,
+        otherUsername = '',
+        mostRecentOtherLetterDate = new Date(0),
+        setMostRecentOtherLetterDate = letter => {
+            if (otherUsername) {
+                var lDate = new Date(letter.date); // letter.date is a STRING !!!
+                if (lDate > mostRecentOtherLetterDate) {
+                    mostRecentOtherLetterDate = lDate;
+                }
+            }
+        },
         transformLetter = letter => {
             return {
                 letter,
@@ -26,11 +37,23 @@ const input = (function () {
             lettersToSend[cursor.ind] = letterWithDate;
             return this;
         },
+        clearCursor = () => {
+            grid.drawCursor({
+                pos: cursor.pos,
+                color: colorBackground,
+                isCertain: true
+            });
+        },
         stub = {
-            init(letters, lettersSupp, s) {
-                letters.forEach(ele => lettersHash[ele.pos] = ele.letter);
+            init(letters, lettersSupp, s, isP1, otherName) {
+                letters.forEach(lt => {
+                    setMostRecentOtherLetterDate(lt);
+                    lettersHash[lt.pos] = lt.letter;
+                });
                 lettersSupported = lettersSupp;
                 socket = s;
+                isPlayer1 = isP1;
+                otherUsername = otherName;
                 return this;
             },
             check(key, squares) {
@@ -53,11 +76,7 @@ const input = (function () {
                             break;
                         case 'Backspace':
                             // Clear cursor and move cursor one square backwards
-                            grid.drawCursor({
-                                pos: cursor.pos,
-                                color: colorBackground,
-                                isCertain: true
-                            });
+                            clearCursor();
                             selection.moveCursor('backwards');
                             break;
                     }
@@ -78,18 +97,17 @@ const input = (function () {
                         add(transformedLetter);
                         grid.drawLetter(transformedLetter);
                     } else {
-                        grid.drawCursor({ // Just clear cursor
-                            pos: cursor.pos,
-                            color: colorBackground,
-                            isCertain: true
-                        });
+                        clearCursor(); // Just clear cursor
                     }
                     selection.moveCursor('forward'); // Advance cursor
                 }
 
             },
             updateLetters(letters) {
-                letters.forEach(l => lettersHash[l.pos] = l.letter);
+                letters.forEach(lt => {
+                    setMostRecentOtherLetterDate(lt);
+                    lettersHash[lt.pos] = lt.letter;
+                });
             },
             clear() {
                 userInput.value = '';
@@ -106,6 +124,12 @@ const input = (function () {
                 socket.emit('letters to other', {
                     letters: notEmptyLetters
                 });
+                return this;
+            },
+            receive() {
+                if (otherUsername) {
+                    socket.emit('letters to me', mostRecentOtherLetterDate);
+                }
                 return this;
             },
             clearLetters() {

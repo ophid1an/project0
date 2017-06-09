@@ -25,6 +25,7 @@ const selection = (function () {
         },
         clues = {},
         socket = {},
+        otherUsername = '',
         getSelectionSquares = (ind) => {
             var isAcross = clues[ind].isAcross,
                 len = clues[ind].len,
@@ -120,9 +121,10 @@ const selection = (function () {
 
 
         stub = {
-            init(c, s) {
+            init(c, s,otherName) {
                 clues = c.clues;
                 socket = s;
+                otherUsername = otherName;
                 return this;
             },
             set(ind) {
@@ -209,17 +211,19 @@ const selection = (function () {
             getSquares() {
                 return thisSelection.squares;
             },
-            emit() {
-                var ind = -1,
-                    squares = [];
-                if (!thisSelection.isClear) {
-                    ind = thisSelection.clueInd;
-                    squares = thisSelection.squares;
+            send() {
+                if (otherUsername) {
+                    var ind = -1,
+                        squares = [];
+                    if (!thisSelection.isClear) {
+                        ind = thisSelection.clueInd;
+                        squares = thisSelection.squares;
+                    }
+                    socket.emit('selection to other', {
+                        ind,
+                        squares
+                    });
                 }
-                socket.emit('selection to other', {
-                    ind,
-                    squares
-                });
                 return this;
             }
 

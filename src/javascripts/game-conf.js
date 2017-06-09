@@ -40,8 +40,18 @@ const gameConf = {
         en: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     },
     localeStrings: {
-        online: 'Online',
-        offline: 'Offline'
+        el: {
+            online: 'Με σύνδεση',
+            offline: 'Χωρίς σύνδεση',
+            isOnline: 'είναι συνδεδεμένος',
+            isOffline: 'είναι αποσυνδεδεμένος'
+        },
+        en: {
+            online: 'Online',
+            offline: 'Offline',
+            isOnline: 'is online',
+            isOffline: 'is offline'
+        }
     },
     utilKeys: ['Enter', 'Backspace'],
     extraChars: ' .',
