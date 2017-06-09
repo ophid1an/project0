@@ -79,16 +79,18 @@ exports.gameNewPost = function (req, res, next) {
 
                         game.crossword = cw[0]._id;
 
-                        var rows = cw[0].dim[0];
-                        var cols = cw[0].dim[1];
-                        var bpos = cw[0].blacksPos;
-                        var letters = [];
+                        var rows = cw[0].dim[0],
+                            cols = cw[0].dim[1],
+                            bpos = cw[0].blacksPos,
+                            letters = [],
+                            date = new Date();
 
                         for (let i = 0; i < rows; i += 1) {
                             for (let j = 0; j < cols; j += 1) {
                                 if (indexOfArray([i, j], bpos) === -1) {
                                     letters.push({
-                                        pos: [i, j]
+                                        pos: [i, j],
+                                        date
                                     });
                                 }
                             }
