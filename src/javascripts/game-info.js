@@ -8,7 +8,6 @@ const info = (function () {
         infoDiv = gameConf.htmlElements.infoDiv, // TODO REMOVE?
         locale = gameConf.localeStrings.el,
         otherUsername = '',
-        otherOnline = false,
         infoLog = msg => { //TODO Remove
             infoDiv.innerHTML = msg;
             setTimeout(() => infoDiv.innerHTML = '&nbsp;', 5000);
@@ -33,6 +32,7 @@ const info = (function () {
                     infoThisSpan.classList.replace('text-danger', 'text-success');
                     infoThisSpan.innerHTML = `&lt;${locale.online}&gt;`;
                     if (otherUsername) {
+                        stub.otherOnline(false);
                         changeOtherSpans('show');
                     }
                 } else {
@@ -46,14 +46,9 @@ const info = (function () {
             },
             otherOnline(flag = true) {
                 if (flag) {
-                    if (!otherOnline) {
-                        infoOtherSpan.classList.replace('text-danger', 'text-success');
-                        infoOtherSpan.innerHTML = `&lt;${otherUsername}&gt; ${locale.isOnline}.`;
-                        otherOnline = true;
-                    }
-
+                    infoOtherSpan.classList.replace('text-danger', 'text-success');
+                    infoOtherSpan.innerHTML = `&lt;${otherUsername}&gt; ${locale.isOnline}.`;
                 } else {
-                    otherOnline = false;
                     infoOtherSpan.classList.replace('text-success', 'text-danger');
                     infoOtherSpan.innerHTML = `&lt;${otherUsername}&gt; ${locale.isOffline}.`;
                 }
