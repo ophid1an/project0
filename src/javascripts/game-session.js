@@ -35,6 +35,10 @@ function start() {
             infoDiv = gameConf.htmlElements.infoDiv, // TODO to be removed
             defSpanOffset = gameConf.htmlElements.defSpanOffset,
             locale = gameConf.localeStrings,
+            infoLog = msg => { //TODO Remove
+                infoDiv.innerHTML = msg
+                setTimeout(() => infoDiv.innerHTML = '&nbsp;', 2000)
+            },
             hasFocus = elem => {
                 return elem === document.activeElement && (elem.type || elem.href);
             },
@@ -124,7 +128,7 @@ function start() {
 
             selection.init(game.crossword, socket);
 
-            input.init(game.lettersSupported, socket);
+            input.init(game.letters, game.lettersSupported, socket);
 
             /***
                   HTML event listeners
@@ -187,12 +191,18 @@ function start() {
             infoThisSpan.classList.replace('text-danger', 'text-success');
             infoThisSpan.innerHTML = locale.online;
 
-            if (!game.crossword) {
+            if (!game.crossword) { // If connecting freshly
                 socket.emit('game data to me');
             } else {
-                if (game.otherUsername) {
+                if (game.otherUsername) { // If reconnecting to a partnered game
+                    // Send own saved letters
+                    input.send();
+                    // Wait a bit to signal to receive other player's letters
+                    setTimeout(() => {
+                        socket.emit('letters to me', game.mostRecentLetter.getDate());
+                    }, 500);
+                    // Signal to receive other player's messages
                     socket.emit('messages to me', game.mostRecentMessage.getDate());
-                    socket.emit('letters to me', game.mostRecentLetter.getDate());
                 }
             }
         });
@@ -218,8 +228,8 @@ function start() {
         });
 
         socket.on('letters', data => {
-            infoDiv.innerHTML = data.length;
             game.mostRecentLetter.setDate(data);
+            input.updateLetters(data);
             grid.drawLetters(data);
         });
 
@@ -231,7 +241,6 @@ function start() {
 
         socket.on('messages', data => {
             game.mostRecentMessage.setDate(data);
-            console.log(data);
         });
 
         socket.on('joined', () => {

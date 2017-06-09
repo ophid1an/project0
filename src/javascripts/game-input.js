@@ -8,28 +8,28 @@ const input = (function () {
         socket = {},
         lettersToSend = [],
         selectionSquares = [],
+        lettersHash = {},
+        cursor = {},
+        colorBackground = gameConf.colors.background,
         transformLetter = letter => {
-            var cursor = selection.getCursor();
             return {
-                ind: cursor.ind,
-                letter: {
-                    letter,
-                    pos: selectionSquares[cursor.ind],
-                    isCertain: cursor.isCertain
-                }
+                letter,
+                pos: cursor.pos,
+                isCertain: cursor.isCertain
             };
         },
         add = letter => {
-            var letterWithDate = Object.assign(letter.letter, {
+            var letterWithDate = Object.assign(letter, {
                 date: Date.now()
             });
 
-            lettersToSend[letter.ind] = letterWithDate;
+            lettersToSend[cursor.ind] = letterWithDate;
             return this;
         },
         stub = {
-            init(letters, s) {
-                lettersSupported = letters;
+            init(letters, lettersSupp, s) {
+                letters.forEach(ele => lettersHash[ele.pos] = ele.letter);
+                lettersSupported = lettersSupp;
                 socket = s;
                 return this;
             },
@@ -40,6 +40,8 @@ const input = (function () {
                     transformedLetter = {};
 
                 selectionSquares = squares;
+                cursor = selection.getCursor();
+                cursor.pos = selectionSquares[cursor.ind];
 
                 // Check for util keys
                 ind = utilKeys.indexOf(key);
@@ -50,9 +52,18 @@ const input = (function () {
                             userInput.blur();
                             break;
                         case 'Backspace':
-                            transformedLetter = transformLetter(' ');
-                            add(transformedLetter);
-                            grid.drawLetter(transformedLetter.letter);
+                            if (lettersHash[cursor.pos] !== ' ') { // Draw ' ' is not empty already
+                                lettersHash[cursor.pos] = ' ';
+                                transformedLetter = transformLetter(' ');
+                                add(transformedLetter);
+                                grid.drawLetter(transformedLetter);
+                            } else {
+                                grid.drawCursor({ // Just clear cursor
+                                    pos: cursor.pos,
+                                    color: colorBackground,
+                                    isCertain: true
+                                });
+                            }
                             selection.moveCursor('backwards');
                             break;
                     }
@@ -67,12 +78,24 @@ const input = (function () {
                     if (letter === '.') {
                         return selection.toggleCursor();
                     }
-                    transformedLetter = transformLetter(letter);
-                    add(transformedLetter);
-                    grid.drawLetter(transformedLetter.letter);
+                    if (lettersHash[cursor.pos] !== letter) { // Draw letter if different than previous one
+                        lettersHash[cursor.pos] = letter;
+                        transformedLetter = transformLetter(letter);
+                        add(transformedLetter);
+                        grid.drawLetter(transformedLetter);
+                    } else {
+                        grid.drawCursor({ // Just clear cursor
+                            pos: cursor.pos,
+                            color: colorBackground,
+                            isCertain: true
+                        });
+                    }
                     selection.moveCursor('forward');
                 }
 
+            },
+            updateLetters(letters) {
+                letters.forEach(l => lettersHash[l.pos] = l.letter);
             },
             clear() {
                 userInput.value = '';
