@@ -85,7 +85,7 @@ const input = (function () {
                 }
 
                 var notEmptyLetters = lettersToSend.filter(letter => letter.letter);
-console.log(notEmptyLetters)
+
                 socket.emit('letters to other', {
                     letters: notEmptyLetters
                 });
