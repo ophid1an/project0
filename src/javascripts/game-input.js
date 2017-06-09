@@ -52,18 +52,12 @@ const input = (function () {
                             userInput.blur();
                             break;
                         case 'Backspace':
-                            if (lettersHash[cursor.pos] !== ' ') { // Draw ' ' is not empty already
-                                lettersHash[cursor.pos] = ' ';
-                                transformedLetter = transformLetter(' ');
-                                add(transformedLetter);
-                                grid.drawLetter(transformedLetter);
-                            } else {
-                                grid.drawCursor({ // Just clear cursor
-                                    pos: cursor.pos,
-                                    color: colorBackground,
-                                    isCertain: true
-                                });
-                            }
+                            // Clear cursor and move cursor one square backwards
+                            grid.drawCursor({
+                                pos: cursor.pos,
+                                color: colorBackground,
+                                isCertain: true
+                            });
                             selection.moveCursor('backwards');
                             break;
                     }
@@ -78,7 +72,7 @@ const input = (function () {
                     if (letter === '.') {
                         return selection.toggleCursor();
                     }
-                    if (lettersHash[cursor.pos] !== letter) { // Draw letter if different than previous one
+                    if (letter !== ' ' && letter !== lettersHash[cursor.pos]) { // Draw letter if not space and not different than previous one
                         lettersHash[cursor.pos] = letter;
                         transformedLetter = transformLetter(letter);
                         add(transformedLetter);
@@ -90,7 +84,7 @@ const input = (function () {
                             isCertain: true
                         });
                     }
-                    selection.moveCursor('forward');
+                    selection.moveCursor('forward'); // Advance cursor
                 }
 
             },
