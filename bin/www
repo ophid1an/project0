@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-
+require('dotenv').config();
 const app = require('../app');
 const debug = require('debug')('ptyxiakh-skeleton:server');
 const http = require('http');
@@ -13,7 +13,10 @@ const sockets = require('../lib/sockets');
  * Get port from environment and store in Express.
  */
 
-const port = normalizePort(process.env.PORT || '3000');
+const port = normalizePort(process.env.NODE_ENV === 'production' ?
+    (process.env.PORT_PROD || '3000') :
+    (process.env.PORT_DEV || '3000'));
+
 app.set('port', port);
 
 /**
