@@ -33,7 +33,7 @@ const input = (function () {
                 socket = s;
                 return this;
             },
-            check(key, squares, which) {
+            check(key, squares) {
                 var inputValue = userInput.value,
                     utilKeys = gameConf.utilKeys,
                     ind = -1,
@@ -80,14 +80,14 @@ const input = (function () {
                 return this;
             },
             send() {
-                if (!lettersToSend) {
+                if (!lettersToSend.length) {
                     return false;
                 }
 
-                var notEmptyLeters = lettersToSend.filter(letter => letter.letter);
-
+                var notEmptyLetters = lettersToSend.filter(letter => letter.letter);
+console.log(notEmptyLetters)
                 socket.emit('letters to other', {
-                    letters: notEmptyLeters
+                    letters: notEmptyLetters
                 });
                 return this;
             },
