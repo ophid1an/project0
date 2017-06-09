@@ -38,7 +38,7 @@ i18n.configure({
 
 const app = express();
 
-if (!process.env.DONTUSECOMPRESSION) {
+if (!process.env.DONT_USE_COMPRESSION) {
     app.use(require('compression')());
 }
 
