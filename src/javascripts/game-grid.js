@@ -14,6 +14,10 @@ const grid = (function () {
         offsetFromBtm = 5,
         crossword = {},
         isPlayer1 = true,
+        rows = -1,
+        cols = -1,
+        bpos = [],
+        bposHash = {},
 
         manipulateSquare = spec => {
             var x, y;
@@ -73,13 +77,14 @@ const grid = (function () {
             init(c, isP1) {
                 crossword = c;
                 isPlayer1 = isP1;
+                rows = crossword.dim[0];
+                cols = crossword.dim[1];
+                bpos = crossword.bpos;
+                bpos.forEach((ele, ind) => bposHash[ele] = ind);
                 return this;
             },
             draw() {
-                var rows = crossword.dim[0],
-                    cols = crossword.dim[1],
-                    bpos = crossword.bpos,
-                    i, x, y;
+                var i, x, y;
 
                 // var scaleFactor = 1;
 
@@ -205,19 +210,13 @@ const grid = (function () {
                 return this;
             },
             getSquarePosition(crossword, mousePos) {
-                var padX = gameConf.grid.padX,
-                    padY = gameConf.grid.padY,
-                    sqLen = gameConf.grid.sqLen,
-                    rows = crossword.dim[0],
-                    cols = crossword.dim[1],
-                    bpos = crossword.bpos,
-                    sqPos = [];
+                var sqPos = [];
 
                 sqPos.push(Math.floor((mousePos[1] - padY) / sqLen));
                 sqPos.push(Math.floor((mousePos[0] - padX) / sqLen));
 
                 if (sqPos[0] >= 0 && sqPos[1] >= 0 && sqPos[0] < rows && sqPos[1] < cols &&
-                    indexOfArray(sqPos, bpos) === -1) {
+                    !bposHash.hasOwnProperty(sqPos)) {
                     return sqPos;
                 }
 
