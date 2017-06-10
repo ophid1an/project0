@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const limits = require('../config').limits;
 
-const UserSchema = Schema({
+const userSchema = Schema({
     username: {
         type: String,
         required: true,
@@ -72,7 +72,12 @@ const UserSchema = Schema({
     isAdmin: Boolean
 });
 
-UserSchema.statics.getFriends = function (userId, callback) {
+userSchema.index({
+    _id: 1,
+    jti: 1
+});
+
+userSchema.statics.getFriends = function (userId, callback) {
     this
         .findOne({
             _id: userId
@@ -94,4 +99,4 @@ UserSchema.statics.getFriends = function (userId, callback) {
         });
 };
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('User', userSchema);
