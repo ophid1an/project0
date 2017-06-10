@@ -1,11 +1,16 @@
 <div class="container">
 
     <div class="row">
-        <div class="twelve columns">
-            <a class="button" href="/main">{{__ 'back'}}</a>
-            {{#if isPlayer1}}
-                <a class="button u-pull-right" href="/">{{__ 'complete'}}</a>
-            {{/if}}
+        <div class="twelve columns" id="buttons">
+            <a id="messages-button" class="button hidden">{{__ 'messages'}}</a>
+            <a id="home-button" class="hidden" href="/main">{{__ 'home'}}</a>
+            <div class="u-pull-right">
+                <a id="options-button" class="button">{{__ 'options'}}</a>
+                <div class="dropdown-content hidden" id="dropdown-list">
+                    <a id="help-button">{{__ 'help'}}</a>
+                    <a id="complete-button" class="hidden">{{__ 'complete'}}</a>
+                </div>
+            </div>
         </div>
     </div>
 

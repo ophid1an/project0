@@ -10,17 +10,21 @@
 
 function start() {
 
+    require('./polyfills/classList');
+    require('./polyfills/matches');
+
     const gameConf = require('./game-conf');
 
     if (gameConf.canvas.getContext) {
 
         const io = require('socket.io-client'),
+            buttons = require('./game-buttons'),
+            info = require('./game-info'),
             grid = require('./game-grid'),
             defs = require('./game-defs'),
             selection = require('./game-selection'),
             input = require('./game-input'),
             messages = require('./game-messages'),
-            info = require('./game-info'),
             getMousePosition = require('../../lib/util').getMousePosition,
             socket = io(undefined, {
                 query: 'gid=' + gameConf.gameId
@@ -52,6 +56,8 @@ function start() {
                 gameConf.extraChars).split('');
 
             // Setup game objects
+            buttons.init(data.isPlayer1, data.otherUsername);
+
             info.init(data.otherUsername)
                 .thisOnline();
 

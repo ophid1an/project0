@@ -1,4 +1,3 @@
-require('./classList-polyfill');
 const gameConf = require('./game-conf');
 
 const info = (function () {

@@ -23,6 +23,12 @@ const gameConf = {
         background: window.getComputedStyle(document.getElementsByTagName('body')[0]).backgroundColor
     },
     htmlElements: {
+        messagesBtn: document.getElementById('messages-button'),
+        optionsBtn: document.getElementById('options-button'),
+        homeBtn: document.getElementById('home-button'),
+        helpBtn: document.getElementById('help-button'),
+        completeBtn: document.getElementById('complete-button'),
+        dropdownList: document.getElementById('dropdown-list'),
         infoDiv: document.getElementById('info'), // TODO: remove when done
         defsDiv: document.getElementById('defs'),
         userInput: document.getElementById('input'),

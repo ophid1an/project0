@@ -83,5 +83,9 @@
   "moderator": "Moderator",
   "select": "Select",
   "yes": "Yes",
-  "no": "No"
+  "no": "No",
+  "messages": "Messages",
+  "help": "Help",
+  "options": "Options",
+  "home": "Home"
 }
