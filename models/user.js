@@ -72,11 +72,6 @@ const userSchema = Schema({
     isAdmin: Boolean
 });
 
-userSchema.index({
-    _id: 1,
-    jti: 1
-});
-
 userSchema.statics.getFriends = function (userId, callback) {
     this
         .findOne({
