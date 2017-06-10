@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const limits = require('../config').limits;
 
-const CrosswordSchema = Schema({
+const crosswordSchema = Schema({
     lang: {
         type: String,
         enum: limits.CW_LANGUAGES_SUPPORTED,
@@ -63,4 +63,4 @@ const CrosswordSchema = Schema({
     }
 });
 
-module.exports = mongoose.model('Crossword', CrosswordSchema);
+module.exports = mongoose.model('Crossword', crosswordSchema);

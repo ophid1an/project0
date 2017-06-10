@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const limits = require('../config').limits;
 
-const StatisticSchema = Schema({
+const statisticSchema = Schema({
     dateStarted: {
         type: Date,
         required: true
@@ -39,4 +39,4 @@ const StatisticSchema = Schema({
     }
 });
 
-module.exports = mongoose.model('Statistic', StatisticSchema);
+module.exports = mongoose.model('Statistic', statisticSchema);

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const limits = require('../config').limits;
 
-const GameSchema = Schema({
+const gameSchema = Schema({
     crossword: {
         type: Schema.Types.ObjectId,
         ref: 'Crossword',
@@ -59,4 +59,4 @@ const GameSchema = Schema({
     }]
 });
 
-module.exports = mongoose.model('Game', GameSchema);
+module.exports = mongoose.model('Game', gameSchema);
