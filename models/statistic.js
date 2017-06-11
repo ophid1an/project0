@@ -3,9 +3,10 @@ const Schema = mongoose.Schema;
 const limits = require('../config').limits;
 
 const statisticSchema = Schema({
-    dateStarted: {
-        type: Date,
-        required: true
+    gameId: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        index: true
     },
     diff: {
         type: String,

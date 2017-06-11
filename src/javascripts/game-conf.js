@@ -4,6 +4,7 @@ const gameConf = {
             ind = window.location.href.match(strToSearch).index + strToSearch.length;
         return window.location.href.slice(ind, ind + 24);
     }(),
+    redirectURI: '',
     canvas: document.getElementById('canvas'),
     grid: {
         pad: 10,
@@ -73,7 +74,7 @@ const gameConf = {
     uncertaintyChar: '*',
 };
 
-
+gameConf.redirectURI = '/main/game-statistics/' + gameConf.gameId;
 gameConf.grid.padX = gameConf.grid.pad + gameConf.grid.numberPadX;
 gameConf.grid.padY = gameConf.grid.pad + gameConf.grid.numberPadY;
 gameConf.htmlElements.defSpanOffset = gameConf.htmlElements.defSpanPrefix.length;

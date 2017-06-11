@@ -94,7 +94,8 @@ function start() {
             });
 
             completeConfirmBtn.addEventListener('click', () => {
-                console.log('COMPLETE!');
+                window.location.href = gameConf.redirectURI;
+                socket.emit('send complete');
             });
 
             userInput.addEventListener('keyup', e => {
@@ -186,6 +187,10 @@ function start() {
             messages.update(data);
         });
 
+        socket.on('complete', () => {
+            window.location.href = gameConf.redirectURI;
+        });
+
         socket.on('other online', () => {
             setTimeout(() => selection.send(), 500); // Wait a bit (solves timing issue)
             info.otherOnline();
@@ -198,6 +203,11 @@ function start() {
 
         socket.on('error', err => {
             console.log('Error: ' + err);
+            info.error(err);
+        });
+
+        socket.on('exception', err => {
+            console.log('Exception: ' + err);
             info.error(err);
         });
     }

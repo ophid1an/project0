@@ -1,0 +1,21 @@
+<div class="container">
+
+    <div class="u-full-width">
+        <a class="button u-full-width" href="/">{{__ 'back'}}</a>
+    </div>
+
+    <div class="u-full-width align-center game-statistics">
+        <h3>{{__ 'gameStatisticsHeader'}}</h3>
+        <p>{{__ 'difficultyLevel'}}:</p>
+        <p>{{diff}}</p>
+        <p>{{__ 'whitesC'}}:</p>
+        <p>{{whitesC}}</p>
+        <p>{{__ 'lettersYouFound'}}:</p>
+        <p>{{thisLetters}}</p>
+        {{#if otherUsername}}
+            <p>{{__ 'lettersOtherFound'}} &lt;{{otherUsername}}&gt;:</p>
+            <p>{{otherLetters}}</p>
+        {{/if}}
+    </div>
+
+</div>

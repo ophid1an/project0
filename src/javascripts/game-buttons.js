@@ -33,6 +33,8 @@ const buttons = (function () {
                 } else {
                     homeBtn.classList.add('button');
                     homeBtn.classList.remove('hidden');
+                    dropdownList.appendChild(completeBtn);
+                    completeBtn.classList.remove('hidden');
                 }
 
                 // Add event listeners

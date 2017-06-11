@@ -1,12 +1,11 @@
 const moment = require('moment');
+const validator = require('express-validator').validator;
 const User = require('../models/user');
 const Game = require('../models/game');
 const Crossword = require('../models/crossword');
+const Statistic = require('../models/statistic');
 const limits = require('../config').limits;
-
 const indexOfArray = require('../lib/util').indexOfArray;
-
-
 
 
 exports.gameNewGet = function (req, res, next) {
@@ -200,63 +199,143 @@ exports.gameSessionGet = function (req, res) {
 };
 
 
-var gameSessionPost = function (req, res) { // TODO Delete
-    var data = req.body;
+exports.gameStatisticsGet = function (req, res, next) {
+    /*****
+    Checks to see if game exists and caller is game's moderator
+    (player1). If so it saves the game statistics and removes game.
+    If not it searches statistics for the specific game and displays
+    found statistic
+    *****/
+    var gid = req.params.gameId;
 
-    var query = {
-        _id: data.gameId
-    };
-
-    if (data.isPlayer1) {
-        query.player1 = req.user._id;
-    } else {
-        query.player2 = req.user._id;
+    if (!validator.isHexadecimal(gid) || gid.length !== 24) {
+        return res.redirect('/main');
     }
 
-    var updateLetter = (letter, callback) => {
-        query['letters.pos'] = letter.pos;
+    var renderStat = (stat, isPlayer1, otherUsername) => {
+        var thisLetters = isPlayer1 ? stat.p1Letters : (stat.p2Letters || 0),
+            otherLetters = isPlayer1 ? (stat.p2Letters ? stat.p2Letters : 0) :
+            stat.p1Letters;
 
-        Game
-            .update(query, {
-                $set: {
-                    'letters.$.isCertain': letter.isCertain,
-                    'letters.$.letter': letter.letter,
-                    'letters.$.isPlayer1': data.isPlayer1,
-                }
-            })
-            .exec((err) => {
-                if (err) {
-                    return callback(err);
-                }
-                callback();
-            });
-    };
-
-    if (!data.letters || !data.letters.length) {
-        return res.json({
-            error: 'Invalid JSON file!'
+        res.render('game-statistics', {
+            diff: res.__(stat.diff),
+            whitesC: stat.whitesC,
+            thisLetters,
+            otherLetters,
+            otherUsername
         });
-    }
+    };
 
-    var len = data.letters.length;
-
-    (function uploadLetters(ind) {
-        if (ind < len) {
-            updateLetter(data.letters[ind], err => {
+    var findStatistic = () => {
+        Statistic
+            .findOne({
+                gameId: gid,
+                $or: [{
+                    player1: req.user._id
+                }, {
+                    player2: req.user._id
+                }]
+            })
+            .populate('player1', 'username')
+            .populate('player2', 'username')
+            .exec((err, stat) => {
                 if (err) {
-                    return res.json({
-                        error: err
-                    });
-                } else {
-                    uploadLetters(ind + 1);
+                    return next(err);
+                }
+
+                if (!stat) {
+                    return res.redirect('/main');
+                }
+                var isPlayer1 = req.user._id.equals(stat.player1);
+                var otherUsername = isPlayer1 ? (stat.player2 ? stat.player2.username : undefined) :
+                    stat.player1.username;
+
+                renderStat(stat, isPlayer1, otherUsername);
+            });
+    };
+
+    // After game moderator (player1) pressed 'Complete'
+    Game
+        .findOne({
+            _id: gid,
+            player1: req.user._id
+        })
+        .populate('crossword')
+        .populate('player2', 'username')
+        .exec((err, game) => {
+
+            if (err) {
+                return next(err);
+            }
+
+            if (!game) {
+                // If game doesn't exist, try to find player's statistic
+                return findStatistic();
+            }
+
+            var cw = game.crossword,
+                lettersHash = {},
+                p1Letters = 0,
+                p2Letters = 0,
+                stat = {
+                    gameId: game._id,
+                    diff: cw.diff,
+                    whitesC: cw.whitesC,
+                    player1: game.player1,
+                    player2: game.player2
+                };
+
+            // Calculate crossword letters hash
+            cw.clues.forEach(clue => {
+                var isAcross = clue.isAcross,
+                    answer = clue.answer,
+                    len = answer.length,
+                    firstPos = clue.pos;
+
+                for (var i = 0; i < len; i++) {
+                    var pos = [
+                        firstPos[0] + (isAcross ? 0 : i),
+                        firstPos[1] + (isAcross ? i : 0)
+                    ];
+                    lettersHash[pos] = answer[i];
                 }
             });
-        }
 
-    })(0);
+            // Compare letters between correct and submitted and
+            // update players' counts
+            game.letters.forEach(l => {
+                if (l.letter === lettersHash[l.pos]) {
+                    if (l.isPlayer1) {
+                        p1Letters += 1;
+                    } else {
+                        p2Letters += 1;
+                    }
+                }
+            });
 
-    return res.json({
-        msg: 'OK'
-    });
+            stat.p1Letters = p1Letters;
+            if (p2Letters) {
+                stat.p2Letters = p2Letters;
+            }
 
+            // Save statistic
+            new Statistic(stat).save(err => {
+                if (err) {
+                    return next(err);
+                }
+            });
+
+            var p2Username = game.player2 ? game.player2.username : '';
+
+            // Remove game
+            Game.remove({
+                _id: game._id
+            }, err => {
+                if (err) {
+                    return next(err);
+                }
+                // Finally render statistic for moderator (player1)
+                renderStat(stat, true, p2Username);
+            });
+        });
 };

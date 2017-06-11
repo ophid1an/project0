@@ -42,9 +42,8 @@ exports.crosswordUploadPost = function (req, res, next) {
             const cwData = parseCrossword(crosswordToParse);
 
             if (cwData && cwData.cw && cwData.matrix) {
-                var cw = new Crossword(cwData.cw);
-                
-                cw.save(err => {
+                // Insert crossword to database
+                new Crossword(cwData.cw).save(err => {
                     if (err) {
                         return next(err);
                     }

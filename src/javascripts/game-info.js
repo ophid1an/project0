@@ -41,7 +41,12 @@ const info = (function () {
                 }
             },
             error(err) {
-                infoLog('Error: ' + err);
+                if (err === 'Game not found' ||
+                    err === 'Message update failed') {
+                    window.location.href = gameConf.redirectURI;
+                } else {
+                    infoLog('Error: ' + err);
+                }
             }
         };
 
