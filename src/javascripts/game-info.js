@@ -1,26 +1,19 @@
 const gameConf = require('./game-conf');
 
 const info = (function () {
-    var infoThisSpan = gameConf.htmlElements.infoThisSpan,
-        infoOtherSpan = gameConf.htmlElements.infoOtherSpan,
-        dividerSpan = gameConf.htmlElements.dividerSpan,
-        infoDiv = gameConf.htmlElements.infoDiv, // TODO REMOVE?
+    var infoDiv = gameConf.htmlElements.infoDiv,
         locale = gameConf.localeStrings.el,
         otherUsername = '',
         infoLog = msg => { //TODO Remove
+            var oldMsg = infoDiv.innerHTML;
             infoDiv.innerHTML = msg;
-            setTimeout(() => infoDiv.innerHTML = '&nbsp;', 5000);
+            setTimeout(() => {
+                if (infoDiv.innerHTML === msg) {
+                    infoDiv.innerHTML = oldMsg;
+                }
+            }, 5000);
         },
-        changeOtherSpans = action => {
-            if (action === 'show') {
-                infoOtherSpan.classList.remove('hidden');
-                dividerSpan.classList.remove('hidden');
-            }
-            if (action === 'hide') {
-                infoOtherSpan.classList.add('hidden');
-                dividerSpan.classList.add('hidden');
-            }
-        },
+
         stub = {
             init(otherName) {
                 otherUsername = otherName;
@@ -28,28 +21,23 @@ const info = (function () {
             },
             thisOnline(flag = true) {
                 if (flag) {
-                    infoThisSpan.classList.replace('text-danger', 'text-success');
-                    infoThisSpan.innerHTML = `&lt;${locale.online}&gt;`;
+                    infoDiv.classList.replace('text-danger', 'text-success');
+                    infoDiv.innerHTML = `&lt;${locale.online}&gt;`;
                     if (otherUsername) {
                         stub.otherOnline(false);
-                        changeOtherSpans('show');
                     }
                 } else {
-                    infoThisSpan.classList.replace('text-success', 'text-danger');
-                    infoThisSpan.innerHTML = `&lt;${locale.offline}&gt;`;
-                    if (otherUsername) {
-                        changeOtherSpans('hide');
-                        stub.otherOnline(false);
-                    }
+                    infoDiv.classList.replace('text-success', 'text-danger');
+                    infoDiv.innerHTML = `&lt;${locale.offline}&gt;`;
                 }
             },
             otherOnline(flag = true) {
                 if (flag) {
-                    infoOtherSpan.classList.replace('text-danger', 'text-success');
-                    infoOtherSpan.innerHTML = `&lt;${otherUsername}&gt; ${locale.isOnline}.`;
+                    infoDiv.classList.replace('text-danger', 'text-success');
+                    infoDiv.innerHTML = `&lt;${otherUsername}&gt; ${locale.isOnline}.`;
                 } else {
-                    infoOtherSpan.classList.replace('text-success', 'text-danger');
-                    infoOtherSpan.innerHTML = `&lt;${otherUsername}&gt; ${locale.isOffline}.`;
+                    infoDiv.classList.replace('text-success', 'text-danger');
+                    infoDiv.innerHTML = `&lt;${otherUsername}&gt; ${locale.isOffline}.`;
                 }
             },
             error(err) {

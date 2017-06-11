@@ -87,5 +87,10 @@
   "messages": "Messages",
   "help": "Help",
   "options": "Options",
-  "home": "Home"
+  "home": "Home",
+  "ok": "OK",
+  "cancel": "Cancel",
+  "helpText": "<h4>Help</h4><p>&lt;Space&gt; to move cursor one position forward</p><p>&lt;Backspace&gt; to move cursor one position backwards</p><p>&lt;.&gt; to toggle the certainty of letters (certain/uncertain)</p><p>&lt;Enter&gt; or click anywhere outside of selected word to finish input</p>",
+  "completeText": "Are you sure you want to complete your attempt?",
+  "crossword": "Crossword"
 }

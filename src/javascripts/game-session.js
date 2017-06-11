@@ -16,7 +16,6 @@ function start() {
     const gameConf = require('./game-conf');
 
     if (gameConf.canvas.getContext) {
-
         const io = require('socket.io-client'),
             buttons = require('./game-buttons'),
             info = require('./game-info'),
@@ -35,9 +34,13 @@ function start() {
                 return elem === document.activeElement && (elem.type || elem.href);
             },
             canvas = gameConf.canvas,
-            defsDiv = gameConf.htmlElements.defsDiv;
+            defsDiv = gameConf.htmlElements.defsDiv,
+            messagesForm = gameConf.htmlElements.messagesForm,
+            messagesInput = gameConf.htmlElements.messagesInput,
+            completeConfirmBtn = gameConf.htmlElements.completeConfirmBtn;
 
-        var firstConnection = true;
+        var firstConnection = true,
+            isConnected = false;
 
         socket.on('game data', function (data) {
             /*****
@@ -82,6 +85,18 @@ function start() {
                   HTML event listeners
             ***/
 
+            messagesForm.addEventListener('submit', e => {
+                e.preventDefault();
+                if (isConnected) {
+                    messages.send(messagesInput.value);
+                }
+                messagesInput.value = '';
+            });
+
+            completeConfirmBtn.addEventListener('click', () => {
+                console.log('COMPLETE!');
+            });
+
             userInput.addEventListener('keyup', e => {
                 // ignore alt, shift, ctrl, caps lock
                 if ([16, 17, 18, 20].indexOf(e.which) === -1) {
@@ -120,11 +135,14 @@ function start() {
 
             window.onresize = () => {
                 defs.resize();
+                messages.resize();
             };
 
         });
 
         socket.on('connect', () => {
+            isConnected = true;
+
             if (firstConnection) { // If connecting freshly
                 socket.emit('game data to me');
             } else {
@@ -142,6 +160,7 @@ function start() {
         });
 
         socket.on('disconnect', () => {
+            isConnected = false;
             selection.clearOther();
             info.thisOnline(false);
         });

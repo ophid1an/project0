@@ -3,24 +3,20 @@
     <div class="row">
         <div class="twelve columns" id="buttons">
             <a id="messages-button" class="button hidden">{{__ 'messages'}}</a>
+            <a id="crossword-button" class="button hidden">{{__ 'crossword'}}</a>
             <a id="home-button" class="hidden" href="/main">{{__ 'home'}}</a>
+            <a id="complete-button" class="hidden">{{__ 'complete'}}</a>
             <div class="u-pull-right">
                 <a id="options-button" class="button">{{__ 'options'}}</a>
                 <div class="dropdown-content hidden" id="dropdown-list">
                     <a id="help-button">{{__ 'help'}}</a>
-                    <a id="complete-button" class="hidden">{{__ 'complete'}}</a>
+
                 </div>
             </div>
         </div>
     </div>
 
-    <input type="text" class="pos-abs-hidden" id="input" name="input" autocomplete="off" value="">
-
-    <div class="row">
-        <div class="twelve columns overflow-auto nowrap">
-            <span id="info-this">&nbsp;</span><span class="hidden" id="divider"> - </span><span class="hidden" id="info-other">&nbsp;</span>
-        </div>
-    </div>
+    <input type="text" class="pos-abs-hidden" id="letters-input" name="letters-input" autocomplete="off" value="">
 
     <div class="row">
         <div class="twelve columns overflow-auto nowrap" id="info">&nbsp;</div>
@@ -30,7 +26,33 @@
         <div class="twelve columns overflow-auto nowrap" id="def-single">&nbsp;</div>
     </div>
 
-    <div class="row border-dotted spacing-special">
+    <div id="messages" class="hidden">
+        <ul id="messages-list" class="no-bullets border-dotted overflow-auto"></ul>
+        <form id="messages-form">
+            <div class="row">
+                <label for="messages-input">{{__ 'text'}}:</label>
+                <input type="text" name="messages-input" id="messages-input">
+            </div>
+        </form>
+    </div>
+
+    <div id="help" class="u-full-width hidden fixed align-center">
+        {{{__ 'helpText'}}}
+    </div>
+
+    <div id="complete" class="hidden fixed align-center">
+        <div class="u-full-width">
+            <h4>{{__ 'complete'}}</h4>
+        </div>
+        <div class="u-full-width">
+            <p>{{__ 'completeText'}}</p>
+        </div>
+        <div class="u-full-width">
+            <button type="button" id="complete-confirm-button" name="complete-confirm-button" class="button-primary">{{__ 'ok'}}</button>
+        </div>
+    </div>
+
+    <div class="row border-dotted spacing-special" id="canvas-container">
         <canvas id="canvas">
           Canvas element is not supported!
         </canvas>

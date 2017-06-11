@@ -23,15 +23,10 @@ const gameConf = {
         background: window.getComputedStyle(document.getElementsByTagName('body')[0]).backgroundColor
     },
     htmlElements: {
-        messagesBtn: document.getElementById('messages-button'),
-        optionsBtn: document.getElementById('options-button'),
-        homeBtn: document.getElementById('home-button'),
-        helpBtn: document.getElementById('help-button'),
-        completeBtn: document.getElementById('complete-button'),
-        dropdownList: document.getElementById('dropdown-list'),
+        canvasDiv: document.getElementById('canvas-container'),
         infoDiv: document.getElementById('info'), // TODO: remove when done
         defsDiv: document.getElementById('defs'),
-        userInput: document.getElementById('input'),
+        userInput: document.getElementById('letters-input'),
         defSingleDiv: document.getElementById('def-single'),
         infoThisSpan: document.getElementById('info-this'),
         infoOtherSpan: document.getElementById('info-other'),
@@ -39,7 +34,21 @@ const gameConf = {
         defsAcrossDiv: document.getElementById('defs-across'),
         defsDownDiv: document.getElementById('defs-down'),
         defSpanPrefix: 'def',
-        defSpanOffset: 0
+        defSpanOffset: 0,
+        messagesBtn: document.getElementById('messages-button'),
+        crosswordBtn: document.getElementById('crossword-button'),
+        optionsBtn: document.getElementById('options-button'),
+        homeBtn: document.getElementById('home-button'),
+        helpBtn: document.getElementById('help-button'),
+        completeBtn: document.getElementById('complete-button'),
+        dropdownList: document.getElementById('dropdown-list'),
+        helpDiv: document.getElementById('help'),
+        completeDiv: document.getElementById('complete'),
+        messagesDiv: document.getElementById('messages'),
+        messagesList: document.getElementById('messages-list'),
+        messagesForm: document.getElementById('messages-form'),
+        messagesInput: document.getElementById('messages-input'), // TODO MAY NOT BE NEEDED
+        completeConfirmBtn: document.getElementById('complete-confirm-button')
     },
     langsSupported: {
         el: 'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ',
