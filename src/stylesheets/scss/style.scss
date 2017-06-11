@@ -206,6 +206,23 @@ h4 {
   font-weight: bold;
 }
 
+.history {
+  th, td {
+    text-align: center;
+  }
+
+  td:first-child {
+    text-align: left;
+    font-weight: bold;
+  }
+}
+
+.completed-games {
+  th, td {
+    text-align: center;
+  }
+}
+
 // Text colors
 .text-muted {
   color: $color-muted;

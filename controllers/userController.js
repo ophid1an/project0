@@ -1,14 +1,13 @@
+const moment = require('moment');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 const saltRounds = 10;
 
+const Statistic = require('../models/statistic');
 const limits = require('../config').limits;
 const jwtOptions = require('../config').jwtOptions;
 const cookiesOptions = require('../config').cookiesOptions;
 const User = require('../models/user');
-
-
 
 
 
@@ -251,8 +250,101 @@ exports.userRegisterPost = function (req, res, next) {
 
 
 
-exports.userHistoryGet = function (req, res) {
-    res.render('history');
+exports.userHistoryGet = function (req, res, next) {
+    Statistic
+        .find({
+            $or: [{
+                player1: req.user._id
+            }, {
+                player2: req.user._id
+            }]
+        })
+        .populate('player1', 'username')
+        .populate('player2', 'username')
+        .sort({ // Sort by date game ended descending
+            _id: -1
+        })
+        .exec((err, statsResult) => {
+            if (err) {
+                return next(err);
+            }
+
+
+            var stats = {
+                easy: {
+                    whitesC: 0,
+                    lettersFound: 0,
+                    highestRating: 0,
+                    hasPlayed: false
+                },
+                medium: {
+                    whitesC: 0,
+                    lettersFound: 0,
+                    highestRating: 0,
+                    hasPlayed: false
+                },
+                hard: {
+                    whitesC: 0,
+                    lettersFound: 0,
+                    highestRating: 0,
+                    hasPlayed: false
+                }
+            };
+
+            var completedGames = [],
+                mdash = '\u2014',
+                calcRating = (found, total) => {
+                    return found ? parseFloat(found * 100 / total).toFixed(2) : 0;
+                };
+
+            statsResult.forEach(stat => {
+                var isPlayer1 = req.user._id.equals(stat.player1._id),
+                    otherUsername = isPlayer1 ? (stat.player2 ? stat.player2.username : mdash) :
+                    stat.player1.username,
+                    date = moment(stat._id.getTimestamp())
+                    .format('MMM DD YYYY, HH:mm'),
+                    diff = res.__(stat.diff),
+                    p2Letters = stat.p2Letters ? stat.p2Letters : 0,
+                    lettersFound = stat.p1Letters + p2Letters,
+                    rating = calcRating(lettersFound, stat.whitesC);
+
+                // Calculate general statistics
+                stats[stat.diff].hasPlayed = true;
+                stats[stat.diff].whitesC += stat.whitesC;
+                stats[stat.diff].lettersFound += lettersFound;
+                if (rating > stats[stat.diff].highestRating) {
+                    stats[stat.diff].highestRating = rating;
+                }
+
+                // Calculate completed games array
+                completedGames.push({
+                    date,
+                    diff,
+                    rating,
+                    otherUsername
+                });
+            });
+
+            res.render('history', {
+                completedGames,
+                stats: {
+                    highestRating: [
+                        stats.easy.hasPlayed ? stats.easy.highestRating : mdash,
+                        stats.medium.hasPlayed ? stats.medium.highestRating : mdash,
+                        stats.hard.hasPlayed ? stats.hard.highestRating : mdash,
+                    ],
+                    avgRating: [
+                        stats.easy.hasPlayed ? calcRating(stats.easy.lettersFound, stats.easy.whitesC) :
+                        mdash,
+                        stats.medium.hasPlayed ? calcRating(stats.medium.lettersFound, stats.easy.whitesC) :
+                        mdash,
+                        stats.hard.hasPlayed ? calcRating(stats.hard.lettersFound, stats.easy.whitesC) :
+                        mdash,
+                    ]
+                }
+            });
+
+        });
 };
 
 
