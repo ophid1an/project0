@@ -28,11 +28,13 @@ router.get('/resume-game', gameController.gameResumeGet);
 
 router.get('/game-session/:gameId', gameController.gameSessionGet);
 
+router.get('/game-statistics/:gameId', gameController.gameStatisticsGet);
+
 router.get('/friends', userController.userFriendsGet);
 
 router.get('/history', userController.userHistoryGet);
 
-router.get('/user-settings', userController.userSettingsGet);
+router.get('/settings', userController.userSettingsGet);
 
 router.get('/upload-crossword', crosswordController.crosswordUploadGet);
 

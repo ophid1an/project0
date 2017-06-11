@@ -273,5 +273,5 @@ exports.userFriendsGet = function (req, res, next) {
 
 
 exports.userSettingsGet = function (req, res) {
-    res.render('user-settings');
+    res.render('settings');
 };
