@@ -1,0 +1,35 @@
+<div class="container">
+
+    <div>
+        <a class="button" href="/main/friends">{{__ 'back'}}</a>
+    </div>
+
+    <div class="align-center">
+        <h3>{{__ 'newFriendRequest'}}</h3>
+    </div>
+
+    {{#if errors}}
+        <div class="row">
+            <div class="twelve columns">
+                <ul class="text-danger">
+                    {{#each errors}}
+                        <li>{{msg}}</li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+    {{/if}}
+
+    <form action="/main/friends/new-request" method="post">
+            <div>
+                <label for="username">{{__ 'username'}}:</label>
+                <input type="text" id="username" name="username" required/>
+            </div>
+            <div>
+                <label for="text">{{__ 'text'}}:</label>
+                <textarea id="text" cols="30" rows="5" name="text" required/></textarea>
+            </div>
+
+        <input class="button-primary" type="submit" value="{{__ 'submit'}}">
+    </form>
+</div>

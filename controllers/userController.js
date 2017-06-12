@@ -364,6 +364,18 @@ exports.userFriendsGet = function (req, res, next) {
 
 
 
+exports.userNewRequestGet = function (req, res) {
+    res.render('new-request');
+};
+
+
+
+exports.userNewRequestPost = function (req, res) {
+    res.json(req.user.friends);
+};
+
+
+
 exports.userSettingsGet = function (req, res) {
     res.render('settings');
 };

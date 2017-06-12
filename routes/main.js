@@ -32,6 +32,10 @@ router.get('/game-statistics/:gameId', gameController.gameStatisticsGet);
 
 router.get('/friends', userController.userFriendsGet);
 
+router.get('/friends/new-request', userController.userNewRequestGet);
+
+router.post('/friends/new-request', userController.userNewRequestPost);
+
 router.get('/history', userController.userHistoryGet);
 
 router.get('/settings', userController.userSettingsGet);
