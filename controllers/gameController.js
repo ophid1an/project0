@@ -212,47 +212,80 @@ exports.gameStatisticsGet = function (req, res, next) {
         return res.redirect('/main');
     }
 
+
     var renderStat = (stat, isPlayer1, otherUsername) => {
-        var thisLetters = isPlayer1 ? stat.p1Letters : (stat.p2Letters || 0),
-            otherLetters = isPlayer1 ? (stat.p2Letters ? stat.p2Letters : 0) :
-            stat.p1Letters;
+            var thisLetters = isPlayer1 ? stat.p1Letters : (stat.p2Letters || 0),
+                otherLetters = isPlayer1 ? (stat.p2Letters ? stat.p2Letters : 0) :
+                stat.p1Letters;
 
-        res.render('game-statistics', {
-            diff: res.__(stat.diff),
-            whitesC: stat.whitesC,
-            thisLetters,
-            otherLetters,
-            otherUsername
-        });
-    };
-
-    var findStatistic = () => {
-        Statistic
-            .findOne({
-                gameId: gid,
-                $or: [{
-                    player1: req.user._id
-                }, {
-                    player2: req.user._id
-                }]
-            })
-            .populate('player1', 'username')
-            .populate('player2', 'username')
-            .exec((err, stat) => {
-                if (err) {
-                    return next(err);
-                }
-
-                if (!stat) {
-                    return res.redirect('/main');
-                }
-                var isPlayer1 = req.user._id.equals(stat.player1);
-                var otherUsername = isPlayer1 ? (stat.player2 ? stat.player2.username : undefined) :
-                    stat.player1.username;
-
-                renderStat(stat, isPlayer1, otherUsername);
+            res.render('game-statistics', {
+                diff: res.__(stat.diff),
+                whitesC: stat.whitesC,
+                thisLetters,
+                otherLetters,
+                otherUsername
             });
-    };
+        },
+
+        findStatistic = () => {
+            Statistic
+                .findOne({
+                    gameId: gid,
+                    $or: [{
+                        player1: req.user._id
+                    }, {
+                        player2: req.user._id
+                    }]
+                })
+                .populate('player1', 'username')
+                .populate('player2', 'username')
+                .exec((err, stat) => {
+                    if (err) {
+                        return next(err);
+                    }
+
+                    if (!stat) {
+                        return res.redirect('/main');
+                    }
+                    var isPlayer1 = req.user._id.equals(stat.player1);
+                    var otherUsername = isPlayer1 ? (stat.player2 ? stat.player2.username : undefined) :
+                        stat.player1.username;
+
+                    renderStat(stat, isPlayer1, otherUsername);
+                });
+        },
+
+        updateFriends = (userId, friendId, statId, cb) => {
+            User
+                .update({
+                    _id: userId,
+                    'friends.friend': friendId
+                }, {
+                    $set: {
+                        'friends.$.lastCompleted': statId
+                    },
+                    $inc: {
+                        'friends.$.completedGames': 1
+                    }
+                })
+                .exec((err) => {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb();
+                });
+        },
+
+        removeGame = (gid, cb) => {
+            Game.remove({
+                _id: gid
+            }, err => {
+                if (err) {
+                    return cb(err);
+                }
+                cb();
+            });
+        };
 
     // After game moderator (player1) pressed 'Complete'
     Game
@@ -319,23 +352,43 @@ exports.gameStatisticsGet = function (req, res, next) {
             }
 
             // Save statistic
-            new Statistic(stat).save(err => {
+            new Statistic(stat).save((err, savedStat) => {
                 if (err) {
                     return next(err);
                 }
-            });
 
-            var p2Username = game.player2 ? game.player2.username : '';
+                var p2Username = game.player2 ? game.player2.username : '';
 
-            // Remove game
-            Game.remove({
-                _id: game._id
-            }, err => {
-                if (err) {
-                    return next(err);
+                if (game.player2) { // Update user.friends stats if two players
+                    var parallelTasks = 3,
+                        finalCb = (err) => {
+                            if (err) {
+                                return next(err);
+                            }
+                            parallelTasks -= 1;
+                            if (!parallelTasks) {
+                                // Finally render statistic for moderator (player1)
+                                renderStat(stat, true, p2Username);
+
+                            }
+                        };
+
+                    // Update player1 record
+                    updateFriends(game.player1, game.player2, savedStat._id, finalCb);
+                    // Update player2 record
+                    updateFriends(game.player2, game.player1, savedStat._id, finalCb);
+                    // Remove game
+                    removeGame(game._id, finalCb);
+                } else {
+                    // Remove game
+                    removeGame(game._id, () => {
+                        if (err) {
+                            return next(err);
+                        }
+                        // Finally render statistic for moderator (player1)
+                        renderStat(stat, true, p2Username);
+                    });
                 }
-                // Finally render statistic for moderator (player1)
-                renderStat(stat, true, p2Username);
             });
         });
 };
