@@ -25,8 +25,8 @@
         </form>
     </div>
 
-    <div id="friends">
-        {{#if invitations}}
+    <div id="friendsRequests">
+        {{#if incFriendRequests}}
             <h4>{{__ 'incFriendReqs'}} </h4>
 
             <div class="overflow-auto">
@@ -40,7 +40,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{#each invitations}}
+                        {{#each incFriendRequests}}
                             <tr>
                                 <td>{{date}}</td>
                                 <td>{{username}}</td>

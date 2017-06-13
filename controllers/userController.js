@@ -373,7 +373,7 @@ exports.userFriendsGet = function (req, res, next) {
                         lastCompleted
                     };
                 }),
-                invitations = user.incFriendReq.map(e => {
+                incFriendRequests = user.incFriendReq.map(e => {
                     var date = moment(e.from._id.getTimestamp())
                         .format('MMM DD YYYY, HH:mm');
                     return {
@@ -385,7 +385,7 @@ exports.userFriendsGet = function (req, res, next) {
 
             return res.render('friends', {
                 friends,
-                invitations
+                incFriendRequests
             });
 
         });
@@ -395,16 +395,106 @@ exports.userFriendsGet = function (req, res, next) {
 
 
 exports.userIncRequestPost = function (req, res, next) {
+    var username = req.body.username,
+        accepted = req.body.accepted;
 
-    res.json(req.body);
+    if (!username || typeof username !== 'string') {
+        return res.end();
+    }
+console.log(req.body)
+    var updateSender = (uid, otheruid, accepted, cb) => {
+            var update = {
+                $pull: {
+                    outFriendReq: otheruid
+                }
+            };
+
+            if (accepted) {
+                update.$push = {
+                    friends: {
+                        friend: otheruid
+                    }
+                };
+            }
+            console.log(update)
+            User.update({
+                    _id: uid
+                }, update)
+                .exec(err => {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb();
+                });
+        },
+        updateReceiver = (uid, otheruid, accepted, cb) => {
+            var update = {
+                $pull: {
+                    incFriendReq: {
+                        from: otheruid
+                    }
+                }
+            };
+
+            if (accepted) {
+                update.$push = {
+                    friends: {
+                        friend: otheruid
+                    }
+                };
+            }
+console.log(update)
+            User.update({
+                    _id: uid
+                }, update)
+                .exec(err => {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb();
+                });
+        };
 
 
+    User.findOne({
+            username,
+            outFriendReq: req.user._id
+        })
+        .exec((err, user) => {
+            if (err) {
+                return next(err);
+            }
+
+            if (!user) {
+                return res.end();
+            }
+
+            var parallelTasks = 2,
+                finalCb = (err) => {
+                    if (err) {
+                        return next(err);
+                    }
+                    parallelTasks -= 1;
+                    if (!parallelTasks) {
+                        // Finally send ack
+                        return res.json({
+                            msg: 'OK'
+                        });
+                    }
+                };
+
+            // Update this user's incoming friend requests list and
+            // other user's outgoing friend requests list
+            // and if accepted add each other to friends list
+            updateSender(user._id, req.user._id, accepted, finalCb);
+            updateReceiver(req.user._id, user._id, accepted, finalCb);
+        });
 };
 
 
 exports.userOutRequestPost = function (req, res, next) {
 
-    var updateUserOutReqList = (uid, otheruid, cb) => {
+    var updateSender = (uid, otheruid, cb) => {
             User.update({
                     _id: uid
                 }, {
@@ -419,7 +509,7 @@ exports.userOutRequestPost = function (req, res, next) {
                     cb();
                 });
         },
-        updateUserIncReqList = (uid, otheruid, text, cb) => {
+        updateReceiver = (uid, otheruid, text, cb) => {
             User.update({
                     _id: uid
                 }, {
@@ -493,8 +583,8 @@ exports.userOutRequestPost = function (req, res, next) {
 
             // Update this user's outgoing friend requests list and
             // other user's incoming friend requests list
-            updateUserOutReqList(req.user._id, user._id, finalCb);
-            updateUserIncReqList(user._id, req.user._id, req.body.text, finalCb);
+            updateSender(req.user._id, user._id, finalCb);
+            updateReceiver(user._id, req.user._id, req.body.text, finalCb);
 
         });
 

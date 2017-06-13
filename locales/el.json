@@ -69,7 +69,7 @@
   "errorCrosswordNotFound": "Δεν βρέθηκε σταυρόλεξο με την ζητούμενη δυσκολία.",
   "errorUserDoesNotExist": "Ο χρήστης δεν υπάρχει.",
   "errorFriendExists": "Ο χρήστης είναι ήδη φίλος σου.",
-  "errorRequestExists": "Το αίτημα υπάρχει ήδη.",
+  "errorRequestExists": "Το αίτημα φιλίας υπάρχει ήδη.",
   "dateCreated": "Η/Μ δημιουργίας",
   "moderator": "Συντονιστής",
   "select": "Επιλογή",

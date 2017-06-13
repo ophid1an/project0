@@ -69,7 +69,7 @@
   "errorCrosswordNotFound": "A crossword with the requested difficulty could not be found.",
   "errorUserDoesNotExist": "User does not exist.",
   "errorFriendExists": "You are already friends with user",
-  "errorRequestExists": "Request already exists.",
+  "errorRequestExists": "Friend request already exists.",
   "dateCreated": "Creation date",
   "moderator": "Moderator",
   "select": "Select",
