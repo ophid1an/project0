@@ -7,16 +7,20 @@ const userController = require('../controllers/userController');
 const crosswordController = require('../controllers/crosswordController');
 const gameController = require('../controllers/gameController');
 
-const testController = require('../controllers/testController'); // TODO delete
+const testController = require('../controllers/testController');
 
 
 /* GET main page. */
 router.get('/', function (req, res) {
+    var iReqs = req.user.incFriendReq,
+        incRequests = (iReqs && iReqs.length) ? iReqs.length : 0;
+
     res.render('main', {
-        title: title,
-        author: author,
+        title,
+        author,
         username: req.user.username,
-        isAdmin: req.user.isAdmin
+        isAdmin: req.user.isAdmin,
+        incRequests
     });
 });
 
@@ -32,9 +36,9 @@ router.get('/game-statistics/:gameId', gameController.gameStatisticsGet);
 
 router.get('/friends', userController.userFriendsGet);
 
-router.get('/friends/new-request', userController.userNewRequestGet);
+router.post('/friends/out-request', userController.userOutRequestPost);
 
-router.post('/friends/new-request', userController.userNewRequestPost);
+router.post('/friends/inc-request', userController.userIncRequestPost);
 
 router.get('/history', userController.userHistoryGet);
 
@@ -46,12 +50,12 @@ router.post('/upload-crossword', crosswordController.crosswordUploadPost);
 
 
 
-// if (process.env.NODE_ENV !== 'production') { // TODO delete
-router.get('/add-friend/:user', testController.userAddFriendGet);
-router.get('/crosswords', testController.crosswordsGet);
-router.get('/games', testController.gamesGet);
-router.get('/random-crossword/:diff', testController.randomCrosswordGet);
-// }
+if (process.env.NODE_ENV !== 'production') {
+    router.get('/add-friend/:user', testController.userAddFriendGet);
+    router.get('/crosswords', testController.crosswordsGet);
+    router.get('/games', testController.gamesGet);
+    router.get('/random-crossword/:diff', testController.randomCrosswordGet);
+}
 
 
 

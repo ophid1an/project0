@@ -1,9 +1,12 @@
 var path = require('path');
 
 module.exports = {
-    entry: './src/javascripts/game-session.js',
+    entry: {
+        'game-session': './src/javascripts/game-session.js',
+        'friends': './src/javascripts/friends.js'
+    },
     output: {
-        filename: 'game-session.js',
+        filename: '[name].js',
         path: path.resolve(__dirname, 'dist/javascripts'),
     },
     module: {

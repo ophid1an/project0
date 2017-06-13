@@ -84,7 +84,11 @@ passport.use(new JwtStrategy(jwtOptions, function (jwt_payload, done) {
     User.findOne({
         _id: jwt_payload.uid,
         jti: new Date(parseInt(jwt_payload.jti, 10))
-    }, 'username isAdmin', function (err, user) {
+    }, {
+        username: 1,
+        isAdmin: 1,
+        incFriendReq: 1
+    }, function (err, user) {
         if (err) {
             return done(err, false);
         }

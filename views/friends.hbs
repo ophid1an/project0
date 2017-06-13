@@ -1,66 +1,83 @@
-<div class="container">
+<div class="container friends">
 
     <div class="row">
         <a class="button" href="/">{{__ 'back'}}</a>
-        <a class="button u-pull-right" href="/main/friends/new-request">{{__ 'newRequest'}}</a>
+        <button class="u-pull-right" id="new-request-button">{{__ 'newRequest'}}</button>
     </div>
 
-    <div class="align-center">
-        <h3>{{__ 'friends'}}</h3>
+    <h3>{{__ 'friends'}}</h3>
+
+    <p id="info"></p>
+
+    <div id="new-request" class="hidden">
+        <form id="form" method="post">
+            <div>
+                <label for="username">{{__ 'username'}}:</label>
+                <input type="text" name="username"/>
+            </div>
+            <div>
+                <label for="text">{{__ 'text'}}:</label>
+                <textarea cols="30" rows="5" name="text"/></textarea>
+            </div>
+
+            <input class="button-primary" type="submit" value="{{__ 'submit'}}">
+            <button class="u-pull-right" type="button" id="cancel-button">{{__ 'cancel'}}</button>
+        </form>
     </div>
 
-    {{#if inqFriendReqs}}
-        <div class="row">
-            <h4 class="align-center">{{__ 'incFriendReqs'}} </h4>
-        </div>
+    <div id="friends">
+        {{#if invitations}}
+            <h4>{{__ 'incFriendReqs'}} </h4>
 
-
-        <div class="row overflow-auto">
-            <table class="">
-                <thead>
-                    <tr>
-                        <th class="align-center">{{__ 'dateSent'}}</th>
-                        <th class="align-center">{{__ 'sender'}}</th>
-                        <th class="align-center">{{__ 'text'}}</th>
-                        <th class="align-center" colspan="2"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each inqFriendReqs}}
+            <div class="overflow-auto">
+                <table class="">
+                    <thead>
                         <tr>
-                            <td class="align-center">{{date}}</td>
-                            <td class="align-center">{{username}}</td>
-                            <td>{{text}}</td>
-                            <td class="align-center"><button>Αποδοχή</button></td>
-                            <td class="align-center"><button>Απόρριψη</button></td>
+                            <th>{{__ 'dateSent'}}</th>
+                            <th>{{__ 'sender'}}</th>
+                            <th>{{__ 'text'}}</th>
+                            <th colspan="2"></th>
                         </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        </div>
-    {{/if}}
+                    </thead>
+                    <tbody>
+                        {{#each invitations}}
+                            <tr>
+                                <td>{{date}}</td>
+                                <td>{{username}}</td>
+                                <td>{{text}}</td>
+                                <td><button class="button-primary">Αποδοχή</button></td>
+                                <td><button>Απόρριψη</button></td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        {{/if}}
 
-    {{#if friends}}
-        <div class="overflow-auto">
-            <table class="">
-                <thead>
-                    <tr>
-                        <th class="align-center">{{__ 'username'}}</th>
-                        <th class="align-center">{{__ 'completedGames'}}</th>
-                        <th class="align-center">{{__ 'lastCompletedGame'}}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each friends}}
+        {{#if friends}}
+            <div class="overflow-auto">
+                <table class="">
+                    <thead>
                         <tr>
-                            <td class="align-center">{{username}}</td>
-                            <td class="align-center">{{completedGames}}</td>
-                            <td class="align-center">{{lastCompleted}}</td>
+                            <th>{{__ 'username'}}</th>
+                            <th>{{__ 'completedGames'}}</th>
+                            <th>{{__ 'lastCompletedGame'}}</th>
                         </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        </div>
-    {{/if}}
+                    </thead>
+                    <tbody>
+                        {{#each friends}}
+                            <tr>
+                                <td>{{username}}</td>
+                                <td>{{completedGames}}</td>
+                                <td>{{lastCompleted}}</td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        {{/if}}
+    </div>
+
+    <script src="/javascripts/friends.js"></script>
 
 </div>

@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const moment = require('moment');
 const Schema = mongoose.Schema;
 const limits = require('../config').limits;
 
@@ -92,13 +91,9 @@ userSchema.statics.getFriends = function (userId, callback) {
                 return callback(err);
             }
             return callback(null, user.friends.map(e => {
-                var lastCompleted = e.lastCompleted ? moment(e.lastCompleted.getTimestamp())
-                    .format('MMM DD YYYY, HH:mm') : '\u2014';
                 return {
                     username: e.friend.username,
                     _id: e.friend._id,
-                    completedGames: e.completedGames,
-                    lastCompleted
                 };
             }));
         });

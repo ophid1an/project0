@@ -67,6 +67,9 @@
   "errorInvalidDifficulty": "Μη έγκυρη δυσκολία.",
   "errorInvalidPartner": "Μη έγκυρος συνεργάτης.",
   "errorCrosswordNotFound": "Δεν βρέθηκε σταυρόλεξο με την ζητούμενη δυσκολία.",
+  "errorUserDoesNotExist": "Ο χρήστης δεν υπάρχει.",
+  "errorFriendExists": "Ο χρήστης είναι ήδη φίλος σου.",
+  "errorRequestExists": "Το αίτημα υπάρχει ήδη.",
   "dateCreated": "Η/Μ δημιουργίας",
   "moderator": "Συντονιστής",
   "select": "Επιλογή",
@@ -84,5 +87,6 @@
   "gameStatistics": "Στατιστικά παιχνιδιού",
   "whitesC": "Αριθμός λευκών τετραγώνων",
   "lettersYouFound": "Αριθμός γραμμάτων που βρήκες",
-  "lettersOtherFound": "Αριθμός γραμμάτων που βρήκε ο/η"
+  "lettersOtherFound": "Αριθμός γραμμάτων που βρήκε ο/η",
+  "infoInvitationSent": "Το αίτημα φιλίας αποστάλθηκε."
 }

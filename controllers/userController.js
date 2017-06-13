@@ -351,27 +351,153 @@ exports.userHistoryGet = function (req, res, next) {
 
 
 exports.userFriendsGet = function (req, res, next) {
-    User.getFriends(req.user._id, (err, friends) => {
-        if (err) {
-            return next(err);
-        }
-        res.render('friends', {
-            friends: friends
+    User.findOne({
+            _id: req.user._id
+        }, {
+            friends: 1,
+            incFriendReq: 1
+        })
+        .populate('friends.friend', 'username')
+        .populate('incFriendReq.from', 'username')
+        .exec((err, user) => {
+            if (err) {
+                return next(err);
+            }
+
+            var friends = user.friends.map(e => {
+                    var lastCompleted = e.lastCompleted ? moment(e.lastCompleted.getTimestamp())
+                        .format('MMM DD YYYY, HH:mm') : '\u2014';
+                    return {
+                        username: e.friend.username,
+                        completedGames: e.completedGames,
+                        lastCompleted
+                    };
+                }),
+                invitations = user.incFriendReq.map(e => {
+                    var date = moment(e.from._id.getTimestamp())
+                        .format('MMM DD YYYY, HH:mm');
+                    return {
+                        date,
+                        username: e.from.username,
+                        text: e.text
+                    };
+                });
+
+            return res.render('friends', {
+                friends,
+                invitations
+            });
+
         });
-    });
 };
 
 
 
 
-exports.userNewRequestGet = function (req, res) {
-    res.render('new-request');
+exports.userIncRequestPost = function (req, res, next) {
+
+    res.json(req.body);
+
+
 };
 
 
+exports.userOutRequestPost = function (req, res, next) {
 
-exports.userNewRequestPost = function (req, res) {
-    res.json(req.user.friends);
+    var updateUserOutReqList = (uid, otheruid, cb) => {
+            User.update({
+                    _id: uid
+                }, {
+                    $push: {
+                        outFriendReq: otheruid
+                    }
+                })
+                .exec(err => {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb();
+                });
+        },
+        updateUserIncReqList = (uid, otheruid, text, cb) => {
+            User.update({
+                    _id: uid
+                }, {
+                    $push: {
+                        incFriendReq: {
+                            from: otheruid,
+                            text
+                        }
+                    }
+                })
+                .exec(err => {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb();
+                });
+        };
+
+    if (!req.body.username || !req.body.text) {
+        return res.json({
+            error: res.__('badInput')
+        });
+    }
+
+    if (req.user.username === req.body.username) {
+        return res.json({
+            error: res.__('errorFriendExists')
+        });
+    }
+
+    User.findOne({ // Find other user and act accordingly
+            username: req.body.username
+        })
+        .exec((err, user) => {
+            if (err) {
+                return next(err);
+            }
+
+            if (!user) {
+                return res.json({
+                    error: res.__('errorUserDoesNotExist')
+                });
+            }
+
+            if (user.friends.some(e => e.friend.equals(req.user._id))) {
+                return res.json({
+                    error: res.__('errorFriendExists')
+                });
+            }
+
+            if (user.outFriendReq.some(e => e.equals(req.user._id)) ||
+                user.incFriendReq.some(e => e.from.equals(req.user._id))) {
+                return res.json({
+                    error: res.__('errorRequestExists')
+                });
+            }
+
+            var parallelTasks = 2,
+                finalCb = (err) => {
+                    if (err) {
+                        return next(err);
+                    }
+                    parallelTasks -= 1;
+                    if (!parallelTasks) {
+                        // Finally send ack
+                        return res.json({
+                            msg: res.__('infoInvitationSent')
+                        });
+                    }
+                };
+
+            // Update this user's outgoing friend requests list and
+            // other user's incoming friend requests list
+            updateUserOutReqList(req.user._id, user._id, finalCb);
+            updateUserIncReqList(user._id, req.user._id, req.body.text, finalCb);
+
+        });
+
 };
 
 

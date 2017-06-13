@@ -223,6 +223,19 @@ h4 {
   }
 }
 
+.friends {
+  h3, h4, th, td {
+    text-align: center;
+  }
+
+  tr {
+    button {
+      padding: 0 2px;
+      font-size: 10px;
+    }
+  }
+}
+
 // Text colors
 .text-muted {
   color: $color-muted;

@@ -67,6 +67,9 @@
   "errorInvalidDifficulty": "Invalid difficulty.",
   "errorInvalidPartner": "Invalid partner.",
   "errorCrosswordNotFound": "A crossword with the requested difficulty could not be found.",
+  "errorUserDoesNotExist": "User does not exist.",
+  "errorFriendExists": "You are already friends with user",
+  "errorRequestExists": "Request already exists.",
   "dateCreated": "Creation date",
   "moderator": "Moderator",
   "select": "Select",
@@ -84,5 +87,6 @@
   "gameStatistics": "Game statistics",
   "whitesC": "White squares number",
   "lettersYouFound": "Number of letters found by you",
-  "lettersOtherFound": "Number of letters found by"
+  "lettersOtherFound": "Number of letters found by",
+  "infoInvitationSent": "Friend request sent."
 }
