@@ -56,23 +56,6 @@ const userSchema = Schema({
             required: true
         }
     }],
-    gameInv: [{
-        from: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
-            required: true
-        },
-        game: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
-            required: true
-        },
-        diff: {
-            type: String,
-            enum: limits.CW_DIFFICULTIES,
-            required: true
-        }
-    }],
     isAdmin: Boolean
 });
 
