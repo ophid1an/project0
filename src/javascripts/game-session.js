@@ -188,7 +188,7 @@ function start() {
         });
 
         socket.on('complete', () => {
-            window.location.href = gameConf.redirectURI;
+            setTimeout(() => window.location.href = gameConf.redirectURI, 500); // Wait a bit to update database
         });
 
         socket.on('other online', () => {

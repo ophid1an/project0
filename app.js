@@ -1,35 +1,36 @@
 require('dotenv').config();
 
-const express = require('express');
-const path = require('path');
-const favicon = require('serve-favicon');
-const logger = require('morgan');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
+const express = require('express'),
+    path = require('path'),
+    favicon = require('serve-favicon'),
+    logger = require('morgan'),
+    cookieParser = require('cookie-parser'),
+    bodyParser = require('body-parser'),
 
-const index = require('./routes/index');
-const main = require('./routes/main');
+    index = require('./routes/index'),
+    main = require('./routes/main'),
 
-const hbs = require('hbs');
-const helmet = require('helmet');
-const mongoose = require('mongoose');
-const expressValidator = require('express-validator');
-const i18n = require('i18n');
-const dbUrl = require('./config').dbUrl;
+    hbs = require('hbs'),
+    helmet = require('helmet'),
+    mongoose = require('mongoose'),
+    expressValidator = require('express-validator'),
+    i18n = require('i18n'),
+    dbUrl = require('./config').dbUrl,
+    locales = require('./config').limits.LOCALES,
 
-const passport = require('passport');
-const JwtStrategy = require('passport-jwt').Strategy;
-const jwtOptions = require('./config').jwtOptions;
-const User = require('./models/user');
-const isProduction = process.env.NODE_ENV === 'production';
+    passport = require('passport'),
+    JwtStrategy = require('passport-jwt').Strategy,
+    jwtOptions = require('./config').jwtOptions,
+    User = require('./models/user'),
+    isProduction = process.env.NODE_ENV === 'production';
 
 
 i18n.configure({
     // setup some locales - other locales default to en silently
-    locales: ['en', 'el'],
+    locales: Object.keys(locales),
 
     // sets a custom cookie name to parse locale settings from
-    // cookie: 'locale',
+    cookie: 'locale',
 
     // where to store json files - defaults to './locales'
     directory: __dirname + '/locales'
@@ -87,6 +88,7 @@ passport.use(new JwtStrategy(jwtOptions, function (jwt_payload, done) {
     }, {
         username: 1,
         isAdmin: 1,
+        locale: 1,
         incFriendReq: 1
     }, function (err, user) {
         if (err) {

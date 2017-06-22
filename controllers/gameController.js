@@ -1,14 +1,15 @@
-const moment = require('moment');
-const validator = require('express-validator').validator;
-const User = require('../models/user');
-const Game = require('../models/game');
-const Crossword = require('../models/crossword');
-const Statistic = require('../models/statistic');
-const limits = require('../config').limits;
-const indexOfArray = require('../lib/util').indexOfArray;
+const dateformat = require('dateformat'),
+    validator = require('express-validator').validator,
+    User = require('../models/user'),
+    Game = require('../models/game'),
+    Crossword = require('../models/crossword'),
+    Statistic = require('../models/statistic'),
+    limits = require('../config').limits,
+    indexOfArray = require('../lib/util').indexOfArray,
+    toDate = require('../lib/util').toDate;
 
 
-exports.gameNewGet = function (req, res, next) {
+exports.gameNewGet = (req, res, next) => {
     User.getFriends(req.user._id, (err, friends) => {
         if (err) {
             return next(err);
@@ -21,7 +22,7 @@ exports.gameNewGet = function (req, res, next) {
 
 
 
-exports.gameNewPost = function (req, res, next) {
+exports.gameNewPost = (req, res, next) => {
 
     const game = new Game({
         player1: req.user._id
@@ -151,7 +152,8 @@ exports.gameNewPost = function (req, res, next) {
 
 
 
-exports.gameResumeGet = function (req, res, next) {
+exports.gameResumeGet = (req, res, next) => {
+    var locale = req.getLocale();
 
     Game
         .find({
@@ -178,7 +180,7 @@ exports.gameResumeGet = function (req, res, next) {
             games.forEach(e => {
                 var entry = {};
                 entry.url = '/main/game-session/' + e._id;
-                entry.dateCreated = moment(e._id.getTimestamp()).format('MMM DD YYYY, HH:mm');
+                entry.dateCreated = toDate(locale, dateformat(e._id.getTimestamp(), 'mmm d yyyy, HH:MM'));
                 entry.isAdmin = req.user._id.equals(e.player1._id);
                 entry.partner = e.player2 ? (req.user._id.equals(e.player1._id) ? e.player2.username : e.player1.username) : '';
                 gamesMod.push(entry);
@@ -194,12 +196,12 @@ exports.gameResumeGet = function (req, res, next) {
 };
 
 
-exports.gameSessionGet = function (req, res) {
+exports.gameSessionGet = (req, res) => {
     res.render('game-session');
 };
 
 
-exports.gameStatisticsGet = function (req, res, next) {
+exports.gameStatisticsGet = (req, res, next) => {
     /*****
     Checks to see if game exists and caller is game's moderator
     (player1). If so it saves the game statistics and removes game.

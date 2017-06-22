@@ -1,5 +1,4 @@
 const gameConf = require('./game-conf');
-const indexOfArray = require('../../lib/util').indexOfArray;
 
 const grid = (function () {
     var canvas = gameConf.canvas,
@@ -81,29 +80,19 @@ const grid = (function () {
                 cols = crossword.dim[1];
                 bpos = crossword.bpos;
                 bpos.forEach((ele, ind) => bposHash[ele] = ind);
+
+                var canvasW = 2 * pad + numberPadX + sqLen * cols,
+                    canvasH = 2 * pad + numberPadY + sqLen * rows;
+
+                canvas.setAttribute('width', canvasW);
+                canvas.setAttribute('height', canvasH);
+
                 return this;
             },
             draw() {
                 var i, x, y;
 
-                // var scaleFactor = 1;
-
-
-                // if (conf.scaleFactor) {
-                //   scaleFactor = conf.scaleFactor;
-                //   pad = pad / scaleFactor;
-                // }
-
-
-                // sqLen = Math.floor(Math.min((cw - 2 * pad - 1) / (cols ), (ch - 2 * pad - 1) / (rows )));
-
-
                 ctx.strokeStyle = colors.default;
-                // ctx.strokeRect(0, 0, canvas.width, canvas.height);
-
-
-                // ctx.scale(scaleFactor, scaleFactor);
-                // ctx.save();
 
                 // horizontal lines
                 for (i = 0; i <= rows; i += 1) {
@@ -200,12 +189,13 @@ const grid = (function () {
                 });
             },
             resize() {
-                var rows = crossword.dim[0],
-                    cols = crossword.dim[1],
-                    w = 2 * pad + numberPadX + sqLen * cols,
-                    h = 2 * pad + numberPadY + sqLen * rows;
-                canvas.setAttribute('width', w);
-                canvas.setAttribute('height', h);
+                var canvasDiv = gameConf.htmlElements.canvasDiv,
+                    innerHeight = window.innerHeight,
+                    heightThreshold = 0.45;
+
+                if (canvas.getAttribute('height') > heightThreshold * innerHeight) {
+                    canvasDiv.style.height = (heightThreshold * innerHeight) + 'px';
+                }
 
                 return this;
             },

@@ -1,17 +1,17 @@
-const moment = require('moment');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
+const dateformat = require('dateformat'),
+    jwt = require('jsonwebtoken'),
+    bcrypt = require('bcrypt'),
+    saltRounds = 10,
+    User = require('../models/user'),
+    Statistic = require('../models/statistic'),
+    limits = require('../config').limits,
+    jwtOptions = require('../config').jwtOptions,
+    cookiesOptions = require('../config').cookiesOptions,
+    toDate = require('../lib/util').toDate;
 
-const Statistic = require('../models/statistic');
-const limits = require('../config').limits;
-const jwtOptions = require('../config').jwtOptions;
-const cookiesOptions = require('../config').cookiesOptions;
-const User = require('../models/user');
 
 
-
-exports.userLoginGet = function (req, res) {
+exports.userLoginGet = (req, res) => {
     if (req.cookies.jwt) {
         return res.redirect('/main');
     }
@@ -20,7 +20,7 @@ exports.userLoginGet = function (req, res) {
 
 
 
-exports.userLoginPost = function (req, res, next) {
+exports.userLoginPost = (req, res, next) => {
 
     if (req.cookies.jwt) {
         return res.redirect('/main');
@@ -37,8 +37,10 @@ exports.userLoginPost = function (req, res, next) {
 
 
     req.sanitize('username').trim();
+    console.log(req.body.username.length)
 
     if (!req.body.username || !req.body.pwd || req.body.username.length < limits.USERNAME_MIN_LENGTH || req.body.username.length > limits.USERNAME_MAX_LENGTH || req.body.pwd.length < limits.PWD_MIN_LENGTH) {
+        console.log('ERROR PRE FIND')
         return userLoginPostErrors();
     }
 
@@ -46,7 +48,7 @@ exports.userLoginPost = function (req, res, next) {
     req.sanitize('pwd').escape();
 
     User.findOne({
-            'username': req.body.username.toLowerCase()
+            username: req.body.username.toLowerCase()
         })
         .exec((err, user) => {
 
@@ -57,6 +59,8 @@ exports.userLoginPost = function (req, res, next) {
             if (!user) {
                 return userLoginPostErrors();
             }
+
+            console.log(user.username)
 
             bcrypt.compare(req.body.pwd, user.pwd, (err, result) => {
                 if (err) {
@@ -84,6 +88,14 @@ exports.userLoginPost = function (req, res, next) {
                         secure: process.env.NODE_ENV === 'production'
                     });
 
+                    if (user.locale) {
+                        res.cookie('locale', user.locale, {
+                            expires: new Date(Date.now() + cookiesOptions.age),
+                            httpOnly: true,
+                            secure: process.env.NODE_ENV === 'production'
+                        });
+                    }
+
                     res.redirect('/main');
                 });
 
@@ -95,7 +107,7 @@ exports.userLoginPost = function (req, res, next) {
 
 
 
-exports.userRegisterGet = function (req, res) {
+exports.userRegisterGet = (req, res) => {
     if (req.cookies.jwt) {
         return res.redirect('/main');
     }
@@ -105,7 +117,7 @@ exports.userRegisterGet = function (req, res) {
 
 
 
-exports.userRegisterPost = function (req, res, next) {
+exports.userRegisterPost = (req, res, next) => {
 
     if (req.cookies.jwt) {
         return res.redirect('/main');
@@ -250,7 +262,9 @@ exports.userRegisterPost = function (req, res, next) {
 
 
 
-exports.userHistoryGet = function (req, res, next) {
+exports.userHistoryGet = (req, res, next) => {
+    var locale = req.getLocale();
+
     Statistic
         .find({
             $or: [{
@@ -294,15 +308,17 @@ exports.userHistoryGet = function (req, res, next) {
             var completedGames = [],
                 mdash = '\u2014',
                 calcRating = (found, total) => {
-                    return found ? parseFloat(found * 100 / total).toFixed(2) : 0;
+                    return found ? found * 100 / total : 0;
+                },
+                ratingToString = rating => {
+                    return rating ? parseFloat(rating).toFixed(2) : 0;
                 };
 
             statsResult.forEach(stat => {
                 var isPlayer1 = req.user._id.equals(stat.player1._id),
                     otherUsername = isPlayer1 ? (stat.player2 ? stat.player2.username : mdash) :
                     stat.player1.username,
-                    date = moment(stat._id.getTimestamp())
-                    .format('MMM DD YYYY, HH:mm'),
+                    date = toDate(locale, dateformat(stat._id.getTimestamp(), 'mmm d yyyy, HH:MM')),
                     diff = res.__(stat.diff),
                     p2Letters = stat.p2Letters ? stat.p2Letters : 0,
                     lettersFound = stat.p1Letters + p2Letters,
@@ -320,7 +336,7 @@ exports.userHistoryGet = function (req, res, next) {
                 completedGames.push({
                     date,
                     diff,
-                    rating,
+                    rating: ratingToString(rating),
                     otherUsername
                 });
             });
@@ -329,16 +345,16 @@ exports.userHistoryGet = function (req, res, next) {
                 completedGames,
                 stats: {
                     highestRating: [
-                        stats.easy.hasPlayed ? stats.easy.highestRating : mdash,
-                        stats.medium.hasPlayed ? stats.medium.highestRating : mdash,
-                        stats.hard.hasPlayed ? stats.hard.highestRating : mdash,
+                        stats.easy.hasPlayed ? ratingToString(stats.easy.highestRating) : mdash,
+                        stats.medium.hasPlayed ? ratingToString(stats.medium.highestRating) : mdash,
+                        stats.hard.hasPlayed ? ratingToString(stats.hard.highestRating) : mdash,
                     ],
                     avgRating: [
-                        stats.easy.hasPlayed ? calcRating(stats.easy.lettersFound, stats.easy.whitesC) :
+                        stats.easy.hasPlayed ? ratingToString(calcRating(stats.easy.lettersFound, stats.easy.whitesC)) :
                         mdash,
-                        stats.medium.hasPlayed ? calcRating(stats.medium.lettersFound, stats.easy.whitesC) :
+                        stats.medium.hasPlayed ? ratingToString(calcRating(stats.medium.lettersFound, stats.easy.whitesC)) :
                         mdash,
-                        stats.hard.hasPlayed ? calcRating(stats.hard.lettersFound, stats.easy.whitesC) :
+                        stats.hard.hasPlayed ? ratingToString(calcRating(stats.hard.lettersFound, stats.easy.whitesC)) :
                         mdash,
                     ]
                 }
@@ -350,7 +366,9 @@ exports.userHistoryGet = function (req, res, next) {
 
 
 
-exports.userFriendsGet = function (req, res, next) {
+exports.userFriendsGet = (req, res, next) => {
+    var locale = req.getLocale();
+
     User.findOne({
             _id: req.user._id
         }, {
@@ -365,8 +383,9 @@ exports.userFriendsGet = function (req, res, next) {
             }
 
             var friends = user.friends.map(e => {
-                    var lastCompleted = e.lastCompleted ? moment(e.lastCompleted.getTimestamp())
-                        .format('MMM DD YYYY, HH:mm') : '\u2014';
+                    var lastCompleted = e.lastCompleted ?
+                        toDate(locale, dateformat(e.lastCompleted.getTimestamp(), 'mmm d yyyy, HH:MM')) :
+                        '\u2014';
                     return {
                         username: e.friend.username,
                         completedGames: e.completedGames,
@@ -374,8 +393,8 @@ exports.userFriendsGet = function (req, res, next) {
                     };
                 }),
                 incFriendRequests = user.incFriendReq.map(e => {
-                    var date = moment(e.from._id.getTimestamp())
-                        .format('MMM DD YYYY, HH:mm');
+                    var date = toDate(locale, dateformat(e.from._id.getTimestamp(), 'mmm d yyyy, HH:MM'));
+
                     return {
                         date,
                         username: e.from.username,
@@ -394,14 +413,14 @@ exports.userFriendsGet = function (req, res, next) {
 
 
 
-exports.userIncRequestPost = function (req, res, next) {
+exports.userIncRequestPost = (req, res, next) => {
     var username = req.body.username,
         accepted = req.body.accepted;
 
     if (!username || typeof username !== 'string') {
         return res.end();
     }
-console.log(req.body)
+    console.log(req.body)
     var updateSender = (uid, otheruid, accepted, cb) => {
             var update = {
                 $pull: {
@@ -443,7 +462,7 @@ console.log(req.body)
                     }
                 };
             }
-console.log(update)
+            console.log(update)
             User.update({
                     _id: uid
                 }, update)
@@ -492,7 +511,7 @@ console.log(update)
 };
 
 
-exports.userOutRequestPost = function (req, res, next) {
+exports.userOutRequestPost = (req, res, next) => {
 
     var updateSender = (uid, otheruid, cb) => {
             User.update({
@@ -592,6 +611,6 @@ exports.userOutRequestPost = function (req, res, next) {
 
 
 
-exports.userSettingsGet = function (req, res) {
+exports.userSettingsGet = (req, res) => {
     res.render('settings');
 };

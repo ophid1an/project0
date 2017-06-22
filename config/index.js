@@ -32,5 +32,16 @@ exports.limits = {
     MESSAGE_MAX_LENGTH: 2500,
     LETTER_MIN_LENGTH: 1,
     CW_DIFFICULTIES: ['easy', 'medium', 'hard'],
-    CW_LANGUAGES_SUPPORTED: ['en', 'el']
+    CW_LANGUAGES_SUPPORTED: {
+        el: 'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ',
+        en: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    },
+    LOCALES: {
+        en: {
+            months: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+        },
+        el: {
+            months: ['Ιαν', 'Φεβ', 'Μαρ', 'Απρ', 'Μαι', 'Ιουν', 'Ιουλ', 'Αυγ', 'Σεπ', 'Οκτ', 'Νοε', 'Δεκ']
+        }
+    }
 };

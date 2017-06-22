@@ -5,7 +5,6 @@
 
 /* Variables
 -------------------------------------------------- */
-$lightgray: #efefef;
 
 // START -- Bootstrap colors
 $color-muted: #636c72;
@@ -17,38 +16,36 @@ $color-danger: #d9534f;
 $color-white: #fff;
 // END -- Bootstrap colors
 
+$lightgray: #efefef;
 $grey-trans: rgba(200,200,200,0.9);
-$body-padding-top-vh: 1.5vh;
 $body-margin-top-vh: 1.5vh;
-$mobile: 400px;
-$phablet: 550px;
-$tablet: 750px;
-$desktop: 1000px;
-$desktopHD: 1200px;
 
 /* Rules
 ------------------------------------------------- */
 body {
     margin-top: $body-margin-top-vh;
-    // padding-top: $body-padding-top-vh;
-    // padding-top: 2rem;
     background-color: $lightgray;
     font-family: "Roboto", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-h1,
-h2,
-h3,
-h4 {
+.container {
+  h1,
+  h2,
+  h3,
+  h4 {
     border-top: 1px solid black;
     border-bottom: 1px solid black;
-}
+  }
 
-// @media (max-width: $phablet) { // PROBABLY NOT NEEDED
-//     .column-special {
-//         width: 50%;
-//     }
-// }
+  h1,
+  h2,
+  h3,
+  h4,
+  footer {
+    text-align: center;
+  }
+
+}
 
 .overflow-auto {
   overflow: auto;
@@ -88,14 +85,6 @@ h4 {
     background-color: $grey-trans !important;
 }
 
-.align-center {
-    text-align: center;
-}
-
-.align-right { // PROBABLY NOT NEEDED
-    text-align: right;
-}
-
 .bg {
     background-image: url("/images/crossword-arxiki.jpg");
     background-position: center;
@@ -105,7 +94,6 @@ h4 {
 }
 
 .border-dotted {
-    // padding: -1px;
     border: 1px dotted black;
 }
 

@@ -1,16 +1,15 @@
-const multer = require('multer');
-const storage = multer.memoryStorage();
-const upload = multer({
-    storage: storage
-}).single('file-to-upload');
+const multer = require('multer'),
+    storage = multer.memoryStorage(),
+    upload = multer({
+        storage: storage
+    }).single('file-to-upload'),
 
-const Crossword = require('../models/crossword');
-const parseCrossword = require('../lib/util').parseCrossword;
-// const Busboy = require('busboy');
-
+    Crossword = require('../models/crossword'),
+    parseCrossword = require('../lib/util').parseCrossword;
 
 
-exports.crosswordUploadGet = function (req, res) {
+
+exports.crosswordUploadGet = (req, res) => {
     if (req.user.isAdmin) {
         return res.render('upload-crossword');
     }
@@ -20,7 +19,7 @@ exports.crosswordUploadGet = function (req, res) {
 
 
 
-exports.crosswordUploadPost = function (req, res, next) {
+exports.crosswordUploadPost = (req, res, next) => {
 
     if (req.user.isAdmin) {
         upload(req, res, (err) => {

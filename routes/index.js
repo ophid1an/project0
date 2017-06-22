@@ -1,13 +1,12 @@
-const express = require('express');
-const router = express.Router();
-
-const title = require('../config').title;
-const author = require('../config').author;
-const userController = require('../controllers/userController');
+const express = require('express'),
+    router = express.Router(),
+    title = require('../config').title,
+    author = require('../config').author,
+    userController = require('../controllers/userController');
 
 
 /* GET home page. */
-router.get('/', function (req, res) {
+router.get('/', (req, res) => {
     if (req.cookies.jwt) {
         return res.redirect('/main');
     }
@@ -17,8 +16,9 @@ router.get('/', function (req, res) {
     });
 });
 
-router.get('/logout', function (req, res) {
+router.get('/logout', (req, res) => {
     res.clearCookie('jwt');
+    res.clearCookie('locale');
     res.redirect('/');
 });
 
@@ -29,5 +29,6 @@ router.post('/login', userController.userLoginPost);
 router.get('/register', userController.userRegisterGet);
 
 router.post('/register', userController.userRegisterPost);
+
 
 module.exports = router;

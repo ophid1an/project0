@@ -1,17 +1,14 @@
-const express = require('express');
-const router = express.Router();
-
-const title = require('../config').title;
-const author = require('../config').author;
-const userController = require('../controllers/userController');
-const crosswordController = require('../controllers/crosswordController');
-const gameController = require('../controllers/gameController');
-
-const testController = require('../controllers/testController');
+const express = require('express'),
+    router = express.Router(),
+    title = require('../config').title,
+    author = require('../config').author,
+    userController = require('../controllers/userController'),
+    crosswordController = require('../controllers/crosswordController'),
+    gameController = require('../controllers/gameController');
 
 
 /* GET main page. */
-router.get('/', function (req, res) {
+router.get('/', (req, res) => {
     var iReqs = req.user.incFriendReq,
         incRequests = (iReqs && iReqs.length) ? iReqs.length : 0;
 
@@ -47,16 +44,6 @@ router.get('/settings', userController.userSettingsGet);
 router.get('/upload-crossword', crosswordController.crosswordUploadGet);
 
 router.post('/upload-crossword', crosswordController.crosswordUploadPost);
-
-
-
-if (process.env.NODE_ENV !== 'production') {
-    router.get('/add-friend/:user', testController.userAddFriendGet);
-    router.get('/crosswords', testController.crosswordsGet);
-    router.get('/games', testController.gamesGet);
-    router.get('/random-crossword/:diff', testController.randomCrosswordGet);
-}
-
 
 
 module.exports = router;
