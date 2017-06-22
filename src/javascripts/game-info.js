@@ -2,7 +2,7 @@ const gameConf = require('./game-conf');
 
 const info = (function () {
     var infoDiv = gameConf.htmlElements.infoDiv,
-        locale = gameConf.localeStrings.el,
+        locale = gameConf.localeStrings.en,
         otherUsername = '',
         infoLog = msg => { //TODO Remove
             var oldMsg = infoDiv.innerHTML;
@@ -15,7 +15,10 @@ const info = (function () {
         },
 
         stub = {
-            init(otherName) {
+            init(otherName, loc) {
+                if (loc) {
+                    locale = gameConf.localeStrings[loc];
+                }
                 otherUsername = otherName;
                 return this;
             },

@@ -49,7 +49,8 @@ function start() {
               //     letters: 'Array',
               //     messages: 'Array',
               //     isPlayer1: 'Boolean',
-              //     otherUsername: 'String'
+              //     otherUsername: 'String',
+              //     locale: 'String'
               // };
               *****/
 
@@ -61,7 +62,7 @@ function start() {
             // Setup game objects
             buttons.init(data.isPlayer1, data.otherUsername);
 
-            info.init(data.otherUsername)
+            info.init(data.otherUsername, data.locale)
                 .thisOnline();
 
             grid.init(data.crossword, data.isPlayer1)
