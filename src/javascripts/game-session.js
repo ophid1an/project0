@@ -62,7 +62,7 @@ function start() {
             // Setup game objects
             buttons.init(data.isPlayer1, data.otherUsername);
 
-            info.init(data.otherUsername, data.locale)
+            info.init(data.isPlayer1, data.otherUsername, data.locale)
                 .thisOnline();
 
             grid.init(data.crossword, data.isPlayer1)
@@ -80,7 +80,7 @@ function start() {
                 data.isPlayer1, data.otherUsername);
 
             messages.init(data.messages, socket,
-                data.isPlayer1, data.otherUsername);
+                data.isPlayer1, data.otherUsername, data.locale);
 
             /***
                   HTML event listeners
@@ -95,7 +95,6 @@ function start() {
             });
 
             completeConfirmBtn.addEventListener('click', () => {
-                window.location.href = gameConf.redirectURI;
                 socket.emit('send complete');
             });
 
@@ -188,8 +187,8 @@ function start() {
             messages.update(data);
         });
 
-        socket.on('complete', () => {
-            setTimeout(() => window.location.href = gameConf.redirectURI, 500); // Wait a bit to update database
+        socket.on('game completed', () => {
+            info.gameCompleted(() => window.location.href = gameConf.redirectURI);
         });
 
         socket.on('other online', () => {

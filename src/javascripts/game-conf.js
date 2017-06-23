@@ -26,7 +26,7 @@ const langsSupported = require('../../config').limits.CW_LANGUAGES_SUPPORTED,
         },
         htmlElements: {
             canvasDiv: document.getElementById('canvas-container'),
-            infoDiv: document.getElementById('info'), // TODO: remove when done
+            infoDiv: document.getElementById('info'),
             defsDiv: document.getElementById('defs'),
             userInput: document.getElementById('letters-input'),
             defSingleDiv: document.getElementById('def-single'),
@@ -46,10 +46,11 @@ const langsSupported = require('../../config').limits.CW_LANGUAGES_SUPPORTED,
             dropdownList: document.getElementById('dropdown-list'),
             helpDiv: document.getElementById('help'),
             completeDiv: document.getElementById('complete'),
+            gameCompletedDiv: document.getElementById('game-completed'),
             messagesDiv: document.getElementById('messages'),
             messagesList: document.getElementById('messages-list'),
             messagesForm: document.getElementById('messages-form'),
-            messagesInput: document.getElementById('messages-input'), // TODO MAY NOT BE NEEDED
+            messagesInput: document.getElementById('messages-input'),
             completeConfirmBtn: document.getElementById('complete-confirm-button')
         },
         langsSupported,

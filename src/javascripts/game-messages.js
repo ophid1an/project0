@@ -1,10 +1,12 @@
 const gameConf = require('./game-conf');
 const dateformat = require('dateformat');
+const toDate = require('../../lib/util').toDate;
 
 const messages = (function () {
     var socket = {},
         isPlayer1 = false,
         otherUsername = '',
+        locale = '',
         messagesList = gameConf.htmlElements.messagesList,
         messagesBtn = gameConf.htmlElements.messagesBtn,
         messagesBtnName = messagesBtn.innerHTML,
@@ -29,10 +31,11 @@ const messages = (function () {
             }
         },
         stub = {
-            init(msgs, s, isP1, otherName) {
+            init(msgs, s, isP1, otherName, loc = 'en') {
                 socket = s;
                 isPlayer1 = isP1;
                 otherUsername = otherName;
+                locale = loc;
                 stub.update(msgs);
                 canReceiveNewMessages = true; // don't count new messages until after first connection
                 return this;
@@ -66,7 +69,7 @@ const messages = (function () {
                     }
 
                     liDate = document.createElement('li');
-                    liDate.textContent = dateformat(msg.date, 'mmm d, HH:MM:ss');
+                    liDate.textContent = toDate(locale, dateformat(msg.date, 'mmm d yyyy, HH:MM:ss'));
                     liText = document.createElement('li');
                     liText.textContent = msg.text;
 

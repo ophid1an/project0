@@ -1,68 +1,58 @@
 <div class="container">
 
-    <div class="row">
-        <div class="twelve columns" id="buttons">
-            <a id="messages-button" class="button hidden">{{__ 'messages'}}</a>
-            <a id="crossword-button" class="button hidden">{{__ 'crossword'}}</a>
-            <a id="home-button" class="hidden" href="/main">{{__ 'home'}}</a>
-            <a id="complete-button" class="hidden">{{__ 'complete'}}</a>
-            <div class="u-pull-right">
-                <a id="options-button" class="button">{{__ 'options'}}</a>
-                <div class="dropdown-content hidden" id="dropdown-list">
-                    <a id="help-button">{{__ 'help'}}</a>
-                </div>
+    <div class="row" id="buttons">
+        <a id="messages-button" class="button hidden">{{__ 'messages'}}</a>
+        <a id="crossword-button" class="button hidden">{{__ 'crossword'}}</a>
+        <a id="home-button" class="hidden" href="/main">{{__ 'home'}}</a>
+        <a id="complete-button" class="hidden">{{__ 'complete'}}</a>
+        <div class="u-pull-right">
+            <a id="options-button" class="button">{{__ 'options'}}</a>
+            <div class="dropdown-content hidden" id="dropdown-list">
+                <a id="help-button">{{__ 'help'}}</a>
             </div>
         </div>
     </div>
 
     <input type="text" class="pos-abs-hidden" id="letters-input" name="letters-input" autocomplete="off" value="">
 
-    <div class="row">
-        <div class="twelve columns overflow-auto nowrap" id="info">&nbsp;</div>
-    </div>
+    <div class="overflow-auto nowrap" id="info">&nbsp;</div>
 
-    <div class="row">
-        <div class="twelve columns overflow-auto nowrap" id="def-single">&nbsp;</div>
-    </div>
+    <div class="overflow-auto nowrap" id="def-single">&nbsp;</div>
 
-    <div id="messages" class="hidden">
-        <ul id="messages-list" class="no-bullets border-dotted overflow-auto"></ul>
+    <div id="messages" class="hidden game-messages">
+        <ul id="messages-list" class="border-dotted overflow-auto"></ul>
         <form id="messages-form">
-            <div class="row">
-                <label for="messages-input">{{__ 'text'}}:</label>
-                <input type="text" name="messages-input" id="messages-input">
-            </div>
+            <label for="messages-input">{{__ 'text'}}:</label>
+            <input type="text" name="messages-input" id="messages-input">
         </form>
     </div>
 
-    <div id="help" class="u-full-width hidden fixed align-center">
+    <div id="help" class="hidden game-dialog">
         {{{__ 'helpText'}}}
     </div>
 
-    <div id="complete" class="hidden fixed align-center">
-        <div class="u-full-width">
+    <div id="complete" class="hidden game-dialog">
             <h4>{{__ 'complete'}}</h4>
-        </div>
-        <div class="u-full-width">
             <p>{{__ 'completeText'}}</p>
-        </div>
-        <div class="u-full-width">
             <button type="button" id="complete-confirm-button" name="complete-confirm-button" class="button-primary">{{__ 'ok'}}</button>
-        </div>
     </div>
 
-    <div class="row border-dotted spacing-special overflow-auto" id="canvas-container">
+    <div id="game-completed" class="hidden game-dialog">
+            <p>{{__ 'gameCompleted'}}</p>
+    </div>
+
+    <div class="border-dotted spacing-special overflow-auto" id="canvas-container">
         <canvas id="canvas">
           Canvas element is not supported!
         </canvas>
     </div>
 
-    <div id="defs" class="row border-dotted overflow-auto">
-        <h5 class="border-btm align-center">
+    <div id="defs" class="border-dotted overflow-auto">
+        <h5>
           <b>{{__ 'across'}}</b>
         </h5>
         <div id="defs-across"> </div>
-        <h5 class="border-btm align-center">
+        <h5>
           <b>{{__ 'down'}}</b>
         </h5>
         <div id="defs-down"> </div>

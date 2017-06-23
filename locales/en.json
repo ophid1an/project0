@@ -81,10 +81,14 @@
   "cancel": "Cancel",
   "helpText": "<h4>Help</h4><p>&lt;Space&gt; to move cursor one position forward</p><p>&lt;Backspace&gt; to move cursor one position backwards</p><p>&lt;.&gt; to toggle the certainty of letters (certain/uncertain)</p><p>&lt;Enter&gt; or click anywhere outside of selected word to finish input</p>",
   "completeText": "Are you sure you want to complete your attempt?",
+  "gameCompleted": "Game completed!",
   "crossword": "Crossword",
   "gameStatistics": "Game statistics",
   "whitesC": "White squares number",
   "lettersYouFound": "Number of letters found by you",
   "lettersOtherFound": "Number of letters found by",
-  "infoInvitationSent": "Friend request sent."
+  "infoInvitationSent": "Friend request sent.",
+  "language":"Language",
+  "en": "English",
+  "el": "Greek"
 }

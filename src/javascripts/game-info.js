@@ -2,9 +2,11 @@ const gameConf = require('./game-conf');
 
 const info = (function () {
     var infoDiv = gameConf.htmlElements.infoDiv,
-        locale = gameConf.localeStrings.en,
+        gameCompletedDiv = gameConf.htmlElements.gameCompletedDiv,
+        localeStrings = gameConf.localeStrings.en,
+        isPlayer1 = false,
         otherUsername = '',
-        infoLog = msg => { //TODO Remove
+        infoLog = msg => {
             var oldMsg = infoDiv.innerHTML;
             infoDiv.innerHTML = msg;
             setTimeout(() => {
@@ -15,33 +17,41 @@ const info = (function () {
         },
 
         stub = {
-            init(otherName, loc) {
-                if (loc) {
-                    locale = gameConf.localeStrings[loc];
-                }
+            init(isP1, otherName, locale) {
+                isPlayer1 = isP1;
                 otherUsername = otherName;
+                if (locale) {
+                    localeStrings = gameConf.localeStrings[locale];
+                }
                 return this;
             },
             thisOnline(flag = true) {
                 if (flag) {
                     infoDiv.classList.replace('text-danger', 'text-success');
-                    infoDiv.innerHTML = `&lt;${locale.online}&gt;`;
+                    infoDiv.innerHTML = `&lt;${localeStrings.online}&gt;`;
                     if (otherUsername) {
                         stub.otherOnline(false);
                     }
                 } else {
                     infoDiv.classList.replace('text-success', 'text-danger');
-                    infoDiv.innerHTML = `&lt;${locale.offline}&gt;`;
+                    infoDiv.innerHTML = `&lt;${localeStrings.offline}&gt;`;
                 }
             },
             otherOnline(flag = true) {
                 if (flag) {
                     infoDiv.classList.replace('text-danger', 'text-success');
-                    infoDiv.innerHTML = `&lt;${otherUsername}&gt; ${locale.isOnline}.`;
+                    infoDiv.innerHTML = `&lt;${otherUsername}&gt; ${localeStrings.isOnline}.`;
                 } else {
                     infoDiv.classList.replace('text-success', 'text-danger');
-                    infoDiv.innerHTML = `&lt;${otherUsername}&gt; ${locale.isOffline}.`;
+                    infoDiv.innerHTML = `&lt;${otherUsername}&gt; ${localeStrings.isOffline}.`;
                 }
+            },
+            gameCompleted(cb) {
+                if (!isPlayer1) {
+                    gameCompletedDiv.classList.remove('hidden');
+                    return setTimeout(() => cb(), 1000);
+                }
+                cb();
             },
             error(err) {
                 if (err === 'Game not found' ||
