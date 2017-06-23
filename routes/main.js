@@ -41,6 +41,8 @@ router.get('/history', userController.userHistoryGet);
 
 router.get('/settings', userController.userSettingsGet);
 
+router.post('/settings', userController.userSettingsPost);
+
 router.get('/upload-crossword', crosswordController.crosswordUploadGet);
 
 router.post('/upload-crossword', crosswordController.crosswordUploadPost);

@@ -612,5 +612,34 @@ exports.userOutRequestPost = (req, res, next) => {
 
 
 exports.userSettingsGet = (req, res) => {
-    res.render('settings');
+    var userLocale = req.user.locale,
+        localesArr = Object.keys(limits.LOCALES),
+        locales = [];
+
+    if (userLocale) {
+        userLocale = {
+            value: userLocale,
+            text: req.__(userLocale)
+        };
+
+        var ind = localesArr.indexOf(userLocale);
+        localesArr = localesArr.splice(ind, 1);
+    }
+
+    localesArr.forEach(e => locales.push({
+        value: e,
+        text: req.__(e)
+    }));
+
+    res.render('settings', {
+        userLocale,
+        locales
+    });
+};
+
+
+
+
+exports.userSettingsPost = (req, res, next) => {
+    res.json(req.body.language);
 };

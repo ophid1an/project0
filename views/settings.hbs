@@ -1,19 +1,40 @@
 <div class="container">
 
-    <div class="row">
-        <div class="one-half column">
-            <a class="button" href="/">{{__ 'back'}}</a>
+    <a class="button" href="/">{{__ 'back'}}</a>
+
+    <h3>{{__ 'userSettings'}}</h3>
+
+    {{#if errors}}
+        <div class="row text-danger">
+            <div class="twelve columns">
+                <ul>
+                    {{#each errors}}
+                        <li>{{msg}}</li>
+                    {{/each}}
+                </ul>
+            </div>
         </div>
-    </div>
+    {{/if}}
 
-    <div class="row align-center">
-        <div class="twelve columns">
-            <h3>{{__ 'userSettings'}}</h3>
+    <form action="/main/settings" method="post">
+        <div class="row">
+            <div class="twelve-columns">
+                <label for="language" class="select">{{__ 'language'}}:</label>
+                <select name="language" data-mini="true" data-inline="true">
+                  {{#if userLocale}}
+                  <option value={{userLocale.value}}>{{userLocale.text}}</option>
+                  {{else}}
+                  <option value="">&mdash;</option>
+                  {{/if}}
+              {{#each locales}}
+<option value={{this.value}}>{{this.text}}</option>
+              {{/each}}
+              </select>
+            </div>
         </div>
-    </div>
 
-    <div class="row">
+        <input class="button-primary" type="submit" value="{{__ 'submit'}}">
 
-    </div>
+    </form>
 
 </div>
