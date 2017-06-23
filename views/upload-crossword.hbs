@@ -1,16 +1,8 @@
 <div class="container">
 
-    <div class="row">
-        <div class="one-half column">
-            <a class="button" href="/main/">{{__ 'back'}}</a>
-        </div>
-    </div>
+    <a class="button" href="/main/">{{__ 'back'}}</a>
 
-    <div class="row align-center">
-        <div class="twelve columns">
-            <h3>{{__ 'uploadCrossword'}}</h3>
-        </div>
-    </div>
+    <h3>{{__ 'uploadCrossword'}}</h3>
 
     {{#if errors}}
         <div class="row text-danger">
@@ -60,13 +52,13 @@
 
         <div class="row">
             <div class="twelve columns">
-                <h5 class="border-btm align-center"><b>{{__ 'across'}}</b></h5>
+                <h5><b>{{__ 'across'}}</b></h5>
                 <ol>
                     {{#each defs.across}}
                         <li>{{this}}</li>
                     {{/each}}
                 </ol>
-                <h5 class="border-btm align-center"><b>{{__ 'down'}}</b></h5>
+                <h5><b>{{__ 'down'}}</b></h5>
                 <ol>
                     {{#each defs.down}}
                         <li>{{this}}</li>

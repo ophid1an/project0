@@ -1,48 +1,48 @@
 <div class="container">
 
     <div class="row">
-        <div class="twelve columns">
-            <a class="button" href="/logout">{{__ 'logout'}}</a>
-            <a class="button u-pull-right" href="/main/settings">{{__ 'settings'}}</a>
-        </div>
+        <a class="button" href="/logout">{{__ 'logout'}}</a>
+        <a class="button u-pull-right" href="/main/settings">{{__ 'settings'}}</a>
     </div>
 
-    <div class="row align-center">
-        <div class="twelve columns">
-            <h2>{{title}}</h2>
-        </div>
-    </div>
+    <h2>{{title}}</h2>
 
-    <div class="row">
-        <div class="twelve columns">
-            <h6>{{__ 'hello'}} {{username}}!</h6>
-        </div>
-    </div>
+    <h6>{{__ 'hello'}} {{username}}!</h6>
 
     <div class="bg">
 
-        <div class="row align-center">
+        <div class="row">
             <div class="one-half column">
-                <a class="button button-bold u-full-width" href="/main/new-game">{{__ 'newGame'}}</a>
+                <a class="button button-bold u-full-width" href="/main/new-game">
+                  {{__ 'newGame'}}
+                </a>
             </div>
             <div class="one-half column">
-                <a class="button button-bold u-full-width" href="/main/resume-game">{{__ 'resumeGame'}}</a>
+                <a class="button button-bold u-full-width" href="/main/resume-game">
+                  {{__ 'resumeGame'}}
+                </a>
             </div>
         </div>
 
-        <div class="row align-center">
+        <div class="row">
             <div class="one-half column">
-                <a class="button button-bold u-full-width" href="/main/history">{{__ 'history'}}</a>
+                <a class="button button-bold u-full-width" href="/main/history">
+                  {{__ 'history'}}
+                </a>
             </div>
             <div class="one-half column">
-                <a class="button button-bold u-full-width" href="/main/friends">{{__ 'friends'}} {{#if incRequests}}({{incRequests}}){{/if}}</a>
+                <a class="button button-bold u-full-width" href="/main/friends">
+                  {{__ 'friends'}} {{#if incRequests}}({{incRequests}}){{/if}}
+                </a>
             </div>
         </div>
 
         {{#if isAdmin}}
-            <div class="row align-center">
+            <div class="row">
                 <div class="one-half column">
-                    <a class="button button-bold u-full-width" href="/main/upload-crossword">{{__ 'uploadCrossword'}}</a>
+                    <a class="button button-bold u-full-width" href="/main/upload-crossword">
+                      {{__ 'uploadCrossword'}}
+                    </a>
                 </div>
             </div>
         {{/if}}

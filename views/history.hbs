@@ -1,18 +1,12 @@
 <div class="container">
 
-    <div>
-        <a class="button" href="/">{{__ 'back'}}</a>
-    </div>
+    <a class="button" href="/">{{__ 'back'}}</a>
 
-    <div class="align-center">
-        <h3>{{__ 'history'}}</h3>
-    </div>
+    <h3>{{__ 'history'}}</h3>
 
     {{#if completedGames}}
 
-        <div class="align-center">
-            <h4 class="">{{__ 'statistics'}}</h4>
-        </div>
+        <h4 class="">{{__ 'statistics'}}</h4>
 
         <div class="overflow-auto history">
             <table>
@@ -41,11 +35,9 @@
             </table>
         </div>
 
-        <div class="align-center">
-            <h4>{{__ 'completedGames'}}</h4>
-        </div>
+        <h4>{{__ 'completedGames'}}</h4>
 
-        <div class="overflow-auto completed-games">
+        <div class="overflow-auto">
             <table>
                 <thead>
                     <tr>

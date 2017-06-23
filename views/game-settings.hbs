@@ -1,20 +1,10 @@
 <div class="container game">
 
-    <div class="row">
-        <div class="one-half column">
-            <a class="button" href="/main">{{__ 'back'}}</a>
-        </div>
-    </div>
-
-
+    <a class="button" href="/main">{{__ 'back'}}</a>
 
     {{#if resume}}
 
-        <div class="row align-center">
-            <div class="twelve columns">
-                <h3>{{__ 'savedGames'}}</h3>
-            </div>
-        </div>
+        <h3>{{__ 'savedGames'}}</h3>
 
         {{#if errors}}
             <div class="row text-danger">
@@ -30,44 +20,38 @@
 
 
         {{#if games}}
-            <div class="row overflow-auto">
-                <div class="twelve columns">
-                    <table class="">
-                        <thead>
+            <div class="overflow-auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>{{__ 'dateCreated'}}</th>
+                            <th>{{__ 'partner'}}</th>
+                            <th>{{__ 'moderator'}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each games}}
                             <tr>
-                                <th class="align-center"></th>
-                                <th class="align-center">{{__ 'dateCreated'}}</th>
-                                <th class="align-center">{{__ 'partner'}}</th>
-                                <th class="align-center">{{__ 'moderator'}}</th>
+                                <td><input type="radio" name="game" value= {{url}}></td>
+                                <td>{{dateCreated}}</td>
+                                <td>
+                                    {{#if partner}}{{partner}}{{else}}-{{/if}}
+                                </td>
+                                <td>
+                                    {{#if isAdmin}}{{../__ 'yes'}}{{else}}{{../__ 'no'}}{{/if}}
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {{#each games}}
-                                <tr>
-                                    <td><input type="radio" name="game" value= {{url}}></td>
-                                    <td class="align-center">{{dateCreated}}</td>
-                                    <td class="align-center">
-                                        {{#if partner}}{{partner}}{{else}}-{{/if}}
-                                    </td>
-                                    <td class="align-center">
-                                        {{#if isAdmin}}{{../__ 'yes'}}{{else}}{{../__ 'no'}}{{/if}}
-                                    </td>
-                                </tr>
-                            {{/each}}
-                        </tbody>
-                    </table>
-                </div>
+                        {{/each}}
+                    </tbody>
+                </table>
             </div>
             <a class="button button-primary" onclick="window.location.href=document.querySelector('input:checked').value;">{{__ 'select'}}</a>
         {{/if}}
 
     {{else}}
 
-        <div class="row align-center">
-            <div class="twelve columns">
-                <h3>{{__ 'gameSettings'}}</h3>
-            </div>
-        </div>
+        <h3>{{__ 'gameSettings'}}</h3>
 
         {{#if errors}}
             <div class="row text-danger">
