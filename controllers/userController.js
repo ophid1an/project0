@@ -25,27 +25,27 @@ exports.userLoginPost = (req, res, next) => {
         return res.redirect('/main');
     }
 
-    function userLoginPostErrors() {
-        res.render('login', {
-            errors: [{
-                msg: res.__('errorWrongUsernameOrPassword')
+    var username = req.body.username,
+        pwd = req.body.pwd,
+        userLoginPostError = () => {
+            res.render('login', {
+                error: res.__('errorWrongUsernameOrPassword')
+            });
+        };
 
-            }]
-        });
+    if (!username || !pwd || typeof username !== 'string' || typeof pwd !== 'string') {
+        return userLoginPostError();
     }
 
+    username = username.trim().toLowerCase();
 
-    req.sanitize('username').trim();
-
-    if (!req.body.username || !req.body.pwd || req.body.username.length < limits.USERNAME_MIN_LENGTH || req.body.username.length > limits.USERNAME_MAX_LENGTH || req.body.pwd.length < limits.PWD_MIN_LENGTH) {
-        return userLoginPostErrors();
+    if (username.length < limits.USERNAME_MIN_LENGTH || username.length > limits.USERNAME_MAX_LENGTH ||
+        pwd.length < limits.PWD_MIN_LENGTH || pwd.length > limits.PWD_MAX_LENGTH) {
+        return userLoginPostError();
     }
-
-    req.sanitize('username').escape();
-    req.sanitize('pwd').escape();
 
     User.findOne({
-            username: req.body.username.toLowerCase()
+            username
         })
         .exec((err, user) => {
 
@@ -54,16 +54,16 @@ exports.userLoginPost = (req, res, next) => {
             }
 
             if (!user) {
-                return userLoginPostErrors();
+                return userLoginPostError();
             }
 
-            bcrypt.compare(req.body.pwd, user.pwd, (err, result) => {
+            bcrypt.compare(pwd, user.pwd, (err, result) => {
                 if (err) {
                     return next(err);
                 }
 
                 if (!result) {
-                    return userLoginPostErrors();
+                    return userLoginPostError();
                 }
 
                 jwt.sign({

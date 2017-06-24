@@ -4,16 +4,8 @@
 
     <h3>{{__ 'login'}}</h3>
 
-    {{#if errors}}
-        <div class="row text-danger">
-            <div class="twelve columns">
-                <ul>
-                    {{#each errors}}
-                        <li>{{msg}}</li>
-                    {{/each}}
-                </ul>
-            </div>
-        </div>
+    {{#if error}}
+        <p class="text-danger">{{error}}</p>
     {{/if}}
 
     <form id="loginForm" action="/login" method="post">
