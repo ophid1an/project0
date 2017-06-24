@@ -34,7 +34,7 @@ exports.userLoginPost = (req, res, next) => {
             });
         };
 
-    if (!username || !pwd || typeof username !== 'string' || typeof pwd !== 'string') {
+    if (!areStrings(username, pwd)) {
         return userLoginPostError();
     }
 
