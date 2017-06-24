@@ -6,7 +6,8 @@ const dateformat = require('dateformat'),
     Statistic = require('../models/statistic'),
     limits = require('../config').limits,
     jwtOptions = require('../config').jwtOptions,
-    toDate = require('../lib/util').toDate;
+    toDate = require('../lib/util').toDate,
+    areStrings = require('../lib/util').areStrings;
 
 
 
@@ -118,43 +119,49 @@ exports.userRegisterPost = (req, res, next) => {
         return res.redirect('/main');
     }
 
-    function userRegisterPostErrors(errors) {
-        res.render('register', {
-            user: user,
-            errors: errors
-        });
+    if (!areStrings([req.body.username, req.body.email,
+            req.body.pwd, req.body['pwd-confirm']
+        ])) {
+        return res.render('register');
     }
 
-    const registerValidationSchema = {
-        'username': {
-            isAlphanumeric: {
-                errorMessage: res.__('errorInvalidUsernameType')
-            },
-            isLength: {
-                options: [{
-                    min: limits.USERNAME_MIN_LENGTH,
-                    max: limits.USERNAME_MAX_LENGTH
-                }],
-                errorMessage: res.__('errorInvalidUsernameLength')
-            }
+    var userRegisterPostErrors = errors => {
+            res.render('register', {
+                user,
+                errors
+            });
         },
-        'email': {
-            isEmail: true,
-            errorMessage: res.__('errorInvalidEmail')
-        },
-        'pwd': {
-            isLength: {
-                options: [{
-                    min: limits.PWD_MIN_LENGTH
-                }],
-                errorMessage: res.__('errorInvalidPwd')
+        registerValidationSchema = {
+            'username': {
+                isAlphanumeric: {
+                    errorMessage: res.__('errorInvalidUsernameType')
+                },
+                isLength: {
+                    options: [{
+                        min: limits.USERNAME_MIN_LENGTH,
+                        max: limits.USERNAME_MAX_LENGTH
+                    }],
+                    errorMessage: res.__('errorInvalidUsernameLength')
+                }
             },
-            equals: {
-                options: req.body['pwd-confirm'],
-                errorMessage: res.__('errorPasswordsDoNotMatch')
+            'email': {
+                isEmail: true,
+                errorMessage: res.__('errorInvalidEmail')
+            },
+            'pwd': {
+                isLength: {
+                    options: [{
+                        min: limits.PWD_MIN_LENGTH,
+                        max: limits.PWD_MAX_LENGTH
+                    }],
+                    errorMessage: res.__('errorInvalidPwd')
+                },
+                equals: {
+                    options: req.body['pwd-confirm'],
+                    errorMessage: res.__('errorPasswordsDoNotMatch')
+                }
             }
-        }
-    };
+        };
 
     req.sanitize('username').trim();
     req.sanitize('email').trim();
@@ -166,25 +173,22 @@ exports.userRegisterPost = (req, res, next) => {
     req.sanitize('email').normalizeEmail();
     req.sanitize('pwd').escape();
 
-    const errors = req.validationErrors();
-
-    const user = new User({
-        username: req.body.username.toLowerCase(),
-        email: req.body.email,
-        pwd: req.body.pwd
-    });
+    var errors = req.validationErrors(),
+        user = new User({
+            username: req.body.username.toLowerCase(),
+            email: req.body.email,
+            pwd: req.body.pwd
+        });
 
     if (errors) {
-
         return userRegisterPostErrors(errors);
-
     }
 
     User.find({
-            '$or': [{
-                'username': user.username
+            $or: [{
+                username: user.username
             }, {
-                'email': user.email
+                email: user.email
             }, {
                 username: 1,
                 email: 1

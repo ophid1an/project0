@@ -5,15 +5,11 @@
     <h3>{{__ 'register'}}</h3>
 
     {{#if errors}}
-        <div class="row">
-            <div class="twelve columns">
-                <ul class="text-danger">
-                    {{#each errors}}
-                        <li>{{msg}}</li>
-                    {{/each}}
-                </ul>
-            </div>
-        </div>
+        <ul class="text-danger">
+            {{#each errors}}
+                <li>{{msg}}</li>
+            {{/each}}
+        </ul>
     {{/if}}
 
     <form action="/register" method="post">
