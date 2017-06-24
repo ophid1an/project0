@@ -16,13 +16,18 @@ function start() {
         newReqBtn = document.getElementById('new-request-button'),
         newReqDiv = document.getElementById('new-request'),
         cancelBtn = document.getElementById('cancel-button'),
-        friendsRequestsDiv = document.getElementById('friendsRequests'),
+        friendRequestsDiv = document.getElementById('friend-requests'),
+        friendsListDiv = document.getElementById('friends-list'),
+        friendsListTable = document.getElementById('friends-list-table'),
         info = document.getElementById('info'),
         form = document.getElementById('form'),
         toggleVisibility = (time) => {
             var proceed = () => {
                 newReqBtn.classList.toggle('hidden');
-                friendsRequestsDiv.classList.toggle('hidden');
+                if (friendsListTable.rows.length > 1) {
+                    friendsListDiv.classList.toggle('hidden');
+                }
+                friendRequestsDiv.classList.toggle('hidden');
             };
 
             newReqDiv.classList.toggle('hidden');
@@ -37,7 +42,9 @@ function start() {
             }, time);
         };
 
-
+    if (friendsListTable.rows.length > 1) {
+        friendsListDiv.classList.toggle('hidden');
+    }
 
 
     // HTML event listeners
@@ -73,10 +80,11 @@ function start() {
             });
     });
 
-    friendsRequestsDiv.addEventListener('click', (e) => {
+    friendRequestsDiv.addEventListener('click', (e) => {
         var target = e.target;
         if (target.tagName === 'BUTTON') {
             var tr = target.parentElement.parentElement,
+                table = tr.parentElement.parentElement,
                 username = tr.children[1].innerHTML,
                 acceptBtn = tr.children[3].firstChild,
                 accepted = false;
@@ -99,7 +107,36 @@ function start() {
 
                             if (res.data.msg &&
                                 res.data.msg === 'OK') {
-                                tr.remove();
+                                // Remove table row and hide div if it is the
+                                // last incoming friend request
+                                if (table.rows.length === 2) {
+                                    friendRequestsDiv.innerHTML = '';
+                                } else {
+                                    tr.remove();
+                                }
+
+                                // Add row to friends list table
+                                if (accepted) {
+                                    var row = friendsListTable.insertRow(-1),
+                                        cell = row.insertCell(0),
+                                        text = document.createTextNode(username);
+
+                                    cell.appendChild(text);
+
+                                    cell = row.insertCell(1);
+                                    text = document.createTextNode('0');
+
+                                    cell.appendChild(text);
+
+                                    cell = row.insertCell(2);
+                                    text = document.createTextNode('\u2014');
+
+                                    cell.appendChild(text);
+
+                                    if (friendsListTable.rows.length === 2) {
+                                        friendsListDiv.classList.toggle('hidden');
+                                    }
+                                }
                             }
                         }
                     }

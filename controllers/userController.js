@@ -512,7 +512,9 @@ exports.userIncRequestPost = (req, res, next) => {
 
 exports.userOutRequestPost = (req, res, next) => {
 
-    var updateSender = (uid, otheruid, cb) => {
+    var username = req.body.username,
+        text = req.body.text,
+        updateSender = (uid, otheruid, cb) => {
             User.update({
                     _id: uid
                 }, {
@@ -546,20 +548,35 @@ exports.userOutRequestPost = (req, res, next) => {
                 });
         };
 
-    if (!req.body.username || !req.body.text) {
+    if (!areStrings([username, text])) {
         return res.json({
             error: res.__('badInput')
         });
     }
 
-    if (req.user.username === req.body.username) {
+    username = username.trim().toLowerCase();
+
+    if (username.length < limits.USERNAME_MIN_LENGTH ||
+        username.length > limits.USERNAME_MAX_LENGTH ||
+        text.length < limits.MESSAGE_MIN_LENGTH ||
+        text.length > limits.MESSAGE_MAX_LENGTH) {
+        return res.json({
+            error: res.__('badInput')
+        });
+    }
+
+    if (username === req.user.username) {
         return res.json({
             error: res.__('errorFriendExists')
         });
     }
 
     User.findOne({ // Find other user and act accordingly
-            username: req.body.username
+            username
+        }, {
+            friends: 1,
+            outFriendReq: 1,
+            incFriendReq: 1
         })
         .exec((err, user) => {
             if (err) {
@@ -602,7 +619,7 @@ exports.userOutRequestPost = (req, res, next) => {
             // Update this user's outgoing friend requests list and
             // other user's incoming friend requests list
             updateSender(req.user._id, user._id, finalCb);
-            updateReceiver(user._id, req.user._id, req.body.text, finalCb);
+            updateReceiver(user._id, req.user._id, text, finalCb);
 
         });
 

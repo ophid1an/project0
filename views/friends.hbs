@@ -10,6 +10,8 @@
     <p id="info"></p>
 
     <div id="new-request" class="hidden">
+        <h4>{{__ 'newFriendRequest'}}</h4>
+
         <form id="form" method="post">
             <div>
                 <label for="username">{{__ 'username'}}:</label>
@@ -25,9 +27,13 @@
         </form>
     </div>
 
-    <div id="friendsRequests">
+
+
+
+    <div id="friend-requests">
         {{#if incFriendRequests}}
-            <h4>{{__ 'incFriendReqs'}} </h4>
+
+            <h4>{{__ 'incFriendReqs'}}</h4>
 
             <div class="overflow-auto">
                 <table>
@@ -53,21 +59,24 @@
                 </table>
             </div>
         {{/if}}
+    </div>
 
-        {{#if friends}}
 
-            <h4>{{__ 'friendsList'}} </h4>
+    <div id="friends-list" class="hidden">
 
-            <div class="overflow-auto">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>{{__ 'username'}}</th>
-                            <th>{{__ 'completedGames'}}</th>
-                            <th>{{__ 'lastCompletedGame'}}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+        <h4>{{__ 'friendsList'}} </h4>
+
+        <div class="overflow-auto">
+            <table id="friends-list-table">
+                <thead>
+                    <tr>
+                        <th>{{__ 'username'}}</th>
+                        <th>{{__ 'completedGames'}}</th>
+                        <th>{{__ 'lastCompletedGame'}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#if friends}}
                         {{#each friends}}
                             <tr>
                                 <td>{{username}}</td>
@@ -75,11 +84,13 @@
                                 <td>{{lastCompleted}}</td>
                             </tr>
                         {{/each}}
-                    </tbody>
-                </table>
-            </div>
-        {{/if}}
+                    {{/if}}
+                </tbody>
+            </table>
+        </div>
+
     </div>
+
 
     <script src="/javascripts/friends.js"></script>
 
