@@ -636,8 +636,10 @@ exports.userSettingsGet = (req, res) => {
 
 
 exports.userSettingsPost = (req, res, next) => {
-    var locale = req.body.language !== req.user.locale ? req.body.language : undefined,
-        pwd = req.body.pwd === req.body['pwd-confirm'] ? req.body.pwd : undefined,
+    var locale = req.body.language !== req.user.locale ? req.body.language : '',
+        pwd = req.body.pwd === req.body['pwd-confirm'] ? req.body.pwd : '',
+        len = pwd.length,
+        locales = Object.keys(limits.LOCALES),
         update = {
             $set: {}
         },
@@ -659,15 +661,17 @@ exports.userSettingsPost = (req, res, next) => {
                         });
                     }
 
-                    res.redirect('/main');
+                    res.redirect('/login');
                 });
         };
 
-    if (locale) {
+    if (locale && typeof locale === 'string' && locales.indexOf(locale) !== -1) {
         update.$set.locale = locale;
     }
 
-    if (pwd) {
+    if (pwd && typeof pwd === 'string' &&
+        len >= limits.PWD_MIN_LENGTH && len <= limits.PWD_MAX_LENGTH) {
+
         // update jti property
         update.$set.jti = Date.now();
 

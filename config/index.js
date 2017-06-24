@@ -21,10 +21,11 @@ exports.jwtOptions = {
 exports.dbUrl = process.env.MONGODB_URI;
 
 exports.limits = {
-    COOKIES_AGE: 6 * 24 * 60 * 60 * 1000,
+    COOKIES_AGE: 6 * 24 * 60 * 60 * 1000, // 6 days, 1 day less than jwt expiration date
     PWD_MIN_LENGTH: 8,
+    PWD_MAX_LENGTH: 32,
     USERNAME_MIN_LENGTH: 4,
-    USERNAME_MAX_LENGTH: 30,
+    USERNAME_MAX_LENGTH: 32,
     MESSAGE_MIN_LENGTH: 1,
     MESSAGE_MAX_LENGTH: 2500,
     LETTER_MIN_LENGTH: 1,
