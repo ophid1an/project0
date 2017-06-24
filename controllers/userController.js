@@ -28,7 +28,7 @@ exports.userLoginPost = (req, res, next) => {
     function userLoginPostErrors() {
         res.render('login', {
             errors: [{
-                msg: res.__('warnWrongUsernameOrPassword')
+                msg: res.__('errorWrongUsernameOrPassword')
 
             }]
         });
@@ -128,30 +128,30 @@ exports.userRegisterPost = (req, res, next) => {
     const registerValidationSchema = {
         'username': {
             isAlphanumeric: {
-                errorMessage: res.__('warnInvalidUsernameType')
+                errorMessage: res.__('errorInvalidUsernameType')
             },
             isLength: {
                 options: [{
                     min: limits.USERNAME_MIN_LENGTH,
                     max: limits.USERNAME_MAX_LENGTH
                 }],
-                errorMessage: res.__('warnInvalidUsernameLength')
+                errorMessage: res.__('errorInvalidUsernameLength')
             }
         },
         'email': {
             isEmail: true,
-            errorMessage: res.__('warnInvalidEmail')
+            errorMessage: res.__('errorInvalidEmail')
         },
         'pwd': {
             isLength: {
                 options: [{
                     min: limits.PWD_MIN_LENGTH
                 }],
-                errorMessage: res.__('warnInvalidPwd')
+                errorMessage: res.__('errorInvalidPwd')
             },
             equals: {
                 options: req.body['pwd-confirm'],
-                errorMessage: res.__('warnPasswordsDoNotMatch')
+                errorMessage: res.__('errorPasswordsDoNotMatch')
             }
         }
     };
@@ -199,9 +199,9 @@ exports.userRegisterPost = (req, res, next) => {
             if (users && users.length === 2) {
 
                 let errors = [{
-                    msg: res.__('warnUsernameExists')
+                    msg: res.__('errorUsernameExists')
                 }, {
-                    msg: res.__('warnEmailExists')
+                    msg: res.__('errorEmailExists')
                 }];
 
                 return userRegisterPostErrors(errors);
@@ -214,14 +214,14 @@ exports.userRegisterPost = (req, res, next) => {
 
                 if (user.username === users[0].username) {
                     errors.push({
-                        msg: res.__('warnUsernameExists')
+                        msg: res.__('errorUsernameExists')
                     });
                 }
 
                 if (user.email === users[0].email) {
 
                     errors.push({
-                        msg: res.__('warnEmailExists')
+                        msg: res.__('errorEmailExists')
                     });
                 }
 
