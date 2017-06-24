@@ -6,7 +6,6 @@ const dateformat = require('dateformat'),
     Statistic = require('../models/statistic'),
     limits = require('../config').limits,
     jwtOptions = require('../config').jwtOptions,
-    cookiesOptions = require('../config').cookiesOptions,
     toDate = require('../lib/util').toDate;
 
 
@@ -37,10 +36,8 @@ exports.userLoginPost = (req, res, next) => {
 
 
     req.sanitize('username').trim();
-    console.log(req.body.username.length)
 
     if (!req.body.username || !req.body.pwd || req.body.username.length < limits.USERNAME_MIN_LENGTH || req.body.username.length > limits.USERNAME_MAX_LENGTH || req.body.pwd.length < limits.PWD_MIN_LENGTH) {
-        console.log('ERROR PRE FIND')
         return userLoginPostErrors();
     }
 
@@ -59,8 +56,6 @@ exports.userLoginPost = (req, res, next) => {
             if (!user) {
                 return userLoginPostErrors();
             }
-
-            console.log(user.username)
 
             bcrypt.compare(req.body.pwd, user.pwd, (err, result) => {
                 if (err) {
@@ -83,14 +78,14 @@ exports.userLoginPost = (req, res, next) => {
                         return next(err);
                     }
                     res.cookie('jwt', token, {
-                        expires: new Date(Date.now() + cookiesOptions.age),
+                        expires: new Date(Date.now() + limits.COOKIES_AGE),
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production'
                     });
 
                     if (user.locale) {
                         res.cookie('locale', user.locale, {
-                            expires: new Date(Date.now() + cookiesOptions.age),
+                            expires: new Date(Date.now() + limits.COOKIES_AGE),
                             httpOnly: true,
                             secure: process.env.NODE_ENV === 'production'
                         });
@@ -245,7 +240,7 @@ exports.userRegisterPost = (req, res, next) => {
 
                 user.pwd = hash;
 
-                // save user record
+                // save user document
                 user.save(err => {
 
                     if (err) {
@@ -420,7 +415,7 @@ exports.userIncRequestPost = (req, res, next) => {
     if (!username || typeof username !== 'string') {
         return res.end();
     }
-    console.log(req.body)
+
     var updateSender = (uid, otheruid, accepted, cb) => {
             var update = {
                 $pull: {
@@ -435,7 +430,7 @@ exports.userIncRequestPost = (req, res, next) => {
                     }
                 };
             }
-            console.log(update)
+
             User.update({
                     _id: uid
                 }, update)
@@ -462,7 +457,7 @@ exports.userIncRequestPost = (req, res, next) => {
                     }
                 };
             }
-            console.log(update)
+
             User.update({
                     _id: uid
                 }, update)
@@ -622,8 +617,8 @@ exports.userSettingsGet = (req, res) => {
             text: req.__(userLocale)
         };
 
-        var ind = localesArr.indexOf(userLocale);
-        localesArr = localesArr.splice(ind, 1);
+        var ind = localesArr.indexOf(userLocale.value);
+        localesArr.splice(ind, 1);
     }
 
     localesArr.forEach(e => locales.push({
@@ -641,5 +636,59 @@ exports.userSettingsGet = (req, res) => {
 
 
 exports.userSettingsPost = (req, res, next) => {
-    res.json(req.body.language);
+    var locale = req.body.language !== req.user.locale ? req.body.language : undefined,
+        pwd = req.body.pwd === req.body['pwd-confirm'] ? req.body.pwd : undefined,
+        update = {
+            $set: {}
+        },
+        updateUser = () => {
+            User.update({
+                    _id: req.user._id
+                }, update)
+                .exec(err => {
+
+                    if (err) {
+                        return next(err);
+                    }
+
+                    if (locale) {
+                        res.cookie('locale', locale, {
+                            expires: new Date(Date.now() + limits.COOKIES_AGE),
+                            httpOnly: true,
+                            secure: process.env.NODE_ENV === 'production'
+                        });
+                    }
+
+                    res.redirect('/main');
+                });
+        };
+
+    if (locale) {
+        update.$set.locale = locale;
+    }
+
+    if (pwd) {
+        // update jti property
+        update.$set.jti = Date.now();
+
+        // hash password
+        bcrypt.hash(pwd, saltRounds, (err, hash) => {
+
+            if (err) {
+                return next(err);
+            }
+
+            update.$set.pwd = hash;
+
+            // update user document
+            return updateUser();
+        });
+    } else {
+        if (locale) {
+            return updateUser();
+        }
+
+        res.redirect('/main/settings');
+    }
+
 };

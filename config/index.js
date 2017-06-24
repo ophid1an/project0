@@ -4,10 +4,6 @@ exports.title = process.env.TITLE || 'TeamWord';
 
 exports.author = process.env.AUTHOR || 'John';
 
-exports.cookiesOptions = {
-    age: 6 * 24 * 60 * 60 * 1000
-};
-
 exports.jwtOptions = {
     secretOrKey: process.env.JWT_SECRET || 'mySecret',
     issuer: exports.title,
@@ -25,6 +21,7 @@ exports.jwtOptions = {
 exports.dbUrl = process.env.MONGODB_URI;
 
 exports.limits = {
+    COOKIES_AGE: 6 * 24 * 60 * 60 * 1000,
     PWD_MIN_LENGTH: 8,
     USERNAME_MIN_LENGTH: 4,
     USERNAME_MAX_LENGTH: 30,

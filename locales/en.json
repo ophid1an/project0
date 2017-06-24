@@ -90,5 +90,6 @@
   "infoInvitationSent": "Friend request sent.",
   "language":"Language",
   "en": "English",
-  "el": "Greek"
+  "el": "Greek",
+  "changePassword": "Change password"
 }
