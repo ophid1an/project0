@@ -26,11 +26,9 @@ const mongoose = require('mongoose'),
         forgotPwd: {
             expires: {
                 type: Date,
-                required: true
             },
             bytes: {
                 type: String,
-                required: true,
                 minlength: limits.RANDOM_BYTES_NUM * 2,
                 maxlength: limits.RANDOM_BYTES_NUM * 2
             }
