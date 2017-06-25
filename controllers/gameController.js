@@ -6,7 +6,8 @@ const dateformat = require('dateformat'),
     Statistic = require('../models/statistic'),
     limits = require('../config').limits,
     indexOfArray = require('../lib/util').indexOfArray,
-    toDate = require('../lib/util').toDate;
+    toDate = require('../lib/util').toDate,
+    areStrings = require('../lib/util').areStrings;
 
 
 exports.gameNewGet = (req, res, next) => {
@@ -15,7 +16,7 @@ exports.gameNewGet = (req, res, next) => {
             return next(err);
         }
         res.render('game-settings', {
-            friends: friends
+            friends
         });
     });
 };
@@ -24,125 +25,97 @@ exports.gameNewGet = (req, res, next) => {
 
 exports.gameNewPost = (req, res, next) => {
 
-    const game = new Game({
-        player1: req.user._id
-    });
+    var diff = req.body.difficulty,
+        partner = req.body.partner,
+        difficulties = limits.CW_DIFFICULTIES,
+        game = new Game({
+            player1: req.user._id
+        }),
+        proceed = () => {
+            Crossword
+                .count({
+                    diff
+                }, (err, count) => {
+                    if (err) {
+                        return next(err);
+                    }
 
+                    if (!count) {
+                        return res.redirect('/main/new-game');
+                    }
 
-    function renderGameSettingsWithError(error) {
+                    const randomCw = Math.floor(Math.random() * count);
 
-        User.getFriends(req.user._id, (err, friends) => {
-            if (err) {
-                return next(err);
-            }
-            res.render('game-settings', {
-                friends: friends,
-                errors: [{
-                    msg: error
-                }]
-            });
-        });
-    }
-
-
-    function proceed() {
-
-        Crossword
-            .count({
-                diff: req.body.difficulty
-            }, (err, count) => {
-                if (err) {
-                    return next(err);
-                }
-
-                if (!count) {
-                    return renderGameSettingsWithError(res.__('errorCrosswordNotFound'));
-                }
-
-                const randomCw = Math.floor(Math.random() * count);
-
-                Crossword
-                    .find({
-                        diff: req.body.difficulty
-                    })
-                    .select('dim blacksPos')
-                    .limit(-1)
-                    .skip(randomCw)
-                    .exec((err, cw) => {
-                        if (err) {
-                            return next(err);
-                        }
-
-                        if (!cw.length) {
-                            return renderGameSettingsWithError(res.__('errorCrosswordNotFound'));
-                        }
-
-                        game.crossword = cw[0]._id;
-
-                        var rows = cw[0].dim[0],
-                            cols = cw[0].dim[1],
-                            bpos = cw[0].blacksPos,
-                            letters = [],
-                            date = new Date();
-
-                        for (let i = 0; i < rows; i += 1) {
-                            for (let j = 0; j < cols; j += 1) {
-                                if (indexOfArray([i, j], bpos) === -1) {
-                                    letters.push({
-                                        pos: [i, j],
-                                        date
-                                    });
-                                }
-                            }
-                        }
-
-                        game.letters = letters;
-
-                        game.save((err, game) => {
-
+                    Crossword
+                        .find({
+                            diff
+                        })
+                        .select('dim blacksPos')
+                        .limit(-1)
+                        .skip(randomCw)
+                        .exec((err, cw) => {
                             if (err) {
                                 return next(err);
                             }
 
-                            res.redirect('/main/game-session/' + game._id.toString());
+                            if (!cw.length) {
+                                return res.redirect('/main/new-game');
+                            }
 
+                            game.crossword = cw[0]._id;
+
+                            var rows = cw[0].dim[0],
+                                cols = cw[0].dim[1],
+                                bpos = cw[0].blacksPos,
+                                letters = [],
+                                date = new Date();
+
+                            for (let i = 0; i < rows; i += 1) {
+                                for (let j = 0; j < cols; j += 1) {
+                                    if (indexOfArray([i, j], bpos) === -1) {
+                                        letters.push({
+                                            pos: [i, j],
+                                            date
+                                        });
+                                    }
+                                }
+                            }
+
+                            game.letters = letters;
+
+                            game.save((err, game) => {
+
+                                if (err) {
+                                    return next(err);
+                                }
+
+                                res.redirect('/main/game-session/' + game._id.toString());
+
+                            });
                         });
-                    });
-            });
+                });
+        };
 
-
+    if (!areStrings([diff, partner]) || difficulties.indexOf(diff) === -1) {
+        return res.redirect('/main/new-game');
     }
 
-    const difficulties = limits.CW_DIFFICULTIES;
-
-    req.sanitize('difficulty').trim();
-    req.sanitize('partner').trim();
-    req.sanitize('difficulty').escape();
-    req.sanitize('partner').escape();
-
-    if (difficulties.indexOf(req.body.difficulty) === -1) {
-        return renderGameSettingsWithError(res.__('errorInvalidDifficulty'));
-    }
-
-    if (req.body.partner) {
-
+    if (partner) {
         User.getFriends(req.user._id, (err, friends) => {
 
             if (err) {
                 return next(err);
             }
 
-            let pos = friends.map(e => e.username).indexOf(req.body.partner);
+            var pos = friends.map(e => e.username).indexOf(partner);
 
             if (pos === -1) {
-                return renderGameSettingsWithError(res.__('errorInvalidPartner'));
+                return res.redirect('/main/new-game');
             }
 
             game.player2 = friends[pos]._id;
             proceed();
-
         });
-
     } else {
         proceed();
     }
@@ -173,7 +146,6 @@ exports.gameResumeGet = (req, res, next) => {
             if (err) {
                 return next(err);
             }
-
 
             var gamesMod = [];
 

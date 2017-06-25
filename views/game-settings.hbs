@@ -53,19 +53,6 @@
 
         <h3>{{__ 'gameSettings'}}</h3>
 
-        {{#if errors}}
-            <div class="row text-danger">
-                <div class="twelve columns">
-                    <ul>
-                        {{#each errors}}
-                            <li>{{msg}}</li>
-                        {{/each}}
-                    </ul>
-                </div>
-            </div>
-        {{/if}}
-
-
         <form action="/main/new-game" method="post">
             <fieldset>
                 <legend>{{__ 'difficultyLevel'}}:</legend>
