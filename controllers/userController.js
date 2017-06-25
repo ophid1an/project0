@@ -161,28 +161,25 @@ exports.userRegisterPost = (req, res, next) => {
                     errorMessage: res.__('errorPasswordsDoNotMatch')
                 }
             }
-        };
+        },
+        errors = req.validationErrors();
 
-    req.sanitize('username').trim();
-    req.sanitize('email').trim();
+    req.sanitizeBody('username').trim();
+    req.sanitizeBody('email').trim();
 
     req.checkBody(registerValidationSchema);
-
-    req.sanitize('username').escape();
-    req.sanitize('email').escape();
-    req.sanitize('email').normalizeEmail();
-    req.sanitize('pwd').escape();
-
-    var errors = req.validationErrors(),
-        user = new User({
-            username: req.body.username.toLowerCase(),
-            email: req.body.email,
-            pwd: req.body.pwd
-        });
 
     if (errors) {
         return userRegisterPostErrors(errors);
     }
+
+    req.sanitizeBody('email').normalizeEmail();
+
+    var user = new User({
+        username: req.body.username.toLowerCase(),
+        email: req.body.email,
+        pwd: req.body.pwd
+    });
 
     User.find({
             $or: [{
