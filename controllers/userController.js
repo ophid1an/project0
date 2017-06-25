@@ -1,5 +1,9 @@
 const dateformat = require('dateformat'),
+    sg = require('sendgrid')(process.env.SENDGRID_API_KEY),
+    email = require('../config').email,
     jwt = require('jsonwebtoken'),
+    validator = require('express-validator').validator,
+    crypto = require('crypto'),
     bcrypt = require('bcrypt'),
     saltRounds = 10,
     User = require('../models/user'),
@@ -7,7 +11,30 @@ const dateformat = require('dateformat'),
     limits = require('../config').limits,
     jwtOptions = require('../config').jwtOptions,
     toDate = require('../lib/util').toDate,
-    areStrings = require('../lib/util').areStrings;
+    areStrings = require('../lib/util').areStrings,
+    sendMail = (to, subject, content) => {
+        var request = sg.emptyRequest({
+            method: 'POST',
+            path: '/v3/mail/send',
+            body: {
+                personalizations: [{
+                    to: [{
+                        email: to,
+                    }, ],
+                    subject,
+                }, ],
+                from: {
+                    email,
+                },
+                content: [{
+                    type: 'text/plain',
+                    value: content,
+                }, ],
+            },
+        });
+
+        sg.API(request);
+    };
 
 
 
@@ -100,6 +127,91 @@ exports.userLoginPost = (req, res, next) => {
         });
 };
 
+
+
+
+exports.userForgotPwdGet = (req, res) => {
+    if (req.cookies.jwt) {
+        return res.redirect('/main');
+    }
+    res.render('forgot-password');
+};
+
+
+
+exports.userForgotPwdPost = (req, res, next) => {
+
+    if (req.cookies.jwt) {
+        return res.redirect('/main');
+    }
+
+    var email = req.body.email,
+        userForgotPwdError = () => {
+            res.render('forgot-password', {
+                error: res.__('errorUserDoesNotExist')
+            });
+        },
+        userForgotPwdOK = () => {
+            res.render('forgot-password', {
+                info: res.__('checkMail')
+            });
+        };
+
+    if (!areStrings(email) || !validator.isEmail(email)) {
+        return userForgotPwdError();
+    }
+
+    email = validator.normalizeEmail(email);
+
+    User.findOne({
+            email
+        }, {
+            _id: 1
+        })
+        .exec((err, user) => {
+
+            if (err) {
+                return next(err);
+            }
+
+            if (!user) {
+                return userForgotPwdError();
+            }
+
+            crypto.randomBytes(limits.RANDOM_BYTES_NUM, (err, buf) => {
+
+                if (err) {
+                    return next(err);
+                }
+
+                var bytes = buf.toString('hex');
+
+                User.update({
+                        _id: user._id
+                    }, {
+                        $set: {
+                            forgotPwd: {
+                                expires: new Date(Date.now() + limits.FORGOT_PWD_AGE),
+                                bytes
+                            }
+                        }
+                    })
+                    .exec(err => {
+
+                        if (err) {
+                            return next(err);
+                        }
+
+                        sendMail(email,
+                            res.__('newPwdCreation'),
+                            'https://teamword.herokuapp.com/new-password/' + user._id + bytes);
+
+                        userForgotPwdOK();
+                    });
+            });
+
+        });
+};
 
 
 

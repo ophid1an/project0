@@ -26,6 +26,14 @@ router.get('/login', userController.userLoginGet);
 
 router.post('/login', userController.userLoginPost);
 
+router.get('/forgot-password', userController.userForgotPwdGet);
+
+router.post('/forgot-password', userController.userForgotPwdPost);
+
+router.get('/new-password/:string', userController.userNewPwdGet);
+
+router.post('/new-password', userController.userNewPwdPost);
+
 router.get('/register', userController.userRegisterGet);
 
 router.post('/register', userController.userRegisterPost);

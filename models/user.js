@@ -23,6 +23,18 @@ const mongoose = require('mongoose'),
             type: String,
             required: true
         },
+        forgotPwd: {
+            expires: {
+                type: Date,
+                required: true
+            },
+            bytes: {
+                type: String,
+                required: true,
+                minlength: limits.RANDOM_BYTES_NUM * 2,
+                maxlength: limits.RANDOM_BYTES_NUM * 2
+            }
+        },
         locale: {
             type: String,
             enum: Object.keys(limits.LOCALES),

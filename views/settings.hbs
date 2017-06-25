@@ -4,18 +4,6 @@
 
     <h3>{{__ 'userSettings'}}</h3>
 
-    {{#if errors}}
-        <div class="row text-danger">
-            <div class="twelve columns">
-                <ul>
-                    {{#each errors}}
-                        <li>{{msg}}</li>
-                    {{/each}}
-                </ul>
-            </div>
-        </div>
-    {{/if}}
-
     <form action="/main/settings" method="post">
         <div class="row">
             <div class="twelve-columns">

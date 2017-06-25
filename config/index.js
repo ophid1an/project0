@@ -1,5 +1,3 @@
-// const ExtractJwt = require('passport-jwt').ExtractJwt;
-
 exports.title = process.env.TITLE || 'TeamWord';
 
 exports.email = process.env.EMAIL || 'teamword@example.com';
@@ -17,13 +15,14 @@ exports.jwtOptions = {
         }
         return token;
     }
-    //jwtFromRequest: ExtractJwt.fromAuthHeader()
 };
 
 exports.dbUrl = process.env.MONGODB_URI;
 
 exports.limits = {
     COOKIES_AGE: 6 * 24 * 60 * 60 * 1000, // 6 days, 1 day less than jwt expiration date
+    FORGOT_PWD_AGE: 2 * 60 * 60 * 1000,
+    RANDOM_BYTES_NUM: 16,
     PWD_MIN_LENGTH: 8,
     PWD_MAX_LENGTH: 32,
     USERNAME_MIN_LENGTH: 4,

@@ -85,10 +85,13 @@
   "lettersYouFound": "Number of letters found by you",
   "lettersOtherFound": "Number of letters found by",
   "infoInvitationSent": "Friend request sent.",
-  "language":"Language",
+  "language": "Language",
   "en": "English",
   "el": "Greek",
   "changePassword": "Change password",
   "yourFriend": "Your friend",
-  "startedGame": "started a new game with you as partner"
+  "startedGame": "started a new game with you as partner",
+  "forgotPwd": "I forgot the password!",
+  "newPwdCreation": "Create new password",
+  "checkMail": "Please check you email for instructions."
 }
