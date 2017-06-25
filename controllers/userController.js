@@ -520,7 +520,7 @@ exports.userHistoryGet = (req, res, next) => {
                     p2Letters = stat.p2Letters ? stat.p2Letters : 0,
                     lettersFound = stat.p1Letters + p2Letters,
                     rating = calcRating(lettersFound, stat.whitesC);
-
+console.log(stat);
                 // Calculate general statistics
                 stats[stat.diff].hasPlayed = true;
                 stats[stat.diff].whitesC += stat.whitesC;
@@ -537,7 +537,7 @@ exports.userHistoryGet = (req, res, next) => {
                     otherUsername
                 });
             });
-
+            console.log(stats);
             res.render('history', {
                 completedGames,
                 stats: {
@@ -549,9 +549,9 @@ exports.userHistoryGet = (req, res, next) => {
                     avgRating: [
                         stats.easy.hasPlayed ? ratingToString(calcRating(stats.easy.lettersFound, stats.easy.whitesC)) :
                         mdash,
-                        stats.medium.hasPlayed ? ratingToString(calcRating(stats.medium.lettersFound, stats.easy.whitesC)) :
+                        stats.medium.hasPlayed ? ratingToString(calcRating(stats.medium.lettersFound, stats.medium.whitesC)) :
                         mdash,
-                        stats.hard.hasPlayed ? ratingToString(calcRating(stats.hard.lettersFound, stats.easy.whitesC)) :
+                        stats.hard.hasPlayed ? ratingToString(calcRating(stats.hard.lettersFound, stats.hard.whitesC)) :
                         mdash,
                     ]
                 }
