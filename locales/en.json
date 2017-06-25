@@ -88,5 +88,7 @@
   "language":"Language",
   "en": "English",
   "el": "Greek",
-  "changePassword": "Change password"
+  "changePassword": "Change password",
+  "yourFriend": "Your friend",
+  "startedGame": "started a new game with you as partner"
 }

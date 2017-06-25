@@ -1,4 +1,6 @@
 const dateformat = require('dateformat'),
+    sg = require('sendgrid')(process.env.SENDGRID_API_KEY),
+    email = require('../config').email,
     validator = require('express-validator').validator,
     User = require('../models/user'),
     Game = require('../models/game'),
@@ -7,7 +9,30 @@ const dateformat = require('dateformat'),
     limits = require('../config').limits,
     indexOfArray = require('../lib/util').indexOfArray,
     toDate = require('../lib/util').toDate,
-    areStrings = require('../lib/util').areStrings;
+    areStrings = require('../lib/util').areStrings,
+    sendMail = (to, subject, content) => {
+        var request = sg.emptyRequest({
+            method: 'POST',
+            path: '/v3/mail/send',
+            body: {
+                personalizations: [{
+                    to: [{
+                        email: to,
+                    }, ],
+                    subject,
+                }, ],
+                from: {
+                    email,
+                },
+                content: [{
+                    type: 'text/plain',
+                    value: content,
+                }, ],
+            },
+        });
+
+        sg.API(request);
+    };
 
 
 exports.gameNewGet = (req, res, next) => {
@@ -31,7 +56,7 @@ exports.gameNewPost = (req, res, next) => {
         game = new Game({
             player1: req.user._id
         }),
-        proceed = () => {
+        proceed = (friendEmail, friendLocale) => {
             Crossword
                 .count({
                     diff
@@ -89,6 +114,13 @@ exports.gameNewPost = (req, res, next) => {
                                     return next(err);
                                 }
 
+                                if (friendEmail) {
+                                    var catalog = req.getCatalog(friendLocale);
+                                    sendMail(friendEmail,
+                                        `${catalog.yourFriend} ${req.user.username} ${catalog.startedGame}.`,
+                                        'https://teamword.herokuapp.com/main/game-session/' + game._id);
+                                }
+
                                 res.redirect('/main/game-session/' + game._id.toString());
 
                             });
@@ -114,7 +146,7 @@ exports.gameNewPost = (req, res, next) => {
             }
 
             game.player2 = friends[pos]._id;
-            proceed();
+            proceed(friends[pos].email, friends[pos].locale);
         });
     } else {
         proceed();

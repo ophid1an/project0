@@ -2,6 +2,8 @@
 
 exports.title = process.env.TITLE || 'TeamWord';
 
+exports.email = process.env.EMAIL || 'teamword@example.com';
+
 exports.author = process.env.AUTHOR || 'John';
 
 exports.jwtOptions = {

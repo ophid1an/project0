@@ -72,15 +72,17 @@ userSchema.statics.getFriends = function (userId, callback) {
         }, {
             friends: 1
         })
-        .populate('friends.friend', 'username')
+        .populate('friends.friend', 'username email locale')
         .exec((err, user) => {
             if (err) {
                 return callback(err);
             }
             return callback(null, user.friends.map(e => {
                 return {
-                    username: e.friend.username,
                     _id: e.friend._id,
+                    username: e.friend.username,
+                    email: e.friend.email,
+                    locale: e.friend.locale || 'en'
                 };
             }));
         });
