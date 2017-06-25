@@ -61,7 +61,7 @@ exports.userLoginPost = (req, res, next) => {
             });
         };
 
-    if (!areStrings(username, pwd)) {
+    if (!areStrings([username, pwd])) {
         return userLoginPostError();
     }
 
@@ -157,7 +157,7 @@ exports.userForgotPwdPost = (req, res, next) => {
             });
         };
 
-    if (!areStrings(email) || !validator.isEmail(email)) {
+    if (!areStrings([email]) || !validator.isEmail(email)) {
         return userForgotPwdError();
     }
 
@@ -211,6 +211,95 @@ exports.userForgotPwdPost = (req, res, next) => {
             });
 
         });
+};
+
+
+
+exports.userNewPwdGet = (req, res) => {
+    if (req.cookies.jwt) {
+        return res.redirect('/main');
+    }
+    res.render('new-password', {
+        string: req.params.string
+    });
+};
+
+
+
+exports.userNewPwdPost = (req, res, next) => {
+    if (req.cookies.jwt) {
+        return res.redirect('/main');
+    }
+
+    var pwd = req.body.pwd === req.body['pwd-confirm'] ? req.body.pwd : '',
+        string = req.body.string;
+
+    if (!areStrings([string, pwd]) ||
+        string.length !== (24 + limits.RANDOM_BYTES_NUM * 2) ||
+        !validator.isHexadecimal(string)) {
+        return res.redirect('/');
+    }
+
+    var len = pwd.length;
+
+    if (len < limits.PWD_MIN_LENGTH || len > limits.PWD_MAX_LENGTH) {
+        return res.redirect('new-password/' + string);
+    }
+
+    var uid = string.substring(0, 24),
+        bytes = string.substring(24);
+
+    User.findOne({
+            _id: uid
+        }, {
+            forgotPwd: 1
+        })
+        .exec((err, user) => {
+
+            if (err) {
+                return next(err);
+            }
+
+            if (!user || !user.forgotPwd) {
+                return res.redirect('/');
+            }
+
+            var date = new Date();
+
+            if (date > user.forgotPwd.expires || bytes !== user.forgotPwd.bytes) {
+                return res.redirect('/');
+            }
+
+            // hash password
+            bcrypt.hash(pwd, saltRounds, (err, hash) => {
+
+                if (err) {
+                    return next(err);
+                }
+
+                // update user document
+                User.update({
+                        _id: uid
+                    }, {
+                        $set: {
+                            pwd: hash,
+                            jti: Date.now()
+                        },
+                        $unset: {
+                            forgotPwd: ''
+                        }
+                    })
+                    .exec(err => {
+
+                        if (err) {
+                            return next(err);
+                        }
+
+                        res.redirect('/login');
+                    });
+            });
+        });
+
 };
 
 
