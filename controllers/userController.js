@@ -273,7 +273,22 @@ exports.userNewPwdPost = (req, res, next) => {
             var date = new Date();
 
             if (date > user.forgotPwd.expires || bytes !== user.forgotPwd.bytes) {
-                return res.redirect('/');
+                // update user document
+                return User.update({
+                        _id: uid
+                    }, {
+                        $unset: {
+                            forgotPwd: ''
+                        }
+                    })
+                    .exec(err => {
+
+                        if (err) {
+                            return next(err);
+                        }
+
+                        res.redirect('/');
+                    });
             }
 
             // hash password
