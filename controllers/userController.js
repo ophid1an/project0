@@ -3,6 +3,7 @@ const dateformat = require('dateformat'),
     email = require('../config').email,
     jwt = require('jsonwebtoken'),
     validator = require('express-validator').validator,
+    url = require('url'),
     crypto = require('crypto'),
     bcrypt = require('bcrypt'),
     saltRounds = 10,
@@ -204,7 +205,12 @@ exports.userForgotPwdPost = (req, res, next) => {
 
                         sendMail(email,
                             res.__('newPwdCreation'),
-                            'https://teamword.herokuapp.com/new-password/' + user._id + bytes);
+                            url.format({
+                                protocol: req.protocol,
+                                host: req.get('host'),
+                                port: req.app.settings.port,
+                                pathname: 'new-password/' + user._id + bytes
+                            }));
 
                         userForgotPwdOK();
                     });

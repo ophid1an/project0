@@ -2,6 +2,7 @@ const dateformat = require('dateformat'),
     sg = require('sendgrid')(process.env.SENDGRID_API_KEY),
     email = require('../config').email,
     validator = require('express-validator').validator,
+    url = require('url'),
     User = require('../models/user'),
     Game = require('../models/game'),
     Crossword = require('../models/crossword'),
@@ -118,7 +119,12 @@ exports.gameNewPost = (req, res, next) => {
                                     var catalog = req.getCatalog(friendLocale);
                                     sendMail(friendEmail,
                                         `${catalog.yourFriend} ${req.user.username} ${catalog.startedGame}.`,
-                                        'https://teamword.herokuapp.com/main/game-session/' + game._id);
+                                        url.format({
+                                            protocol: req.protocol,
+                                            host: req.get('host'),
+                                            port: req.app.settings.port,
+                                            pathname: 'main/game-session/' + game._id
+                                        }));
                                 }
 
                                 res.redirect('/main/game-session/' + game._id.toString());
