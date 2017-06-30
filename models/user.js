@@ -23,7 +23,7 @@ const mongoose = require('mongoose'),
             type: String,
             required: true
         },
-        forgotPwd: {
+        randomBytes: {
             expires: {
                 type: Date,
             },

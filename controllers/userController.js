@@ -191,7 +191,7 @@ exports.userForgotPwdPost = (req, res, next) => {
                         _id: user._id
                     }, {
                         $set: {
-                            forgotPwd: {
+                            randomBytes: {
                                 expires: new Date(Date.now() + limits.FORGOT_PWD_AGE),
                                 bytes
                             }
@@ -256,7 +256,7 @@ exports.userNewPwdPost = (req, res, next) => {
         bytes = string.substring(24);
 
     User.findById(uid, {
-            forgotPwd: 1
+            randomBytes: 1
         })
         .exec((err, user) => {
 
@@ -264,19 +264,19 @@ exports.userNewPwdPost = (req, res, next) => {
                 return next(err);
             }
 
-            if (!user || !user.forgotPwd) {
+            if (!user || !user.randomBytes) {
                 return res.redirect('/');
             }
 
             var date = new Date();
 
-            if (date > user.forgotPwd.expires || bytes !== user.forgotPwd.bytes) {
+            if (date > user.randomBytes.expires || bytes !== user.randomBytes.bytes) {
                 // update user document
                 return User.update({
                         _id: uid
                     }, {
                         $unset: {
-                            forgotPwd: ''
+                            randomBytes: ''
                         }
                     })
                     .exec(err => {
@@ -305,7 +305,7 @@ exports.userNewPwdPost = (req, res, next) => {
                             jti: Date.now()
                         },
                         $unset: {
-                            forgotPwd: ''
+                            randomBytes: ''
                         }
                     })
                     .exec(err => {
