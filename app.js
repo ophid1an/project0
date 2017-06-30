@@ -84,6 +84,7 @@ hbs.registerHelper('__', function () {
 passport.use(new JwtStrategy(jwtOptions, function (jwt_payload, done) {
     User.findOne({
         _id: jwt_payload.uid,
+        active: true,
         jti: new Date(parseInt(jwt_payload.jti, 10))
     }, {
         username: 1,
