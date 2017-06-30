@@ -23,10 +23,6 @@ const mongoose = require('mongoose'),
             type: String,
             required: true
         },
-        active: {
-            type: Boolean,
-            default: false
-        },
         randomBytes: {
             expires: {
                 type: Date,
