@@ -76,12 +76,10 @@ const mongoose = require('mongoose'),
 
 
 userSchema.statics.getFriends = function (userId, callback) {
-    this
-        .findOne({
-            _id: userId
-        }, {
-            friends: 1
-        })
+    this.findById(
+            userId, {
+                friends: 1
+            })
         .populate('friends.friend', 'username email locale')
         .exec((err, user) => {
             if (err) {

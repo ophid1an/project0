@@ -255,9 +255,7 @@ exports.userNewPwdPost = (req, res, next) => {
     var uid = string.substring(0, 24),
         bytes = string.substring(24);
 
-    User.findOne({
-            _id: uid
-        }, {
+    User.findById(uid, {
             forgotPwd: 1
         })
         .exec((err, user) => {
@@ -586,9 +584,7 @@ exports.userHistoryGet = (req, res, next) => {
 exports.userFriendsGet = (req, res, next) => {
     var locale = req.getLocale();
 
-    User.findOne({
-            _id: req.user._id
-        }, {
+    User.findById(req.user._id, {
             friends: 1,
             incFriendReq: 1
         })
