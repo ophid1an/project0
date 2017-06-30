@@ -381,13 +381,13 @@ exports.userRegisterPost = (req, res, next) => {
                     errorMessage: res.__('errorPasswordsDoNotMatch')
                 }
             }
-        },
-        errors = req.validationErrors();
+        };
 
     req.sanitizeBody('username').trim();
     req.sanitizeBody('email').trim();
 
     req.checkBody(registerValidationSchema);
+    var errors = req.validationErrors();
 
     if (errors) {
         return userRegisterPostErrors(errors);
