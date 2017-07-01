@@ -24,6 +24,8 @@ router.get('/logout', (req, res) => {
 
 router.get('/login', userController.userLoginGet);
 
+router.get('/login/:string', userController.userLoginGet);
+
 router.post('/login', userController.userLoginPost);
 
 router.get('/forgot-password', userController.userForgotPwdGet);

@@ -63,6 +63,7 @@
   "crosswordParsingFailure": "There was a problem during crossword's parsing.",
   "userSettings": "User settings",
   "errorUserDoesNotExist": "User does not exist.",
+  "errorAccountNotActivated" : "The account is not activated.",
   "errorFriendExists": "You are already friends with user",
   "errorRequestExists": "Friend request already exists.",
   "dateCreated": "Creation date",
@@ -93,5 +94,8 @@
   "startedGame": "started a new game with you as partner",
   "forgotPwd": "I forgot the password!",
   "newPwdCreation": "Create new password",
-  "checkMail": "Please check you email for instructions."
+  "newAccountActivation": "Activate new account",
+  "checkMail": "Please check your e-mail for instructions.",
+  "mailSent": "An e-mail was sent to your address. You have",
+  "hoursToFollowInstructions": "hours to follow the instructions."
 }

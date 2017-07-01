@@ -13,6 +13,7 @@ const dateformat = require('dateformat'),
     jwtOptions = require('../config').jwtOptions,
     toDate = require('../lib/util').toDate,
     areStrings = require('../lib/util').areStrings,
+    msToHours = require('../lib/util').msToHours,
     sendMail = (to, subject, content) => {
         var request = sg.emptyRequest({
             method: 'POST',
@@ -43,7 +44,9 @@ exports.userLoginGet = (req, res) => {
     if (req.cookies.jwt) {
         return res.redirect('/main');
     }
-    res.render('login');
+    res.render('login', {
+        string: req.params.string
+    });
 };
 
 
@@ -56,25 +59,39 @@ exports.userLoginPost = (req, res, next) => {
 
     var username = req.body.username,
         pwd = req.body.pwd,
-        userLoginPostError = () => {
+        string = req.body.string,
+        toBeActivated = false,
+        userLoginPostError = msg => {
             res.render('login', {
-                error: res.__('errorWrongUsernameOrPassword')
+                error: res.__(msg),
+                string
             });
         };
 
     if (!areStrings([username, pwd])) {
-        return userLoginPostError();
+        return userLoginPostError('errorWrongUsernameOrPassword');
+    }
+
+    if (areStrings([string]) && string.length === (limits.RANDOM_BYTES_NUM * 2) &&
+        validator.isHexadecimal(string)) {
+        toBeActivated = true;
     }
 
     username = username.trim().toLowerCase();
 
     if (username.length < limits.USERNAME_MIN_LENGTH || username.length > limits.USERNAME_MAX_LENGTH ||
         pwd.length < limits.PWD_MIN_LENGTH || pwd.length > limits.PWD_MAX_LENGTH) {
-        return userLoginPostError();
+        return userLoginPostError('errorWrongUsernameOrPassword');
     }
 
     User.findOne({
             username
+        }, {
+            active: 1,
+            pwd: 1,
+            jti: 1,
+            locale: 1,
+            randomBytes: 1
         })
         .exec((err, user) => {
 
@@ -83,48 +100,86 @@ exports.userLoginPost = (req, res, next) => {
             }
 
             if (!user) {
-                return userLoginPostError();
+                return userLoginPostError('errorWrongUsernameOrPassword');
             }
 
-            bcrypt.compare(pwd, user.pwd, (err, result) => {
-                if (err) {
-                    return next(err);
-                }
-
-                if (!result) {
-                    return userLoginPostError();
-                }
-
-                jwt.sign({
-                    uid: user._id
-                }, jwtOptions.secretOrKey, {
-                    issuer: jwtOptions.issuer,
-                    expiresIn: jwtOptions.expiresIn,
-                    jwtid: user.jti.getTime() + '',
-                    algorithm: 'HS256'
-                }, (err, token) => {
+            var comparePwdsAndSignJWT = (cb) => {
+                bcrypt.compare(pwd, user.pwd, (err, result) => {
                     if (err) {
                         return next(err);
                     }
-                    res.cookie('jwt', token, {
-                        expires: new Date(Date.now() + limits.COOKIES_AGE),
-                        httpOnly: true,
-                        secure: process.env.NODE_ENV === 'production'
-                    });
 
-                    if (user.locale) {
-                        res.cookie('locale', user.locale, {
+                    if (!result) {
+                        return userLoginPostError('errorWrongUsernameOrPassword');
+                    }
+
+                    jwt.sign({
+                        uid: user._id
+                    }, jwtOptions.secretOrKey, {
+                        issuer: jwtOptions.issuer,
+                        expiresIn: jwtOptions.expiresIn,
+                        jwtid: user.jti.getTime() + '',
+                        algorithm: 'HS256'
+                    }, (err, token) => {
+                        if (err) {
+                            return next(err);
+                        }
+                        res.cookie('jwt', token, {
                             expires: new Date(Date.now() + limits.COOKIES_AGE),
                             httpOnly: true,
                             secure: process.env.NODE_ENV === 'production'
                         });
-                    }
 
-                    res.redirect('/main');
+                        if (user.locale) {
+                            res.cookie('locale', user.locale, {
+                                expires: new Date(Date.now() + limits.COOKIES_AGE),
+                                httpOnly: true,
+                                secure: process.env.NODE_ENV === 'production'
+                            });
+                        }
+
+                        cb();
+                    });
                 });
+            };
 
+            if (!user.active) {
+                if (!toBeActivated) {
+                    return userLoginPostError('errorAccountNotActivated');
+                }
 
+                var date = new Date();
+
+                if (date <= user.randomBytes.expires && string === user.randomBytes.bytes) {
+                    return comparePwdsAndSignJWT(() => {
+                        // update user document
+                        User.update({
+                                _id: user._id
+                            }, {
+                                $set: {
+                                    active: true
+                                },
+                                $unset: {
+                                    randomBytes: ''
+                                }
+                            })
+                            .exec(err => {
+
+                                if (err) {
+                                    return next(err);
+                                }
+
+                                res.redirect('/main');
+                            });
+                    });
+                }
+                return res.redirect('/');
+            }
+
+            comparePwdsAndSignJWT(() => {
+                res.redirect('/main');
             });
+
         });
 };
 
@@ -165,7 +220,8 @@ exports.userForgotPwdPost = (req, res, next) => {
     email = validator.normalizeEmail(email);
 
     User.findOne({
-            email
+            email,
+            active: true
         }, {
             _id: 1
         })
@@ -452,28 +508,56 @@ exports.userRegisterPost = (req, res, next) => {
                 return userRegisterPostErrors(errors);
             }
 
-            // create jti property
-            user.jti = Date.now();
-
-            // hash password
-            bcrypt.hash(user.pwd, saltRounds, (err, hash) => {
+            crypto.randomBytes(limits.RANDOM_BYTES_NUM, (err, buf) => {
 
                 if (err) {
                     return next(err);
                 }
 
-                user.pwd = hash;
+                var bytes = buf.toString('hex');
 
-                // save user document
-                user.save(err => {
+                // create jti property
+                user.jti = Date.now();
+
+                // create randomBytes property
+                user.randomBytes = {
+                    expires: new Date(Date.now() + limits.ACTIVATE_ACCOUNT_AGE),
+                    bytes
+                };
+
+                // hash password
+                bcrypt.hash(user.pwd, saltRounds, (err, hash) => {
 
                     if (err) {
                         return next(err);
                     }
 
-                    res.redirect('/login');
+                    user.pwd = hash;
+
+                    // save user document
+                    user.save(err => {
+
+                        if (err) {
+                            return next(err);
+                        }
+
+                        sendMail(user.email,
+                            res.__('newAccountActivation'),
+                            url.format({
+                                protocol: req.protocol,
+                                host: req.get('host'),
+                                port: req.app.settings.port,
+                                pathname: 'login/' + bytes
+                            }));
+
+                        res.render('register', {
+                            info: `${res.__('mailSent')} ${msToHours(limits.ACTIVATE_ACCOUNT_AGE)} ${res.__('hoursToFollowInstructions')}`
+                        });
+                    });
                 });
+
             });
+
         });
 };
 

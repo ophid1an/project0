@@ -21,6 +21,7 @@ exports.dbUrl = process.env.MONGODB_URI;
 
 exports.limits = {
     COOKIES_AGE: 6 * 24 * 60 * 60 * 1000, // 6 days, 1 day less than jwt expiration date
+    ACTIVATE_ACCOUNT_AGE: 24 * 60 * 60 * 1000,
     FORGOT_PWD_AGE: 2 * 60 * 60 * 1000,
     RANDOM_BYTES_NUM: 16,
     PWD_MIN_LENGTH: 8,

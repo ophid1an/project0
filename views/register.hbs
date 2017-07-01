@@ -4,40 +4,48 @@
 
     <h3>{{__ 'register'}}</h3>
 
-    {{#if errors}}
-        <ul class="text-danger">
-            {{#each errors}}
-                <li>{{msg}}</li>
-            {{/each}}
-        </ul>
+    {{#if info}}
+
+        <p class="text-success">{{info}}</p>
+
+    {{else}}
+
+        {{#if errors}}
+            <ul class="text-danger">
+                {{#each errors}}
+                    <li>{{msg}}</li>
+                {{/each}}
+            </ul>
+        {{/if}}
+
+        <form action="/register" method="post">
+
+            <div class="row">
+                <div class="one-half column">
+                    <label for="username">{{__ 'username'}}:</label>
+                    <input type="text" id="username" name="username" {{#if user}} value= {{user.username}} {{/if}} required/>
+                </div>
+                <div class="one-half column">
+                    <label for="email">{{__ 'email'}}:</label>
+                    <input type="email" id="email" name="email" {{#if user}} value= {{user.email}} {{/if}} required/>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="one-half column">
+                    <label for="pwd">{{__ 'password'}}:</label>
+                    <input type="password" id="pwd" name="pwd" required/>
+                </div>
+                <div class="one-half column">
+                    <label for="pwd-confirm">{{__ 'passwordConfirm'}}:</label>
+                    <input type="password" id="pwd-confirm" name="pwd-confirm" required/>
+                </div>
+            </div>
+
+            <input class="button-primary" type="submit" value="{{__ 'submit'}}">
+
+        </form>
+
     {{/if}}
-
-    <form action="/register" method="post">
-
-        <div class="row">
-            <div class="one-half column">
-                <label for="username">{{__ 'username'}}:</label>
-                <input type="text" id="username" name="username" {{#if user}} value= {{user.username}} {{/if}} required/>
-            </div>
-            <div class="one-half column">
-                <label for="email">{{__ 'email'}}:</label>
-                <input type="email" id="email" name="email" {{#if user}} value= {{user.email}} {{/if}} required/>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="one-half column">
-                <label for="pwd">{{__ 'password'}}:</label>
-                <input type="password" id="pwd" name="pwd" required/>
-            </div>
-            <div class="one-half column">
-                <label for="pwd-confirm">{{__ 'passwordConfirm'}}:</label>
-                <input type="password" id="pwd-confirm" name="pwd-confirm" required/>
-            </div>
-        </div>
-
-        <input class="button-primary" type="submit" value="{{__ 'submit'}}">
-
-    </form>
 
 </div>
