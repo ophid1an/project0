@@ -347,7 +347,10 @@ exports.userRegisterPost = (req, res, next) => {
 
     var userRegisterPostErrors = errors => {
             res.render('register', {
-                user,
+                user: {
+                    username: req.body.username,
+                    email: req.body.email
+                },
                 errors
             });
         },
