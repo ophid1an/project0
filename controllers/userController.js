@@ -206,11 +206,6 @@ exports.userForgotPwdPost = (req, res, next) => {
             res.render('forgot-password', {
                 error: res.__('errorUserDoesNotExist')
             });
-        },
-        userForgotPwdOK = () => {
-            res.render('forgot-password', {
-                info: res.__('checkMail')
-            });
         };
 
     if (!areStrings([email]) || !validator.isEmail(email)) {
@@ -268,7 +263,10 @@ exports.userForgotPwdPost = (req, res, next) => {
                                 pathname: 'new-password/' + user._id + bytes
                             }));
 
-                        userForgotPwdOK();
+                        res.render('forgot-password', {
+                            info: `${res.__('mailSent')} ${msToHours(limits.FORGOT_PWD_AGE)} ${res.__('hoursToFollowInstructions')}`
+                        });
+
                     });
             });
 
