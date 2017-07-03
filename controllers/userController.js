@@ -254,65 +254,65 @@ exports.userForgotPwdPost = (req, res, next) => {
     }
 
     var proceed = () => {
-      email = validator.normalizeEmail(email);
+        email = validator.normalizeEmail(email);
 
-      User.findOne({
-              email,
-              active: true
-          }, {
-              _id: 1
-          })
-          .exec((err, user) => {
+        User.findOne({
+                email,
+                active: true
+            }, {
+                _id: 1
+            })
+            .exec((err, user) => {
 
-              if (err) {
-                  return next(err);
-              }
+                if (err) {
+                    return next(err);
+                }
 
-              if (!user) {
-                  return userForgotPwdError();
-              }
+                if (!user) {
+                    return userForgotPwdError();
+                }
 
-              crypto.randomBytes(limits.RANDOM_BYTES_NUM, (err, buf) => {
+                crypto.randomBytes(limits.RANDOM_BYTES_NUM, (err, buf) => {
 
-                  if (err) {
-                      return next(err);
-                  }
+                    if (err) {
+                        return next(err);
+                    }
 
-                  var bytes = buf.toString('hex');
+                    var bytes = buf.toString('hex');
 
-                  User.update({
-                          _id: user._id
-                      }, {
-                          $set: {
-                              randomBytes: {
-                                  expires: new Date(Date.now() + limits.FORGOT_PWD_AGE),
-                                  bytes
-                              }
-                          }
-                      })
-                      .exec(err => {
+                    User.update({
+                            _id: user._id
+                        }, {
+                            $set: {
+                                randomBytes: {
+                                    expires: new Date(Date.now() + limits.FORGOT_PWD_AGE),
+                                    bytes
+                                }
+                            }
+                        })
+                        .exec(err => {
 
-                          if (err) {
-                              return next(err);
-                          }
+                            if (err) {
+                                return next(err);
+                            }
 
-                          sendMail(email,
-                              res.__('newPwdCreation'),
-                              url.format({
-                                  protocol: req.protocol,
-                                  host: req.get('host'),
-                                  port: req.app.settings.port,
-                                  pathname: 'new-password/' + user._id + bytes
-                              }));
+                            sendMail(email,
+                                res.__('newPwdCreation'),
+                                url.format({
+                                    protocol: req.protocol,
+                                    host: req.get('host'),
+                                    port: req.app.settings.port,
+                                    pathname: 'new-password/' + user._id + bytes
+                                }));
 
-                          res.render('forgot-password', {
-                              info: `${res.__('mailSent')} ${msToHours(limits.FORGOT_PWD_AGE)} ${res.__('hoursToFollowInstructions')}`
-                          });
+                            res.render('forgot-password', {
+                                info: `${res.__('mailSent')} ${msToHours(limits.FORGOT_PWD_AGE)} ${res.__('hoursToFollowInstructions')}`
+                            });
 
-                      });
-              });
+                        });
+                });
 
-          });
+            });
     };
 
     if (isProduction) {
@@ -804,7 +804,8 @@ exports.userIncRequestPost = (req, res, next) => {
     var username = req.body.username,
         accepted = req.body.accepted;
 
-    if (!username || typeof username !== 'string') {
+    if (typeof username !== 'string' || username.length < limits.USERNAME_MIN_LENGTH ||
+        username.length > limits.USERNAME_MAX_LENGTH) {
         return res.end();
     }
 
