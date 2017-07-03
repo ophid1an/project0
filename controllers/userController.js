@@ -63,6 +63,7 @@ exports.userLoginPost = (req, res, next) => {
     var username = req.body.username,
         pwd = req.body.pwd,
         string = req.body.string,
+        recaptcha = req.body['g-recaptcha-response'],
         toBeActivated = false,
         userLoginPostError = msg => {
             res.render('login', {
@@ -70,6 +71,14 @@ exports.userLoginPost = (req, res, next) => {
                 string
             });
         };
+
+    if (isProduction) {
+        if (typeof recaptcha !== 'string' || !recaptcha.length) {
+            return res.render('login', {
+                string
+            });
+        }
+    }
 
     if (!areStrings([username, pwd])) {
         return userLoginPostError('errorWrongUsernameOrPassword');
@@ -87,103 +96,125 @@ exports.userLoginPost = (req, res, next) => {
         return userLoginPostError('errorWrongUsernameOrPassword');
     }
 
-    User.findOne({
-            username
-        }, {
-            active: 1,
-            pwd: 1,
-            jti: 1,
-            locale: 1,
-            randomBytes: 1
-        })
-        .exec((err, user) => {
+    var proceed = () => {
+        User.findOne({
+                username
+            }, {
+                active: 1,
+                pwd: 1,
+                jti: 1,
+                locale: 1,
+                randomBytes: 1
+            })
+            .exec((err, user) => {
 
-            if (err) {
-                return next(err);
-            }
+                if (err) {
+                    return next(err);
+                }
 
-            if (!user) {
-                return userLoginPostError('errorWrongUsernameOrPassword');
-            }
+                if (!user) {
+                    return userLoginPostError('errorWrongUsernameOrPassword');
+                }
 
-            var comparePwdsAndSignJWT = (cb) => {
-                bcrypt.compare(pwd, user.pwd, (err, result) => {
-                    if (err) {
-                        return next(err);
-                    }
-
-                    if (!result) {
-                        return userLoginPostError('errorWrongUsernameOrPassword');
-                    }
-
-                    jwt.sign({
-                        uid: user._id
-                    }, jwtOptions.secretOrKey, {
-                        issuer: jwtOptions.issuer,
-                        expiresIn: jwtOptions.expiresIn,
-                        jwtid: user.jti.getTime() + '',
-                        algorithm: 'HS256'
-                    }, (err, token) => {
+                var comparePwdsAndSignJWT = (cb) => {
+                    bcrypt.compare(pwd, user.pwd, (err, result) => {
                         if (err) {
                             return next(err);
                         }
-                        res.cookie('jwt', token, {
-                            expires: new Date(Date.now() + limits.COOKIES_AGE),
-                            httpOnly: true,
-                            secure: isProduction
-                        });
 
-                        if (user.locale) {
-                            res.cookie('locale', user.locale, {
+                        if (!result) {
+                            return userLoginPostError('errorWrongUsernameOrPassword');
+                        }
+
+                        jwt.sign({
+                            uid: user._id
+                        }, jwtOptions.secretOrKey, {
+                            issuer: jwtOptions.issuer,
+                            expiresIn: jwtOptions.expiresIn,
+                            jwtid: user.jti.getTime() + '',
+                            algorithm: 'HS256'
+                        }, (err, token) => {
+                            if (err) {
+                                return next(err);
+                            }
+                            res.cookie('jwt', token, {
                                 expires: new Date(Date.now() + limits.COOKIES_AGE),
                                 httpOnly: true,
                                 secure: isProduction
                             });
-                        }
 
-                        cb();
+                            if (user.locale) {
+                                res.cookie('locale', user.locale, {
+                                    expires: new Date(Date.now() + limits.COOKIES_AGE),
+                                    httpOnly: true,
+                                    secure: isProduction
+                                });
+                            }
+
+                            cb();
+                        });
                     });
+                };
+
+                if (!user.active) {
+                    if (!toBeActivated) {
+                        return userLoginPostError('errorAccountNotActivated');
+                    }
+
+                    var date = new Date();
+
+                    if (date <= user.randomBytes.expires && string === user.randomBytes.bytes) {
+                        return comparePwdsAndSignJWT(() => {
+                            // update user document
+                            User.update({
+                                    _id: user._id
+                                }, {
+                                    $set: {
+                                        active: true
+                                    },
+                                    $unset: {
+                                        randomBytes: ''
+                                    }
+                                })
+                                .exec(err => {
+
+                                    if (err) {
+                                        return next(err);
+                                    }
+
+                                    res.redirect('/main');
+                                });
+                        });
+                    }
+                    return res.redirect('/');
+                }
+
+                comparePwdsAndSignJWT(() => {
+                    res.redirect('/main');
                 });
-            };
 
-            if (!user.active) {
-                if (!toBeActivated) {
-                    return userLoginPostError('errorAccountNotActivated');
-                }
-
-                var date = new Date();
-
-                if (date <= user.randomBytes.expires && string === user.randomBytes.bytes) {
-                    return comparePwdsAndSignJWT(() => {
-                        // update user document
-                        User.update({
-                                _id: user._id
-                            }, {
-                                $set: {
-                                    active: true
-                                },
-                                $unset: {
-                                    randomBytes: ''
-                                }
-                            })
-                            .exec(err => {
-
-                                if (err) {
-                                    return next(err);
-                                }
-
-                                res.redirect('/main');
-                            });
-                    });
-                }
-                return res.redirect('/');
-            }
-
-            comparePwdsAndSignJWT(() => {
-                res.redirect('/main');
             });
+    };
 
-        });
+    if (isProduction) {
+        var remoteip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        axios.post('https://www.google.com/recaptcha/api/siteverify', {
+                secret: recaptchaKey,
+                response: recaptcha,
+                remoteip
+            })
+            .then(() => {
+                proceed();
+            })
+            .catch(() => {
+                res.render('login', {
+                    string
+                });
+            });
+    } else {
+        proceed();
+    }
+
 };
 
 
