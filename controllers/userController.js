@@ -236,75 +236,102 @@ exports.userForgotPwdPost = (req, res, next) => {
     }
 
     var email = req.body.email,
+        recaptcha = req.body['g-recaptcha-response'],
         userForgotPwdError = () => {
             res.render('forgot-password', {
                 error: res.__('errorUserDoesNotExist')
             });
         };
 
+    if (isProduction) {
+        if (typeof recaptcha !== 'string' || !recaptcha.length) {
+            return res.render('forgot-password');
+        }
+    }
+
     if (!areStrings([email]) || !validator.isEmail(email)) {
         return userForgotPwdError();
     }
 
-    email = validator.normalizeEmail(email);
+    var proceed = () => {
+      email = validator.normalizeEmail(email);
 
-    User.findOne({
-            email,
-            active: true
-        }, {
-            _id: 1
-        })
-        .exec((err, user) => {
+      User.findOne({
+              email,
+              active: true
+          }, {
+              _id: 1
+          })
+          .exec((err, user) => {
 
-            if (err) {
-                return next(err);
-            }
+              if (err) {
+                  return next(err);
+              }
 
-            if (!user) {
-                return userForgotPwdError();
-            }
+              if (!user) {
+                  return userForgotPwdError();
+              }
 
-            crypto.randomBytes(limits.RANDOM_BYTES_NUM, (err, buf) => {
+              crypto.randomBytes(limits.RANDOM_BYTES_NUM, (err, buf) => {
 
-                if (err) {
-                    return next(err);
-                }
+                  if (err) {
+                      return next(err);
+                  }
 
-                var bytes = buf.toString('hex');
+                  var bytes = buf.toString('hex');
 
-                User.update({
-                        _id: user._id
-                    }, {
-                        $set: {
-                            randomBytes: {
-                                expires: new Date(Date.now() + limits.FORGOT_PWD_AGE),
-                                bytes
-                            }
-                        }
-                    })
-                    .exec(err => {
+                  User.update({
+                          _id: user._id
+                      }, {
+                          $set: {
+                              randomBytes: {
+                                  expires: new Date(Date.now() + limits.FORGOT_PWD_AGE),
+                                  bytes
+                              }
+                          }
+                      })
+                      .exec(err => {
 
-                        if (err) {
-                            return next(err);
-                        }
+                          if (err) {
+                              return next(err);
+                          }
 
-                        sendMail(email,
-                            res.__('newPwdCreation'),
-                            url.format({
-                                protocol: req.protocol,
-                                host: req.get('host'),
-                                port: req.app.settings.port,
-                                pathname: 'new-password/' + user._id + bytes
-                            }));
+                          sendMail(email,
+                              res.__('newPwdCreation'),
+                              url.format({
+                                  protocol: req.protocol,
+                                  host: req.get('host'),
+                                  port: req.app.settings.port,
+                                  pathname: 'new-password/' + user._id + bytes
+                              }));
 
-                        res.render('forgot-password', {
-                            info: `${res.__('mailSent')} ${msToHours(limits.FORGOT_PWD_AGE)} ${res.__('hoursToFollowInstructions')}`
-                        });
+                          res.render('forgot-password', {
+                              info: `${res.__('mailSent')} ${msToHours(limits.FORGOT_PWD_AGE)} ${res.__('hoursToFollowInstructions')}`
+                          });
 
-                    });
+                      });
+              });
+
+          });
+    };
+
+    if (isProduction) {
+        var remoteip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        axios.post('https://www.google.com/recaptcha/api/siteverify', {
+                secret: recaptchaKey,
+                response: recaptcha,
+                remoteip
+            })
+            .then(() => {
+                proceed();
+            })
+            .catch(() => {
+                res.render('forgot-password');
             });
+    } else {
+        proceed();
+    }
 
-        });
 };
 
 
