@@ -2,6 +2,8 @@ const dateformat = require('dateformat'),
     sg = require('sendgrid')(process.env.SENDGRID_API_KEY),
     email = require('../config').email,
     jwt = require('jsonwebtoken'),
+    axios = require('axios'),
+    recaptchaKey = process.env.RECAPTCHA_KEY,
     validator = require('express-validator').validator,
     url = require('url'),
     crypto = require('crypto'),
@@ -14,6 +16,7 @@ const dateformat = require('dateformat'),
     toDate = require('../lib/util').toDate,
     areStrings = require('../lib/util').areStrings,
     msToHours = require('../lib/util').msToHours,
+    isProduction = process.env.NODE_ENV === 'production',
     sendMail = (to, subject, content) => {
         var request = sg.emptyRequest({
             method: 'POST',
@@ -127,14 +130,14 @@ exports.userLoginPost = (req, res, next) => {
                         res.cookie('jwt', token, {
                             expires: new Date(Date.now() + limits.COOKIES_AGE),
                             httpOnly: true,
-                            secure: process.env.NODE_ENV === 'production'
+                            secure: isProduction
                         });
 
                         if (user.locale) {
                             res.cookie('locale', user.locale, {
                                 expires: new Date(Date.now() + limits.COOKIES_AGE),
                                 httpOnly: true,
-                                secure: process.env.NODE_ENV === 'production'
+                                secure: isProduction
                             });
                         }
 
@@ -393,6 +396,14 @@ exports.userRegisterPost = (req, res, next) => {
         return res.redirect('/main');
     }
 
+    var recaptcha = req.body['g-recaptcha-response'];
+
+    if (true) { // TODO: isProduction
+        if (typeof recaptcha !== 'string' || !recaptcha.length) {
+            return res.render('register');
+        }
+    }
+
     if (!areStrings([req.body.username, req.body.email,
             req.body.pwd, req.body['pwd-confirm']
         ])) {
@@ -444,119 +455,139 @@ exports.userRegisterPost = (req, res, next) => {
     req.sanitizeBody('email').trim();
 
     req.checkBody(registerValidationSchema);
-    var errors = req.validationErrors();
 
-    if (errors) {
-        return userRegisterPostErrors(errors);
-    }
+    var errors = req.validationErrors(),
+        proceed = () => {
+            req.sanitizeBody('email').normalizeEmail();
 
-    req.sanitizeBody('email').normalizeEmail();
+            var user = new User({
+                username: req.body.username.toLowerCase(),
+                email: req.body.email,
+                pwd: req.body.pwd
+            });
 
-    var user = new User({
-        username: req.body.username.toLowerCase(),
-        email: req.body.email,
-        pwd: req.body.pwd
-    });
-
-    User.find({
-            $or: [{
-                username: user.username
-            }, {
-                email: user.email
-            }, {
-                username: 1,
-                email: 1
-            }]
-        })
-        .exec((err, users) => {
-
-            if (err) {
-                return next(err);
-            }
-
-            if (users && users.length === 2) {
-
-                let errors = [{
-                    msg: res.__('errorUsernameExists')
-                }, {
-                    msg: res.__('errorEmailExists')
-                }];
-
-                return userRegisterPostErrors(errors);
-
-            }
-
-            if (users && users.length === 1) {
-
-                let errors = [];
-
-                if (user.username === users[0].username) {
-                    errors.push({
-                        msg: res.__('errorUsernameExists')
-                    });
-                }
-
-                if (user.email === users[0].email) {
-
-                    errors.push({
-                        msg: res.__('errorEmailExists')
-                    });
-                }
-
-                return userRegisterPostErrors(errors);
-            }
-
-            crypto.randomBytes(limits.RANDOM_BYTES_NUM, (err, buf) => {
-
-                if (err) {
-                    return next(err);
-                }
-
-                var bytes = buf.toString('hex');
-
-                // create jti property
-                user.jti = Date.now();
-
-                // create randomBytes property
-                user.randomBytes = {
-                    expires: new Date(Date.now() + limits.ACTIVATE_ACCOUNT_AGE),
-                    bytes
-                };
-
-                // hash password
-                bcrypt.hash(user.pwd, saltRounds, (err, hash) => {
+            User.find({
+                    $or: [{
+                        username: user.username
+                    }, {
+                        email: user.email
+                    }, {
+                        username: 1,
+                        email: 1
+                    }]
+                })
+                .exec((err, users) => {
 
                     if (err) {
                         return next(err);
                     }
 
-                    user.pwd = hash;
+                    if (users && users.length === 2) {
 
-                    // save user document
-                    user.save(err => {
+                        let errors = [{
+                            msg: res.__('errorUsernameExists')
+                        }, {
+                            msg: res.__('errorEmailExists')
+                        }];
+
+                        return userRegisterPostErrors(errors);
+
+                    }
+
+                    if (users && users.length === 1) {
+
+                        let errors = [];
+
+                        if (user.username === users[0].username) {
+                            errors.push({
+                                msg: res.__('errorUsernameExists')
+                            });
+                        }
+
+                        if (user.email === users[0].email) {
+
+                            errors.push({
+                                msg: res.__('errorEmailExists')
+                            });
+                        }
+
+                        return userRegisterPostErrors(errors);
+                    }
+
+                    crypto.randomBytes(limits.RANDOM_BYTES_NUM, (err, buf) => {
 
                         if (err) {
                             return next(err);
                         }
 
-                        sendMail(user.email,
-                            res.__('newAccountActivation'),
-                            url.format({
-                                protocol: req.protocol,
-                                host: req.get('host'),
-                                port: req.app.settings.port,
-                                pathname: 'login/' + bytes
-                            }));
+                        var bytes = buf.toString('hex');
 
-                        res.render('register', {
-                            info: `${res.__('mailSent')} ${msToHours(limits.ACTIVATE_ACCOUNT_AGE)} ${res.__('hoursToFollowInstructions')}`
+                        // create jti property
+                        user.jti = Date.now();
+
+                        // create randomBytes property
+                        user.randomBytes = {
+                            expires: new Date(Date.now() + limits.ACTIVATE_ACCOUNT_AGE),
+                            bytes
+                        };
+
+                        // hash password
+                        bcrypt.hash(user.pwd, saltRounds, (err, hash) => {
+
+                            if (err) {
+                                return next(err);
+                            }
+
+                            user.pwd = hash;
+
+                            // save user document
+                            user.save(err => {
+
+                                if (err) {
+                                    return next(err);
+                                }
+
+                                sendMail(user.email,
+                                    res.__('newAccountActivation'),
+                                    url.format({
+                                        protocol: req.protocol,
+                                        host: req.get('host'),
+                                        port: req.app.settings.port,
+                                        pathname: 'login/' + bytes
+                                    }));
+
+                                res.render('register', {
+                                    info: `${res.__('mailSent')} ${msToHours(limits.ACTIVATE_ACCOUNT_AGE)} ${res.__('hoursToFollowInstructions')}`
+                                });
+                            });
                         });
+
                     });
+
                 });
+        };
 
+    if (errors) {
+        return userRegisterPostErrors(errors);
+    }
+
+    if (true) { // TODO: isProduction
+        var remoteip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        axios.post('https://www.google.com/recaptcha/api/siteverify', {
+                secret: recaptchaKey,
+                response: recaptcha,
+                remoteip
+            })
+            .then(() => {
+                proceed();
+            })
+            .catch(() => {
+                res.render('register');
             });
+    } else {
+        proceed();
+    }
 
-        });
 };
 
 
@@ -976,7 +1007,7 @@ exports.userSettingsPost = (req, res, next) => {
                         res.cookie('locale', locale, {
                             expires: new Date(Date.now() + limits.COOKIES_AGE),
                             httpOnly: true,
-                            secure: process.env.NODE_ENV === 'production'
+                            secure: isProduction
                         });
                     }
 
