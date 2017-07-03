@@ -398,7 +398,7 @@ exports.userRegisterPost = (req, res, next) => {
 
     var recaptcha = req.body['g-recaptcha-response'];
 
-    if (true) { // TODO: isProduction
+    if (isProduction) {
         if (typeof recaptcha !== 'string' || !recaptcha.length) {
             return res.render('register');
         }
@@ -571,7 +571,7 @@ exports.userRegisterPost = (req, res, next) => {
         return userRegisterPostErrors(errors);
     }
 
-    if (true) { // TODO: isProduction
+    if (isProduction) {
         var remoteip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         axios.post('https://www.google.com/recaptcha/api/siteverify', {
                 secret: recaptchaKey,
