@@ -32,9 +32,7 @@ exports.crosswordUploadPost = (req, res, next) => {
                 crosswordToParse = JSON.parse(req.file.buffer.toString());
             } catch (err) {
                 return res.render('upload-crossword', {
-                    errors: [{
-                        msg: err
-                    }]
+                    errors: [err]
                 });
             }
 
@@ -78,19 +76,21 @@ exports.crosswordUploadPost = (req, res, next) => {
                     // Render
 
                     return res.render('upload-crossword', {
-                        success: [{
-                            msg: res.__('crosswordUploadSuccess')
-                        }],
+                        success: res.__('crosswordUploadSuccess'),
                         matrix: cwData.matrix,
                         defs: defs
                     });
                 });
 
             } else {
+                var errors = [res.__('crosswordParsingFailure')];
+
+                if (cwData.error) {
+                    errors.push(cwData.error);
+                }
+
                 return res.render('upload-crossword', {
-                    errors: [{
-                        msg: res.__('crosswordParsingFailure')
-                    }]
+                    errors
                 });
             }
 

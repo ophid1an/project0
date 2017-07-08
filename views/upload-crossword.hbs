@@ -5,27 +5,13 @@
     <h3>{{__ 'uploadCrossword'}}</h3>
 
     {{#if errors}}
-        <div class="row text-danger">
-            <div class="twelve columns">
-                <ul>
-                    {{#each errors}}
-                        <li>{{msg}}</li>
-                    {{/each}}
-                </ul>
-            </div>
-        </div>
+        {{#each errors}}
+            <p class="text-danger">{{this}}</p>
+        {{/each}}
     {{/if}}
 
     {{#if success}}
-        <div class="row text-success">
-            <div class="twelve columns">
-                <ul>
-                    {{#each success}}
-                        <li>{{msg}}</li>
-                    {{/each}}
-                </ul>
-            </div>
-        </div>
+        <p class="text-success">{{success}}</p>
     {{/if}}
 
     <form action="/main/upload-crossword" method="post" enctype="multipart/form-data">

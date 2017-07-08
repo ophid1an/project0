@@ -32,6 +32,7 @@ exports.limits = {
     MESSAGE_MAX_LENGTH: 2500,
     LETTER_MIN_LENGTH: 1,
     CW_DIFFICULTIES: ['easy', 'medium', 'hard'],
+    CW_MAX_DIMENSION: 30,
     CW_LANGUAGES_SUPPORTED: {
         el: 'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ',
         en: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
