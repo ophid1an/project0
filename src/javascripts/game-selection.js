@@ -25,8 +25,9 @@ const selection = (function () {
         },
         clues = {},
         socket = {},
+        sqPosHash = {},
         otherUsername = '',
-        getSelectionSquares = (ind) => {
+        getSelectionSquares = ind => {
             var isAcross = clues[ind].isAcross,
                 len = clues[ind].len,
                 firstPos = clues[ind].pos,
@@ -62,19 +63,6 @@ const selection = (function () {
                 isCertain: cursor.isCertain,
                 color: color
             });
-        },
-        getCluesIndicesFromCursorPos = (sqPos) => {
-            var cluesIndices = [];
-            clues.forEach(function (clue, clueInd) {
-                var rowsMod = clue.isAcross ? 0 : clue.len;
-                var colsMod = clue.isAcross ? clue.len : 0;
-                if (sqPos[0] >= clue.pos[0] && sqPos[1] >= clue.pos[1] &&
-                    sqPos[0] <= clue.pos[0] + rowsMod &&
-                    sqPos[1] <= clue.pos[1] + colsMod) {
-                    cluesIndices.push(clueInd);
-                }
-            });
-            return cluesIndices;
         },
         computeClueIndToUse = (indices, sqPos) => {
             var clueInd = thisSelection.clueInd,
@@ -121,10 +109,27 @@ const selection = (function () {
 
 
         stub = {
-            init(c, s,otherName) {
+            init(c, s, otherName) {
                 clues = c.clues;
                 socket = s;
                 otherUsername = otherName;
+                clues.forEach((clue, ind) => { // Map each square to clues indices
+                    var firstPos = clue.pos,
+                        isAcross = clue.isAcross,
+                        len = clue.len;
+
+                    for (var i = 0; i < len; i += 1) {
+                        var pos = [
+                            firstPos[0] + (isAcross ? 0 : i),
+                            firstPos[1] + (isAcross ? i : 0)
+                        ];
+
+                        if (!sqPosHash.hasOwnProperty(pos)) {
+                            sqPosHash[pos] = [];
+                        }
+                        sqPosHash[pos].push(ind);
+                    }
+                });
                 return this;
             },
             set(ind) {
@@ -147,7 +152,7 @@ const selection = (function () {
                 return false;
             },
             setBySqPos(sqPos) {
-                var cluesIndices = getCluesIndicesFromCursorPos(sqPos),
+                var cluesIndices = sqPosHash[sqPos],
                     ind = computeClueIndToUse(cluesIndices, sqPos);
 
                 if (ind >= 0 && ind < clues.length) {
