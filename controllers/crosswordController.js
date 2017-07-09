@@ -39,6 +39,12 @@ exports.crosswordUploadPost = (req, res, next) => {
             const cwData = parseCrossword(crosswordToParse);
 
             if (cwData && cwData.cw && cwData.matrix) {
+                var filename = req.file.originalname;
+
+                if (typeof filename === 'string') {
+                    cwData.cw.filename = filename;
+                }
+
                 // Insert crossword to database
                 new Crossword(cwData.cw).save(err => {
                     if (err) {

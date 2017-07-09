@@ -3,6 +3,11 @@
      limits = require('../config').limits,
 
      crosswordSchema = Schema({
+         filename: {
+             type: String,
+             required: true,
+             unique: true
+         },
          lang: {
              type: String,
              enum: Object.keys(limits.CW_LANGUAGES_SUPPORTED),
