@@ -43,7 +43,7 @@
     "sendgrid": "5.1.2",
     "serve-favicon": "2.4.3",
     "socket.io": "2.0.3",
-    "webpack": "3.1.0"
+    "webpack": "3.2.0"
   },
   "devDependencies": {
     "nodemon": "1.11.0",
