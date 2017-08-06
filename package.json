@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "devstart": "npm-run-all --parallel watch:server watch:build",
-    "watch:server": "nodemon --ignore src/ --ignore dist/ ./bin/www",
+    "watch:server": "nodemon --ignore src/ --ignore dist/ --ignore utils/ ./bin/www",
     "watch:build": "webpack --watch --progress",
     "build": "webpack -p --progress",
     "devbuild": "webpack --progress",
@@ -13,8 +13,8 @@
     "heroku-postbuild": "webpack -p --progress"
   },
   "engines": {
-    "node": "6.11.2",
-    "npm": "3.10.10"
+    "node": "8.2.1",
+    "npm": "5.3.0"
   },
   "dependencies": {
     "axios": "0.16.2",
