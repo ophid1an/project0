@@ -32,13 +32,13 @@
     </div>
 
     <div id="complete" class="hidden game-dialog">
-            <h4>{{__ 'complete'}}</h4>
-            <p>{{__ 'completeText'}}</p>
-            <button type="button" id="complete-confirm-button" name="complete-confirm-button" class="button-primary">{{__ 'ok'}}</button>
+        <h4>{{__ 'complete'}}</h4>
+        <p>{{__ 'completeText'}}</p>
+        <button type="button" id="complete-confirm-button" name="complete-confirm-button" class="button-primary">{{__ 'ok'}}</button>
     </div>
 
     <div id="game-completed" class="hidden game-dialog">
-            <p>{{__ 'gameCompleted'}}</p>
+        <p>{{__ 'gameCompleted'}}</p>
     </div>
 
     <div class="border-dotted spacing-special overflow-auto" id="canvas-container">
@@ -47,15 +47,22 @@
         </canvas>
     </div>
 
-    <div id="defs" class="border-dotted overflow-auto">
-        <h5>
-          <b>{{__ 'across'}}</b>
-        </h5>
-        <div id="defs-across"> </div>
-        <h5>
-          <b>{{__ 'down'}}</b>
-        </h5>
-        <div id="defs-down"> </div>
+    <div id="defs" class="border-dotted">
+
+        <div class="row">
+
+            <div class="six columns">
+                <h5><b>{{__ 'across'}}</b></h5>
+                <div id="defs-across" class="overflow-auto"> </div>
+            </div>
+
+            <div class="six columns">
+                <h5><b>{{__ 'down'}}</b></h5>
+                <div id="defs-down" class="overflow-auto"> </div>
+            </div>
+
+        </div>
+
     </div>
 
     <script src="/javascripts/game-session.js"></script>

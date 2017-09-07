@@ -2,6 +2,8 @@ const gameConf = require('./game-conf');
 
 const defs = (function () {
     var crossword = {},
+        defsAcrossDiv = gameConf.htmlElements.defsAcrossDiv,
+        defsDownDiv = gameConf.htmlElements.defsDownDiv,
         stub = {
             init(c) {
                 crossword = c;
@@ -17,10 +19,25 @@ const defs = (function () {
                     window.parseFloat(bodyComputedStyle.paddingTop, 10) +
                     window.parseFloat(bodyComputedStyle.paddingBottom, 10),
                     defsDivHeight = window.parseFloat(window.getComputedStyle(defsDiv).height, 10),
+                    isMobile = window.innerWidth < 550, // Will break with different grid system
                     randomOffset = 20,
-                    defsDivNewHeight = (Math.abs(window.innerHeight - (bodyTotalHeight - defsDivHeight + randomOffset))) + 'px';
+                    defsDivNewHeight = Math.abs(window.innerHeight - (bodyTotalHeight - defsDivHeight + randomOffset)),
+                    defHeadersComputedStyle = window.getComputedStyle(defsAcrossDiv.parentElement.children[0]),
+                    defsHeadersHeight = (parseFloat(defHeadersComputedStyle.height, 10) +
+                        parseFloat(defHeadersComputedStyle.marginTop, 10) +
+                        parseFloat(defHeadersComputedStyle.marginBottom, 10) +
+                        parseFloat(defHeadersComputedStyle.paddingTop, 10) +
+                        parseFloat(defHeadersComputedStyle.paddingBottom, 10) +
+                        parseFloat(defHeadersComputedStyle.borderTop, 10) +
+                        parseFloat(defHeadersComputedStyle.borderBottom, 10));
 
-                defsDiv.style.height = defsDivNewHeight;
+                if (isMobile) { // Defs may float or not because of grid
+                    defsAcrossDiv.style.height = defsDownDiv.style.height =
+                        ((defsDivNewHeight - defsHeadersHeight * 2) / 2) + 'px';
+                } else {
+                    defsAcrossDiv.style.height = defsDownDiv.style.height =
+                        (defsDivNewHeight - defsHeadersHeight) + 'px';
+                }
 
                 return this;
             },
@@ -28,8 +45,6 @@ const defs = (function () {
                 var clues = crossword.clues,
                     cluesAcrossInd = crossword.cluesAcrossInd,
                     cluesDownInd = crossword.cluesDownInd,
-                    defsAcrossDiv = gameConf.htmlElements.defsAcrossDiv,
-                    defsDownDiv = gameConf.htmlElements.defsDownDiv,
                     defSpanPrefix = gameConf.htmlElements.defSpanPrefix,
                     str = '',
                     defs = {
