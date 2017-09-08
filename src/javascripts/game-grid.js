@@ -16,7 +16,6 @@ const grid = (function () {
         rows = -1,
         cols = -1,
         bpos = [],
-        bposHash = {},
 
         manipulateSquare = spec => {
             var x, y;
@@ -79,7 +78,6 @@ const grid = (function () {
                 rows = crossword.dim[0];
                 cols = crossword.dim[1];
                 bpos = crossword.bpos;
-                bpos.forEach((ele, ind) => bposHash[ele] = ind);
 
                 var canvasW = 2 * pad + numberPadX + sqLen * cols,
                     canvasH = 2 * pad + numberPadY + sqLen * rows;
@@ -199,18 +197,13 @@ const grid = (function () {
 
                 return this;
             },
-            getSquarePosition(crossword, mousePos) {
+            getSquarePosition(mousePos) {
                 var sqPos = [];
 
                 sqPos.push(Math.floor((mousePos[1] - padY) / sqLen));
                 sqPos.push(Math.floor((mousePos[0] - padX) / sqLen));
 
-                if (sqPos[0] >= 0 && sqPos[1] >= 0 && sqPos[0] < rows && sqPos[1] < cols &&
-                    !bposHash.hasOwnProperty(sqPos)) {
-                    return sqPos;
-                }
-
-                return false;
+                return sqPos;
             }
         };
 

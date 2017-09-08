@@ -68,7 +68,9 @@ const langsSupported = require('../../config').limits.CW_LANGUAGES_SUPPORTED,
                 isOffline: 'is offline'
             }
         },
-        utilKeys: ['Enter', 'Backspace'],
+        utilKeys: ['Enter', 'Backspace', 'ArrowLeft', 'ArrowRight',
+            'ArrowUp', 'ArrowDown', 'Delete'
+        ],
         extraChars: ' .',
         uncertaintyChar: '*',
     };

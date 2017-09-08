@@ -9,6 +9,7 @@ const selection = (function () {
         },
         colorCursor = colors.cursor,
         colorBackground = colors.background,
+        userInput = gameConf.htmlElements.userInput,
         defSingleDiv = gameConf.htmlElements.defSingleDiv,
         thisSelection = {
             isClear: true,
@@ -24,6 +25,8 @@ const selection = (function () {
             squares: []
         },
         clues = {},
+        rows = -1,
+        cols = -1,
         socket = {},
         sqPosHash = {},
         otherUsername = '',
@@ -62,6 +65,13 @@ const selection = (function () {
                 pos: thisSelection.squares[cursor.ind],
                 isCertain: cursor.isCertain,
                 color: color
+            });
+        },
+        clearCursor = () => {
+            grid.drawCursor({
+                pos: cursor.pos,
+                color: colorBackground,
+                isCertain: true
             });
         },
         computeClueIndToUse = (indices, sqPos) => {
@@ -110,6 +120,8 @@ const selection = (function () {
 
         stub = {
             init(c, s, otherName) {
+                rows = crossword.dim[0];
+                cols = crossword.dim[1];
                 clues = c.clues;
                 socket = s;
                 otherUsername = otherName;
@@ -152,8 +164,13 @@ const selection = (function () {
                 return false;
             },
             setBySqPos(sqPos) {
-                var cluesIndices = sqPosHash[sqPos],
-                    ind = computeClueIndToUse(cluesIndices, sqPos);
+                var cluesIndices = sqPosHash[sqPos];
+
+                if (!cluesIndices) {
+                    return false;
+                }
+
+                var ind = computeClueIndToUse(cluesIndices, sqPos);
 
                 if (ind >= 0 && ind < clues.length) {
                     thisSelection.squares = getSelectionSquares(ind);
@@ -191,18 +208,75 @@ const selection = (function () {
                 }
                 return this;
             },
-            moveCursor(direction = "forward") {
+            moveCursor(direction) {
                 var selectionLength = thisSelection.squares.length;
 
-                if (direction === 'backwards') {
+                clearCursor();
+
+                if (['up', 'down', 'left', 'right'].indexOf(direction) !== -1) {
+                    var rowsMod = 0,
+                        colsMod = 0;
+
+                    switch (direction) {
+                        case 'right':
+                            if (clues[thisSelection.clueInd].isAcross) {
+                                colsMod = 1;
+                                if (cursor.ind !== selectionLength - 1) {
+                                    cursor.ind += 1;
+                                }
+                            } else {
+                                console.log('NOT ALLOWED')
+                            }
+                            break;
+                        case 'left':
+                            if (clues[thisSelection.clueInd].isAcross) {
+                                if (cursor.ind) {
+                                    cursor.ind -= 1;
+                                }
+                            } else {
+                                console.log('NOT ALLOWED')
+                            }
+                            break;
+                        case 'up':
+                            if (!clues[thisSelection.clueInd].isAcross) {
+                                if (cursor.ind) {
+                                    cursor.ind -= 1;
+                                }
+                            } else {
+                                console.log('NOT ALLOWED')
+                            }
+                            break;
+                        case 'down':
+                            if (!clues[thisSelection.clueInd].isAcross) {
+                                if (cursor.ind !== selectionLength - 1) {
+                                    cursor.ind += 1;
+                                }
+                            } else {
+                                console.log('NOT ALLOWED')
+                            }
+                            break;
+                    }
+                }
+
+                // var mod = direction === 'up' ? -1 : 1,
+                //     newSqPos = [cursor.pos[0] + mod, cursor.pos[1]];
+                //
+                // if (grid.checkSquare(newSqPos)) {
+                //     if (stub.setBySqPos(newSqPos)) {
+                //         userInput.blur();
+                //         stub.send();
+                //     }
+                // }
+                else if (direction === 'backwards') {
                     if (cursor.ind) {
                         cursor.ind -= 1;
                     }
-                } else {
+                } else if (direction === 'forward') {
                     if (cursor.ind !== selectionLength - 1) {
                         cursor.ind += 1;
                     }
                 }
+
                 setCursor(cursor.ind, cursor.isCertain);
                 return this;
             },

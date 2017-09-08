@@ -4,7 +4,6 @@ const selection = require('./game-selection');
 
 const input = (function () {
     var userInput = gameConf.htmlElements.userInput,
-        colorBackground = gameConf.colors.background,
         lettersSupported = [],
         socket = {},
         lettersToSend = [],
@@ -26,7 +25,7 @@ const input = (function () {
             return {
                 letter,
                 pos: cursor.pos,
-                isCertain: cursor.isCertain
+                isCertain: letter !== ' ' ? cursor.isCertain : true // case when letter is ' '
             };
         },
         add = letter => {
@@ -36,13 +35,6 @@ const input = (function () {
 
             lettersToSend[cursor.ind] = letterWithDate;
             return this;
-        },
-        clearCursor = () => {
-            grid.drawCursor({
-                pos: cursor.pos,
-                color: colorBackground,
-                isCertain: true
-            });
         },
         stub = {
             init(letters, lettersSupp, s, isP1, otherName) {
@@ -56,52 +48,72 @@ const input = (function () {
                 otherUsername = otherName;
                 return this;
             },
+            placeLetter(letter) {
+                var transformedLetter = transformLetter(letter);
+
+                add(transformedLetter);
+                grid.drawLetter(transformedLetter);
+                lettersHash[cursor.pos] = letter;
+            },
             check(key, squares) {
                 var inputValue = userInput.value,
                     utilKeys = gameConf.utilKeys,
-                    ind = -1,
-                    transformedLetter = {};
+                    ind = -1;
 
                 selectionSquares = squares;
                 cursor = selection.getCursor();
                 cursor.pos = selectionSquares[cursor.ind];
+                userInput.value = '';
 
                 // Check for util keys
                 ind = utilKeys.indexOf(key);
                 if (ind !== -1) {
-                    var utilKey = utilKeys[ind];
-                    switch (utilKey) {
+                    switch (key) {
                         case 'Enter':
                             userInput.blur();
                             break;
+                        case 'Delete':
+                            stub.placeLetter(' ');
+                            selection.moveCursor(); // Redraw at current position
+                            break;
                         case 'Backspace':
-                            // Clear cursor and move cursor one square backwards
-                            clearCursor();
                             selection.moveCursor('backwards');
+                            break;
+                        case 'ArrowLeft':
+                            selection.moveCursor('left');
+                            break;
+                        case 'ArrowRight':
+                            selection.moveCursor('right');
+                            break;
+                        case 'ArrowUp':
+                            selection.moveCursor('up');
+                            break;
+                        case 'ArrowDown':
+                            selection.moveCursor('down');
                             break;
                     }
                     return;
                 }
 
                 // Else check for letter
-                ind = lettersSupported.indexOf(inputValue[inputValue.length - 1].toUpperCase());
+
+                if (!inputValue) {
+                    return;
+                }
+
+                ind = lettersSupported.indexOf(inputValue.toUpperCase());
+
                 if (ind !== -1) {
                     var letter = lettersSupported[ind];
 
                     if (letter === '.') {
                         return selection.toggleCursor();
                     }
-                    if (letter !== ' ' && letter !== lettersHash[cursor.pos]) { // Draw letter if not space and not different than previous one
-                        lettersHash[cursor.pos] = letter;
-                        transformedLetter = transformLetter(letter);
-                        add(transformedLetter);
-                        grid.drawLetter(transformedLetter);
-                    } else {
-                        clearCursor(); // Just clear cursor
+                    if (letter !== ' ' && letter !== lettersHash[cursor.pos]) { // Place letter if not space and not different than previous one
+                        stub.placeLetter(letter);
                     }
                     selection.moveCursor('forward'); // Advance cursor
                 }
-
             },
             updateLetters(letters) {
                 letters.forEach(lt => {

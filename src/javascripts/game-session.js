@@ -124,7 +124,7 @@ function start() {
 
             canvas.addEventListener('click', e => {
                 var mousePos = getMousePosition(canvas, e),
-                    sqPos = grid.getSquarePosition(data.crossword, mousePos);
+                    sqPos = grid.getSquarePosition(mousePos);
 
                 if (sqPos) {
                     if (selection.setBySqPos(sqPos)) {
