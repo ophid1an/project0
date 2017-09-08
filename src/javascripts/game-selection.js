@@ -9,7 +9,6 @@ const selection = (function () {
         },
         colorCursor = colors.cursor,
         colorBackground = colors.background,
-        userInput = gameConf.htmlElements.userInput,
         defSingleDiv = gameConf.htmlElements.defSingleDiv,
         thisSelection = {
             isClear: true,
@@ -116,12 +115,18 @@ const selection = (function () {
             }
             return newInd;
         },
+        advanceInWord = (length, flag = true) => {
+            if (flag) {
+                return cursor.ind !== length - 1 ? cursor.ind += 1 : false;
+            }
+            return cursor.ind ? cursor.ind -= 1 : false;
+        },
 
 
         stub = {
             init(c, s, otherName) {
-                rows = crossword.dim[0];
-                cols = crossword.dim[1];
+                rows = c.dim[0];
+                cols = c.dim[1];
                 clues = c.clues;
                 socket = s;
                 otherUsername = otherName;
@@ -213,68 +218,33 @@ const selection = (function () {
 
                 clearCursor();
 
-                if (['up', 'down', 'left', 'right'].indexOf(direction) !== -1) {
-                    var rowsMod = 0,
-                        colsMod = 0;
-
-                    switch (direction) {
-                        case 'right':
-                            if (clues[thisSelection.clueInd].isAcross) {
-                                colsMod = 1;
-                                if (cursor.ind !== selectionLength - 1) {
-                                    cursor.ind += 1;
-                                }
-                            } else {
-                                console.log('NOT ALLOWED')
-                            }
-                            break;
-                        case 'left':
-                            if (clues[thisSelection.clueInd].isAcross) {
-                                if (cursor.ind) {
-                                    cursor.ind -= 1;
-                                }
-                            } else {
-                                console.log('NOT ALLOWED')
-                            }
-                            break;
-                        case 'up':
-                            if (!clues[thisSelection.clueInd].isAcross) {
-                                if (cursor.ind) {
-                                    cursor.ind -= 1;
-                                }
-                            } else {
-                                console.log('NOT ALLOWED')
-                            }
-                            break;
-                        case 'down':
-                            if (!clues[thisSelection.clueInd].isAcross) {
-                                if (cursor.ind !== selectionLength - 1) {
-                                    cursor.ind += 1;
-                                }
-                            } else {
-                                console.log('NOT ALLOWED')
-                            }
-                            break;
-                    }
-                }
-
-                // var mod = direction === 'up' ? -1 : 1,
-                //     newSqPos = [cursor.pos[0] + mod, cursor.pos[1]];
-                //
-                // if (grid.checkSquare(newSqPos)) {
-                //     if (stub.setBySqPos(newSqPos)) {
-                //         userInput.blur();
-                //         stub.send();
-                //     }
-                // }
-                else if (direction === 'backwards') {
-                    if (cursor.ind) {
-                        cursor.ind -= 1;
-                    }
-                } else if (direction === 'forward') {
-                    if (cursor.ind !== selectionLength - 1) {
-                        cursor.ind += 1;
-                    }
+                switch (direction) {
+                    case 'right':
+                        if (clues[thisSelection.clueInd].isAcross) {
+                            advanceInWord(selectionLength);
+                        }
+                        break;
+                    case 'left':
+                        if (clues[thisSelection.clueInd].isAcross) {
+                            advanceInWord(selectionLength, false);
+                        }
+                        break;
+                    case 'up':
+                        if (!clues[thisSelection.clueInd].isAcross) {
+                            advanceInWord(selectionLength, false);
+                        }
+                        break;
+                    case 'down':
+                        if (!clues[thisSelection.clueInd].isAcross) {
+                            advanceInWord(selectionLength);
+                        }
+                        break;
+                    case 'backwards':
+                        advanceInWord(selectionLength, false);
+                        break;
+                    case 'forward':
+                        advanceInWord(selectionLength);
+                        break;
                 }
 
                 setCursor(cursor.ind, cursor.isCertain);
