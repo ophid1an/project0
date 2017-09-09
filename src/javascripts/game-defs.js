@@ -32,9 +32,17 @@ const defs = (function () {
                         parseFloat(defHeadersComputedStyle.borderBottom, 10));
 
                 if (isMobile) { // Defs may float or not because of grid
-                    defsAcrossDiv.style.height = defsDownDiv.style.height =
-                        ((defsDivNewHeight - defsHeadersHeight * 2) / 2) + 'px';
+                    defsDiv.classList.add('overflow-auto');
+                    defsAcrossDiv.classList.remove('overflow-auto');
+                    defsDownDiv.classList.remove('overflow-auto');
+                    defsAcrossDiv.removeAttribute('style');
+                    defsDownDiv.removeAttribute('style');
+                    defsDiv.style.height = defsDivNewHeight + 'px';
                 } else {
+                    defsDiv.classList.remove('overflow-auto');
+                    defsAcrossDiv.classList.add('overflow-auto');
+                    defsDownDiv.classList.add('overflow-auto');
+                    defsDiv.removeAttribute('style');
                     defsAcrossDiv.style.height = defsDownDiv.style.height =
                         (defsDivNewHeight - defsHeadersHeight) + 'px';
                 }
