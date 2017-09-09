@@ -10,6 +10,8 @@ const grid = (function () {
         padX = gameConf.grid.padX,
         padY = gameConf.grid.padY,
         ctx = canvas.getContext('2d'),
+        canvasW = 0,
+        canvasH = 0,
         offsetFromBtm = 5,
         crossword = {},
         isPlayer1 = true,
@@ -79,8 +81,8 @@ const grid = (function () {
                 cols = crossword.dim[1];
                 bpos = crossword.bpos;
 
-                var canvasW = 2 * pad + numberPadX + sqLen * cols,
-                    canvasH = 2 * pad + numberPadY + sqLen * rows;
+                canvasW = 2 * pad + numberPadX + sqLen * cols;
+                canvasH = 2 * pad + numberPadY + sqLen * rows;
 
                 canvas.setAttribute('width', canvasW);
                 canvas.setAttribute('height', canvasH);
@@ -136,7 +138,6 @@ const grid = (function () {
                     });
                 });
 
-                // ctx.restore();
                 return this;
             },
             drawLetters(letters) {
@@ -193,6 +194,8 @@ const grid = (function () {
 
                 if (canvas.getAttribute('height') > heightThreshold * innerHeight) {
                     canvasDiv.style.height = (heightThreshold * innerHeight) + 'px';
+                } else {
+                    canvasDiv.removeAttribute('style');
                 }
 
                 return this;

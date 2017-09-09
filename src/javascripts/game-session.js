@@ -135,6 +135,7 @@ function start() {
             });
 
             window.onresize = () => {
+                grid.resize();
                 defs.resize();
                 messages.resize();
             };
